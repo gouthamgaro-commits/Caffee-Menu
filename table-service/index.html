@@ -207,7 +207,7 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 .tcard .pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .tcard .foot { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: auto; }
 .tcard .foot b { color: var(--fg); font-family: var(--mono); }
-.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); }
+.legend { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
 .tickets { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; align-items: start; }
@@ -224,10 +224,167 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 .photos label { cursor: pointer; }
 .photos input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(170px + env(safe-area-inset-bottom, 0px)); z-index: 30; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; max-width: calc(100% - 32px); animation: up .2s both; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); z-index: 30; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; max-width: calc(100% - 32px); animation: up .2s both; }
 .scrim.still, .scrim.still .sheet { animation: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
 @media (max-width: 380px) { .dishes { gap: 8px; } .tpick { grid-template-columns: repeat(4, 1fr); } }
+
+/* ===== v2 refinements ===== */
+.eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.home-hero { display: grid; gap: 24px; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: center; }
+.home-hero .eyebrow { margin-bottom: 10px; }
+.shots { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 64px; gap: 8px; }
+.shots img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.shots img:nth-child(1) { grid-column: 1 / 5; grid-row: 1 / 4; }
+.shots img:nth-child(2) { grid-column: 5 / 7; grid-row: 1 / 3; }
+.shots img:nth-child(3) { grid-column: 5 / 7; grid-row: 3 / 5; }
+.shots img:nth-child(4) { grid-column: 1 / 3; grid-row: 4 / 6; }
+.shots img:nth-child(5) { grid-column: 3 / 5; grid-row: 4 / 6; }
+@media (max-width: 760px) { .home-hero { grid-template-columns: 1fr; } .shots { grid-auto-rows: 48px; } }
+.shots.small { grid-template-columns: 2fr 1fr; grid-auto-rows: 52px; margin-bottom: 16px; }
+.shots.small img:nth-child(1) { grid-column: 1; grid-row: 1 / 3; }
+.shots.small img:nth-child(2) { grid-column: 2; grid-row: 1; }
+.shots.small img:nth-child(3) { grid-column: 2; grid-row: 2; }
+
+.ghead { padding-block: 16px 6px; align-items: center; }
+.ghead h1 { font-size: 30px; line-height: 1.05; }
+.ghead h1 .mono { font-size: .95em; }
+.bell { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px 0 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-weight: 600; font-size: 14px; flex: none; }
+.bell svg, .wifi > svg, .howto svg, .soundbtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.bell span { display: grid; text-align: left; line-height: 1.1; }
+.bell small { font-size: 11px; font-weight: 500; opacity: .85; }
+.bell.on { background: var(--alert); border-color: var(--alert); color: #fff; animation: ring 1.6s infinite; }
+.bell.on svg { animation: wiggle 1.6s infinite; transform-origin: 50% 20%; }
+@keyframes wiggle { 0%, 60%, 100% { transform: rotate(0); } 10%, 30%, 50% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-14deg); } }
+
+.status { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 11px 14px; border-radius: 14px; margin-top: 8px; font-size: 14px; font-weight: 500; background: var(--surface); border: 1px solid var(--line); }
+.status .st-t { flex: 1; min-width: 0; }
+.status .st-l { color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.status .pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.status.new { background: color-mix(in srgb, var(--pop) 16%, var(--surface)); border-color: color-mix(in srgb, var(--pop) 55%, transparent); }
+.status.new .pulse { background: var(--pop); animation: pulse 1.4s infinite; }
+.status.cook { background: color-mix(in srgb, var(--cook) 12%, var(--surface)); border-color: color-mix(in srgb, var(--cook) 45%, transparent); }
+.status.cook .pulse { background: var(--cook); animation: pulse 1.4s infinite; }
+.status.ok .pulse { background: var(--ok); }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, currentColor 0%, transparent); opacity: .45; } }
+
+.tools { display: flex; gap: 8px; margin-top: 12px; }
+.search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 46px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.search svg { width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; flex: none; }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 16px; color: var(--fg); }
+.search:focus-within { border-color: var(--accent); }
+.vegchip { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; height: 46px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-weight: 600; font-size: 14px; }
+.vegchip.on { border-color: var(--ok); color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--surface)); }
+
+.sec { font-size: 20px; margin: 18px 0 10px; }
+.carousel { display: grid; grid-auto-flow: column; grid-auto-columns: 74%; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; margin-inline: -4px; padding-inline: 4px; }
+.carousel::-webkit-scrollbar { display: none; }
+.pcard { position: relative; scroll-snap-align: start; border-radius: 18px; overflow: hidden; text-align: left; color: #fff; background: #222; }
+.pcard img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; max-width: 100%; }
+.pc-b { position: absolute; inset: auto 0 0 0; padding: 30px 14px 12px; background: linear-gradient(transparent, rgba(0, 0, 0, .78)); display: grid; gap: 2px; }
+.pc-n { font: 700 17px/1.2 var(--display); }
+.pc-m { font-size: 12.5px; opacity: .9; }
+
+.dishes .catname { margin-top: 18px; }
+.dish-open { display: flex; flex-direction: column; width: 100%; height: 100%; text-align: left; }
+.dish .meta { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px 12px; flex: 1; }
+.dish .h3 { font: 700 15px/1.2 var(--display); }
+.dish .d { font-size: 12.5px; line-height: 1.35; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dish .row { margin-top: auto; padding-top: 6px; }
+.tag { align-self: flex-start; display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: color-mix(in srgb, var(--pop) 28%, transparent); color: var(--fg); }
+.add.bump, .basketbar.bump { animation: bump .35s; }
+@keyframes bump { 40% { transform: scale(1.18); } }
+.emptybox { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 28px 12px; color: var(--muted); font-size: 14px; }
+.emptybox b { color: var(--fg); font-size: 16px; }
+.emptybox .btn { margin-top: 6px; }
+.wifi.slim { margin-top: 20px; }
+.wifi > svg { color: var(--accent); }
+
+.basketbar { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; text-align: left; }
+.bb-c { min-width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent-fg) 20%, transparent); font-size: 14px; }
+
+.tracker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tracker div { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: var(--surface-2); color: var(--muted); font-size: 12px; position: relative; }
+.tracker b { font-size: 20px; color: var(--muted); }
+.tracker .on b { color: var(--fg); }
+.tracker .on.new { background: color-mix(in srgb, var(--pop) 22%, var(--surface)); color: var(--fg); }
+.tracker .on.cook { background: color-mix(in srgb, var(--cook) 16%, var(--surface)); color: var(--fg); }
+.tracker .on.ok { background: color-mix(in srgb, var(--ok) 14%, var(--surface)); color: var(--fg); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.unsent { border-style: dashed; border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+
+.field { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+.field input { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 16px; font-weight: 400; color: var(--fg); }
+.field input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.photo-wrap { position: relative; }
+.x.float { position: absolute; top: 12px; right: 12px; background: rgba(0, 0, 0, .5); color: #fff; }
+.dmeta { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.dmeta .mono { font-size: 18px; font-weight: 700; color: var(--fg); margin-right: 6px; }
+.sheet .tag { margin-bottom: 6px; }
+.pairs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.pair { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); text-align: left; }
+.pair img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
+.pair > span { flex: 1; min-width: 0; display: grid; font-size: 13px; }
+.pair b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pair i { font-style: normal; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-fg); font-weight: 700; flex: none; }
+.addrow { display: flex; gap: 12px; align-items: center; position: sticky; bottom: 0; background: var(--bg); padding-block: 8px 4px; }
+
+.welcome-top { padding: 20px 20px 18px; background: var(--fg); color: var(--bg); border-radius: 24px 24px 0 0; }
+.welcome-top .eyebrow { color: inherit; opacity: .7; }
+.welcome-top h2 { font-size: 28px; margin-top: 2px; }
+.howto { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; font-size: 14px; color: var(--muted); }
+.howto li { display: flex; gap: 12px; align-items: flex-start; }
+.howto svg { color: var(--accent); margin-top: 1px; }
+.howto b { color: var(--fg); font-weight: 600; }
+
+.modes button:disabled { opacity: .45; cursor: default; }
+.splitrow { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.bigcheck svg { width: 38px; height: 38px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.req { color: var(--cook); font-weight: 600; }
+
+/* game */
+.tbar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.tbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--alert), var(--pop)); border-radius: 4px; }
+.count { font: 800 88px/1 var(--display); color: #fff4e2; animation: pop .6s both; }
+@keyframes pop { from { transform: scale(1.6); opacity: 0; } }
+.plus { position: absolute; font: 800 22px var(--display); color: #fff4e2; text-shadow: 0 2px 6px rgba(0, 0, 0, .5); animation: rise .45s both; pointer-events: none; }
+.plus.minus { color: #ffb3a6; }
+@keyframes rise { to { transform: translateY(-28px); opacity: 0; } }
+.basket { touch-action: manipulation; }
+
+/* staff */
+.shead h1 { margin-right: auto; }
+.sbadge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--alert); color: #fff; font: 700 11px var(--mono); margin-left: 4px; }
+.sbadge.k { background: var(--cook); }
+.soundbtn { gap: 6px; }
+.soundbtn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.kpi .of { font-size: 16px; color: var(--muted); }
+.kpi-s { font-size: 12px; color: var(--ok); font-weight: 600; margin-top: 2px; }
+.floorwrap { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .floorwrap { grid-template-columns: 1fr; } }
+.queue { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); }
+@media (max-width: 900px) { .queue { position: static; } }
+.queue h2 { font-size: 18px; margin-bottom: 8px; display: flex; gap: 8px; align-items: baseline; }
+.queue ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.queue li { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--bg); border-left: 4px solid var(--line); }
+.queue li.q-alert { border-left-color: var(--alert); }
+.queue li.q-new, .queue li.q-bill { border-left-color: var(--pop); }
+.qt { font-size: 18px; font-weight: 700; }
+.qx { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; }
+.qx small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.allclear { display: grid; justify-items: center; text-align: center; gap: 4px; padding: 24px 12px; color: var(--muted); font-size: 14px; }
+.allclear svg { width: 34px; height: 34px; fill: none; stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; padding: 6px; border-radius: 50%; background: color-mix(in srgb, var(--ok) 14%, transparent); box-sizing: content-box; }
+.allclear b { color: var(--fg); font-size: 16px; }
+.floor { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.tcard { cursor: pointer; min-height: 140px; }
+.tcard:hover { border-color: color-mix(in srgb, var(--fg) 25%, var(--line)); }
+.tcard .qa { justify-self: start; }
+.ticket { border-top: 5px solid var(--cook); }
+.ticket .age { font: 600 13px var(--mono); padding: 2px 8px; border-radius: 8px; background: var(--surface-2); color: var(--muted); }
+.ticket.late { border-top-color: var(--pop); }
+.ticket.late .age { background: color-mix(in srgb, var(--pop) 30%, transparent); color: var(--fg); }
+.ticket.late2 { border-top-color: var(--alert); }
+.ticket.late2 .age { background: var(--alert); color: #fff; }
 </style>
 
 <div id="app"></div>
@@ -273,6 +430,7 @@ const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
+const agoAgo = t => { const a = ago(t); return a === "just now" ? a : a + " ago"; };
 const ago = t => { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; };
 let toastT;
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2400); }
@@ -458,34 +616,46 @@ function photo(d) {
   return PHOTO[d.id];
 }
 
+/* ================= Menu extras: badges and pairings ================= */
+const EXTRA = {
+  burrata: { tag: "Chef's pick", pair: ["lime", "margherita"] }, soup: { pair: ["aglio"] }, calamari: { pair: ["lime"] },
+  satay: { tag: "Spicy", pair: ["cooler"] }, margherita: { tag: "Chef's pick", pair: ["lime", "tiramisu"] },
+  funghi: { pair: ["cooler", "lava"] }, aglio: { tag: "Spicy", pair: ["burrata", "gelato"] },
+  butterchicken: { tag: "Most ordered", pair: ["lassi", "gelato"] }, burger: { pair: ["cooler", "lava"] },
+  salmon: { pair: ["lime", "tiramisu"] }, tiramisu: { tag: "Most ordered", pair: ["cappuccino"] }, lava: { pair: ["cappuccino"] },
+  gelato: { pair: ["cappuccino"] }, lassi: { tag: "House special" }, cappuccino: { pair: ["tiramisu"] },
+};
+MENU.forEach(d => Object.assign(d, EXTRA[d.id] || {}));
+
 /* ================= Shared state ================= */
-const S = { orders: {}, tables: {}, scores: {}, photos: {} };
+const S = { orders: {}, tables: {}, scores: {}, photos: {}, payments: {} };
 const COLLS = Object.keys(S);
 let mode = "connecting", db = null, assets = null, canEdit = false, loadedRemote = false;
 const bc = (() => { try { return new BroadcastChannel("olive-ember-demo"); } catch { return null; } })();
 
 function localSeed() {
   const now = Date.now(), m = 60000, o = {};
-  const add = (id, table, dish, qty, state, mins, name) => o[id] = { table, dish, qty, state, at: now - mins * m, by: "seed-" + table + name, name };
+  const add = (id, table, dish, qty, state, mins, name) => o[id] = { table, dish, qty, state, at: now - mins * m, by: "seed-" + table + name, name, note: "" };
   add("s1", 2, "margherita", 1, "served", 38, "Ana"); add("s2", 2, "lime", 2, "served", 38, "Ana"); add("s3", 2, "tiramisu", 2, "cooking", 6, "Raj");
   add("s4", 3, "butterchicken", 2, "cooking", 12, "Meera"); add("s5", 3, "lassi", 2, "served", 15, "Meera");
   add("s6", 7, "burger", 1, "new", 1, "Sam"); add("s7", 7, "calamari", 1, "new", 1, "Sam"); add("s8", 7, "cooler", 2, "new", 1, "Leo");
   add("s9", 9, "salmon", 1, "served", 52, "Priya"); add("s10", 9, "funghi", 1, "served", 52, "Priya"); add("s11", 9, "cappuccino", 2, "served", 20, "Kiran");
   return {
     orders: o,
-    tables: { t3: { table: 3, waiter: now - 2 * m, bill: 0, paid: 0 }, t9: { table: 9, waiter: 0, bill: now - 4 * m, paid: 0 } },
+    tables: { t3: { table: 3, waiter: now - 2 * m, bill: 0 }, t9: { table: 9, waiter: 0, bill: now - 4 * m } },
     scores: { "seed-a": { name: "Raj", table: 2, best: 31, at: now }, "seed-b": { name: "Meera", table: 3, best: 27, at: now }, "seed-c": { name: "Leo", table: 7, best: 24, at: now }, "seed-d": { name: "Ana", table: 2, best: 19, at: now } },
-    photos: {},
+    photos: {}, payments: {},
   };
 }
+function loadLocal() { const s = LS.get("rt-demo", null); if (s) COLLS.forEach(c => S[c] = s[c] || {}); }
 function startLocal() {
   mode = "local";
   const saved = LS.get("rt-demo", null) || localSeed();
   COLLS.forEach(c => S[c] = saved[c] || {});
   LS.set("rt-demo", S);
-  if (bc) bc.onmessage = () => { const s = LS.get("rt-demo", null); if (s) { COLLS.forEach(c => S[c] = s[c] || {}); render(); } };
-  addEventListener("storage", e => { if (e.key === "rt-demo") { const s = LS.get("rt-demo", null); if (s) { COLLS.forEach(c => S[c] = s[c] || {}); render(); } } });
-  render();
+  if (bc) bc.onmessage = () => { loadLocal(); dataChanged(); };
+  addEventListener("storage", e => { if (e.key === "rt-demo") { loadLocal(); dataChanged(); } });
+  dataChanged();
 }
 function startRemote() {
   mode = "live";
@@ -494,7 +664,7 @@ function startRemote() {
     db.collection(c).onSnapshot(snap => {
       const next = {}; snap.docs.forEach(d => next[d.id] = d.data()); S[c] = next;
       if (!snap.metadata.fromCache) { loadedRemote = true; clearTimeout(timer); }
-      render();
+      dataChanged();
     }, err => { clearTimeout(timer); console.error(err); toast("Live updates stopped. Reload to reconnect."); });
   });
   render();
@@ -504,56 +674,125 @@ async function put(coll, id, data) {
     try { await db.collection(coll).doc(id).set(data); return true; }
     catch (e) { console.error(e); toast(e && e.code === "invalid_argument" ? "You can't change this page's data. Ask the owner for Contributor access." : "That didn't save. Try again."); return false; }
   }
-  S[coll] = { ...S[coll], [id]: data }; LS.set("rt-demo", S); bc && bc.postMessage(1); render(); return true;
+  S[coll] = { ...S[coll], [id]: data }; LS.set("rt-demo", S); bc && bc.postMessage(1); dataChanged(); return true;
 }
 async function del(coll, id) {
   if (mode === "live") { try { await db.collection(coll).doc(id).delete(); return true; } catch (e) { console.error(e); toast("That didn't save. Try again."); return false; } }
-  const n = { ...S[coll] }; delete n[id]; S[coll] = n; LS.set("rt-demo", S); bc && bc.postMessage(1); render(); return true;
+  const n = { ...S[coll] }; delete n[id]; S[coll] = n; LS.set("rt-demo", S); bc && bc.postMessage(1); dataChanged(); return true;
 }
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 /* ================= Derived ================= */
 const ordersFor = n => Object.entries(S.orders).filter(([, o]) => o.table === n).map(([id, o]) => ({ id, ...o })).sort((a, b) => a.at - b.at);
-const tdoc = n => S.tables["t" + n] || { table: n, waiter: 0, bill: 0, paid: 0 };
-const sumOf = os => os.reduce((s, o) => s + (DISH[o.dish] ? DISH[o.dish].price * o.qty : 0), 0);
+const paymentsFor = n => Object.entries(S.payments).filter(([, p]) => p.table === n).map(([id, p]) => ({ id, ...p })).sort((a, b) => a.at - b.at);
+const tdoc = n => S.tables["t" + n] || { table: n, waiter: 0, bill: 0 };
+const lineTotal = o => DISH[o.dish] ? DISH[o.dish].price * o.qty : 0;
+const sumOf = os => os.reduce((s, o) => s + lineTotal(o), 0);
 const qtyOf = (os, st) => os.filter(o => !st || o.state === st).reduce((s, o) => s + o.qty, 0);
+const withTax = n => Math.round(n * (1 + R.tax));
 function tableState(n) {
-  const os = ordersFor(n), t = tdoc(n);
-  const st = t.paid ? "paid" : t.waiter ? "call" : t.bill ? "bill" : qtyOf(os, "new") ? "new" : qtyOf(os, "cooking") ? "cooking" : os.length ? "seated" : "empty";
-  return { os, t, st, total: sumOf(os), guests: new Set(os.map(o => o.name)).size, since: os.length ? os[0].at : 0 };
+  const os = ordersFor(n), t = tdoc(n), pays = paymentsFor(n);
+  const sub = sumOf(os), due = withTax(sub), paidAmt = pays.reduce((s, p) => s + p.amount, 0), left = Math.max(0, due - paidAmt), paid = due > 0 && left <= 0;
+  const nNew = qtyOf(os, "new"), nCook = qtyOf(os, "cooking"), nServed = qtyOf(os, "served");
+  const st = t.waiter ? "call" : nNew ? "new" : t.bill && !paid ? "bill" : nCook ? "cooking" : paid ? "paid" : os.length ? "seated" : "empty";
+  return { os, t, pays, sub, due, paidAmt, left, paid, nNew, nCook, nServed, st, guests: new Set(os.map(o => o.by)).size, since: os.length ? os[0].at : t.waiter || 0 };
 }
 const STATE_LABEL = { paid: "Paid", call: "Calling waiter", bill: "Wants the bill", new: "New order", cooking: "Food cooking", seated: "Dining", empty: "Free" };
+const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { gtab: "menu", stab: "floor", sheet: null, qty: 1, tip: 10, paying: null, lbMode: "table", clearArm: 0 };
+const ui = { gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
   const m = /^table-(\d{1,2})$/.exec(h);
   if (h === "staff") view = { name: "staff" };
   else if (m && +m[1] >= 1 && +m[1] <= R.tables) view = { name: "guest", table: +m[1] };
   else view = { name: "home" };
-  ui.sheet = null; stopGame(); if (view.name === "guest") loadBasket(); render(); scrollTo(0, 0);
+  ui.sheet = null; ui.q = ""; stopGame(); prevOrders = null; prevWaiter = null; staffSeen = null; document.title = BASE_TITLE;
+  if (view.name === "guest") { loadBasket(); if (!LS.get("rt-welcomed-" + view.table, false)) ui.sheet = "welcome"; }
+  detect(); render(); scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
 
-const basketKey = () => "rt-basket-" + view.table;
+/* Basket: key is dish id, or "id|note" when the guest added a request */
 let basket = {};
+const basketKey = () => "rt-basket-" + view.table;
 function loadBasket() { basket = LS.get(basketKey(), {}); }
 function saveBasket() { LS.set(basketKey(), basket); }
+const parseKey = k => { const i = k.indexOf("|"); return i < 0 ? { id: k, note: "" } : { id: k.slice(0, i), note: k.slice(i + 1) }; };
+const basketLines = () => Object.entries(basket).filter(([k, q]) => q > 0 && DISH[parseKey(k).id]).map(([k, q]) => ({ key: k, ...parseKey(k), qty: q }));
+const inBasket = id => basketLines().filter(l => l.id === id).reduce((s, l) => s + l.qty, 0);
+function addToBasket(id, qty = 1, note = "") { const k = note ? id + "|" + note : id; basket[k] = (basket[k] || 0) + qty; saveBasket(); ui.bump = id; }
+
+/* ================= Live change detection (guest notices, staff alerts) ================= */
+let prevOrders = null, prevWaiter = null, staffSeen = null, actx = null;
+function detect() {
+  if (view.name === "guest") {
+    const os = ordersFor(view.table), cur = {};
+    os.forEach(o => cur[o.id] = o.state);
+    if (prevOrders) {
+      const cooking = [], served = [];
+      os.forEach(o => { const p = prevOrders[o.id]; if (p && p !== o.state && o.by === me.id && DISH[o.dish]) (o.state === "cooking" ? cooking : o.state === "served" ? served : []).push(DISH[o.dish].name); });
+      if (cooking.length || served.length) { notice.cooking.push(...cooking); notice.served.push(...served); clearTimeout(notice.t); notice.t = setTimeout(flushNotice, 450); }
+    }
+    prevOrders = cur;
+    const w = tdoc(view.table).waiter || 0;
+    if (prevWaiter && !w && !ui.selfCancel) toast("Your waiter saw your call and is coming over");
+    ui.selfCancel = false; prevWaiter = w;
+  }
+  if (view.name === "staff") {
+    const keys = new Set(); let count = 0;
+    for (let n = 1; n <= R.tables; n++) {
+      const ts = tableState(n);
+      if (ts.t.waiter) keys.add("w" + n + ":" + ts.t.waiter);
+      if (ts.t.bill && !ts.paid) keys.add("b" + n + ":" + ts.t.bill);
+      ts.os.filter(o => o.state === "new").forEach(o => keys.add("o" + o.id));
+      if (ts.t.waiter || ts.nNew || (ts.t.bill && !ts.paid)) count++;
+    }
+    if (staffSeen && [...keys].some(k => !staffSeen.has(k))) chime();
+    staffSeen = keys;
+    document.title = count ? `(${count}) ${R.name} floor` : `${R.name} floor`;
+  }
+}
+const notice = { cooking: [], served: [], t: 0 };
+function flushNotice() {
+  const { cooking, served } = notice;
+  if (served.length) toast(listText(served) + (served.length > 1 ? " are" : " is") + " on the way. Enjoy!");
+  else if (cooking.length) toast("The kitchen started on " + listText(cooking));
+  notice.cooking = []; notice.served = [];
+}
+function dataChanged() { detect(); render(); }
+function chime() {
+  if (!ui.sound || !actx) return;
+  try {
+    const t = actx.currentTime;
+    [880, 1320].forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = "sine"; o.frequency.value = f; const s = t + i * .18; g.gain.setValueAtTime(.0001, s); g.gain.exponentialRampToValueAtTime(.22, s + .02); g.gain.exponentialRampToValueAtTime(.0001, s + .35); o.connect(g).connect(actx.destination); o.start(s); o.stop(s + .4); });
+  } catch {}
+}
 
 /* ================= Render ================= */
-let lastSheet = null;
+let lastSheet = null, spy = null;
 function render() {
-  if (game.running) { renderNavBadges(); return; }
+  if (game.running || game.counting) return;
   const a = document.activeElement, aid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
-  $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : homeHTML();
   const old = document.querySelector(".sheet"), keep = old && ui.sheet === lastSheet ? old.scrollTop : 0;
+  $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : homeHTML();
   $("#sheet").innerHTML = ui.sheet ? `<div class="scrim${ui.sheet === lastSheet ? " still" : ""}" data-act="close-sheet"><div class="sheet" role="dialog" aria-modal="true">${sheetHTML()}</div></div>` : "";
   if (keep) document.querySelector(".sheet").scrollTop = keep;
   lastSheet = ui.sheet;
   $("#toast").style.bottom = view.name === "guest" ? "" : "calc(24px + env(safe-area-inset-bottom, 0px))";
   if (aid) { const el = document.getElementById(aid); if (el) { el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch {} } }
-  if (view.name === "guest" && ui.gtab === "play") mountGame();
+  if (ui.bump) { document.querySelectorAll(`[data-act="quick-add"][data-id="${ui.bump}"]`).forEach(b => b.classList.add("bump")); const bar = $(".basketbar"); bar && bar.classList.add("bump"); ui.bump = null; }
+  setupSpy();
+}
+function setupSpy() {
+  if (spy) { spy.disconnect(); spy = null; }
+  const heads = document.querySelectorAll(".catname");
+  if (!heads.length || !("IntersectionObserver" in window)) return;
+  spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const id = e.target.dataset.cat; document.querySelectorAll(".cats button").forEach(b => { const on = b.dataset.cat === id; b.classList.toggle("on", on); if (on) b.scrollIntoView({ inline: "center", block: "nearest" }); }); } }), { rootMargin: "-30% 0px -65% 0px" });
+  heads.forEach(h => spy.observe(h));
 }
 function modeLine() {
   if (mode === "live") return `<span class="dot live"></span> Live: orders sync to every phone and the staff floor.`;
@@ -562,23 +801,27 @@ function modeLine() {
 }
 
 function homeHTML() {
+  const shots = ["margherita", "burrata", "butterchicken", "lassi", "tiramisu"].map(id => `<img src="${photo(DISH[id])}" alt="">`).join("");
   return `<main class="home wrap">
-    <div>
-      <p class="mono muted" style="margin:0 0 8px">${esc(R.name)} · ${esc(R.tagline)}</p>
-      <h1>Your waiter can't be at every table. Your website can.</h1>
-      <p class="lede">Guests scan the table's QR code or tap its NFC tag. The menu opens with a photo of every dish. They order, call the waiter, play while they wait, and pay at the table. Staff see the whole room at a glance.</p>
+    <div class="home-hero">
+      <div>
+        <p class="eyebrow">${esc(R.name)} · ${esc(R.tagline)}</p>
+        <h1>Your waiter can't be at every table. Your website can.</h1>
+        <p class="lede">Guests scan the table's QR code or tap its NFC tag. The menu opens with a photo of every dish. They order, call the waiter, play while they wait, and pay at the table. Staff see the whole room at a glance.</p>
+      </div>
+      <div class="shots" aria-hidden="true">${shots}</div>
     </div>
     <div class="entry">
       <section>
         <h2>Sit at a table</h2>
-        <p class="muted" style="margin:0">Open the guest view as if you scanned the code on that table.</p>
-        <div class="tpick">${Array.from({ length: R.tables }, (_, i) => `<a href="#table-${i + 1}">${i + 1}</a>`).join("")}</div>
+        <p class="muted" style="margin:0">Opens the guest view as if you scanned that table's code.</p>
+        <div class="tpick">${Array.from({ length: R.tables }, (_, i) => `<a href="#table-${i + 1}" aria-label="Table ${i + 1}">${i + 1}</a>`).join("")}</div>
       </section>
       <section>
         <h2>Staff floor</h2>
-        <p class="muted" style="margin:0">Every table's status, new orders to send to the kitchen, waiter calls and bills.</p>
+        <p class="muted" style="margin:0">Every table's status, a queue of what needs you, the kitchen board and bills.</p>
         <a class="btn block" href="#staff" style="text-decoration:none">Open the staff floor</a>
-        <p class="muted" style="margin:0;font-size:13px">Try it: open table 5 on your phone and the staff floor on a laptop.</p>
+        <p class="muted" style="margin:0;font-size:13px">Try it: table 5 on your phone, the staff floor on a laptop.</p>
       </section>
     </div>
     <ol class="flow">
@@ -587,7 +830,7 @@ function homeHTML() {
       <li><b>One tap to the kitchen</b>Staff confirm the order and the kitchen starts cooking.</li>
       <li><b>Wi-Fi and games</b>Play alone, against your table, or the whole restaurant.</li>
       <li><b>Call the waiter</b>Staff see exactly which table needs them.</li>
-      <li><b>Pay at the table</b>Card, Apple Pay or Google Pay.</li>
+      <li><b>Pay at the table</b>Whole bill, split it, or just your items.</li>
     </ol>
     <p class="modeline">${modeLine()}</p>
   </main>`;
@@ -598,78 +841,128 @@ const ICON = {
   menu: `<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>`,
   table: `<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>`,
   play: `<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 11v3M6.5 12.5h3M15.5 12h.01M17.5 14h.01"/></svg>`,
+  bell: `<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>`,
+  search: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>`,
+  wifi: `<svg viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4 4 0 0 1 6 0"/><circle cx="12" cy="19" r=".8"/></svg>`,
+  check: `<svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></svg>`,
+  sound: `<svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11"/></svg>`,
+  mute: `<svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="m17 10 4 4M21 10l-4 4"/></svg>`,
 };
 function guestHTML() {
   const n = view.table, ts = tableState(n);
+  const bell = ts.t.waiter
+    ? `<button class="bell on" data-act="cancel-waiter" aria-label="Waiter is coming. Tap to cancel">${ICON.bell}<span>Coming<small>Tap to cancel</small></span></button>`
+    : `<button class="bell" data-act="call-waiter">${ICON.bell}<span>Call waiter</span></button>`;
+  const content = ui.gtab === "menu" ? guestMenu() : ui.gtab === "table" ? guestTable(ts) : guestPlay();
   return `<div class="guest wrap">
     <header class="ghead">
-      <div><p class="muted" style="margin:0;font-size:13px">${esc(R.tagline)}</p><h1>${esc(R.name)}</h1></div>
-      <div class="tableno"><small>Table</small><b>${n}</b></div>
+      <div><p class="eyebrow">${esc(R.name)}</p><h1>Table <span class="mono">${n}</span></h1></div>
+      ${bell}
     </header>
-    ${ui.gtab === "menu" ? guestMenu() : ui.gtab === "table" ? guestTable(ts) : guestPlay()}
+    ${ui.gtab !== "table" ? statusBanner(ts) : ""}
+    ${content}
   </div>
   <div class="dock"><div class="dock-in wrap">${dockHTML(ts)}</div></div>`;
 }
+function statusBanner(ts) {
+  if (!ts.os.length) return "";
+  let text, cls = "";
+  if (ts.paid && !ts.nNew && !ts.nCook) { text = "Bill paid. Thanks for dining with us."; cls = "ok"; }
+  else if (ts.nNew) { text = `${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} waiting for staff to confirm`; cls = "new"; }
+  else if (ts.nCook) { text = `The kitchen is cooking ${ts.nCook} ${ts.nCook === 1 ? "item" : "items"}`; cls = "cook"; }
+  else { text = `Everything is served · ${fmt(ts.left)} left on the bill`; cls = "ok"; }
+  return `<button class="status ${cls}" data-act="gtab" data-tab="table"><span class="pulse"></span><span class="st-t">${text}</span><span class="st-l">Order →</span></button>`;
+}
+function popularDishes() {
+  const c = {}; Object.values(S.orders).forEach(o => { if (DISH[o.dish]) c[o.dish] = (c[o.dish] || 0) + o.qty; });
+  const ranked = Object.keys(c).sort((a, b) => c[b] - c[a]).slice(0, 5);
+  MENU.filter(d => d.tag && !ranked.includes(d.id)).forEach(d => { if (ranked.length < 5) ranked.push(d.id); });
+  return ranked.map(id => ({ d: DISH[id], count: c[id] || 0 }));
+}
+function dishCard(d) {
+  const q = inBasket(d.id);
+  return `<article class="dish">
+    <button class="dish-open" data-act="dish" data-id="${d.id}" aria-label="${esc(d.name)}, ${fmt(d.price)}">
+      <img src="${photo(d)}" alt="" loading="lazy">
+      <span class="meta">
+        ${d.tag ? `<span class="tag">${esc(d.tag)}</span>` : ""}
+        <span class="h3">${esc(d.name)}</span>
+        <span class="d">${esc(d.desc)}</span>
+        <span class="row"><span class="price">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}" title="${d.veg ? "Vegetarian" : "Non-vegetarian"}"></span></span>
+      </span>
+    </button>
+    <button class="add ${q ? "has" : ""}" data-act="quick-add" data-id="${d.id}" aria-label="Add ${esc(d.name)}">${q ? q : "+"}</button>
+  </article>`;
+}
 function guestMenu() {
-  const cats = CATS.map(c => `<button data-act="jump" data-cat="${c.id}">${c.label}</button>`).join("");
-  const body = CATS.map(c => `<h2 class="catname" id="cat-${c.id}">${c.label}</h2>` + MENU.filter(d => d.cat === c.id).map(d => {
-    const q = basket[d.id] || 0;
-    return `<article class="dish">
-      <button data-act="dish" data-id="${d.id}" style="display:contents"><img src="${photo(d)}" alt="${esc(d.name)}" loading="lazy">
-      <div class="meta"><h3>${esc(d.name)}</h3><div class="row"><span class="price">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}" title="${d.veg ? "Vegetarian" : "Non-vegetarian"}"></span></div></div></button>
-      <button class="add ${q ? "has" : ""}" data-act="quick-add" data-id="${d.id}" aria-label="Add ${esc(d.name)}">${q ? q : "+"}</button>
-    </article>`;
-  }).join("")).join("");
-  return `<div class="wifi"><div><div class="k">Free Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v" id="wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm copy" data-act="copy-wifi">Copy password</button></div>
+  const q = ui.q.trim().toLowerCase();
+  const match = d => (!ui.vegOnly || d.veg) && (!q || (d.name + " " + d.desc + " " + (d.tag || "")).toLowerCase().includes(q));
+  const tools = `<div class="tools">
+      <label class="search" for="q">${ICON.search}<input id="q" type="search" placeholder="Search dishes" value="${esc(ui.q)}" autocomplete="off"></label>
+      <button class="vegchip ${ui.vegOnly ? "on" : ""}" data-act="veg" aria-pressed="${ui.vegOnly}"><span class="veg"></span>Veg</button>
+    </div>`;
+  if (q) {
+    const hits = MENU.filter(match);
+    return tools + (hits.length ? `<p class="muted" style="margin:14px 0 4px;font-size:14px">${hits.length} ${hits.length === 1 ? "dish" : "dishes"} for “${esc(ui.q.trim())}”</p><div class="dishes">${hits.map(dishCard).join("")}</div>` : `<div class="emptybox"><b>No dishes match “${esc(ui.q.trim())}”</b><span>Try another word, or ask your waiter.</span><button class="btn ghost sm" data-act="clear-q">Clear search</button></div>`);
+  }
+  const pop = popularDishes();
+  const carousel = `<section class="pop"><h2 class="sec">Popular right now</h2><div class="carousel">${pop.map(({ d, count }) => `<button class="pcard" data-act="dish" data-id="${d.id}"><img src="${photo(d)}" alt=""><span class="pc-b"><span class="pc-n">${esc(d.name)}</span><span class="pc-m"><span class="mono">${fmt(d.price)}</span>${count ? ` · ordered ${count}× today` : d.tag ? ` · ${esc(d.tag)}` : ""}</span></span></button>`).join("")}</div></section>`;
+  const cats = CATS.filter(c => MENU.some(d => d.cat === c.id && match(d))).map((c, i) => `<button class="${i === 0 ? "on" : ""}" data-act="jump" data-cat="${c.id}">${c.label}</button>`).join("");
+  const body = CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id && match(d)); return ds.length ? `<h2 class="catname" id="cat-${c.id}" data-cat="${c.id}">${c.label}</h2>` + ds.map(dishCard).join("") : ""; }).join("");
+  return `${tools}${ui.vegOnly ? "" : carousel}
     <nav class="cats" aria-label="Menu sections">${cats}</nav>
-    <div class="dishes">${body}</div>`;
+    <div class="dishes">${body}</div>
+    <div class="wifi slim">${ICON.wifi}<div><div class="k">Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm" data-act="copy-wifi">Copy</button></div>`;
 }
 function statePill(s) { return s === "new" ? `<span class="pill new">Waiting for staff</span>` : s === "cooking" ? `<span class="pill cook">Cooking</span>` : `<span class="pill ok">Served</span>`; }
 function guestTable(ts) {
-  const { os, t } = ts;
-  const sub = ts.total, tax = sub * R.tax;
-  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = DISH[o.dish]; if (!d) return ""; return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}</small></span>${statePill(o.state)}</li>`; }).join("")}</ul>` : `<p class="empty">Nothing ordered yet. Pick something from the menu.</p>`;
-  const paid = t.paid ? `<div class="alertbox paid"><div><b>Paid ${fmt(t.total || 0)}</b><div class="muted" style="font-size:13px">with ${esc(t.method || "card")} · thank you for dining with us</div></div></div>` : "";
-  return `<section class="panel">
-      <div class="xrow"><h2>Table ${view.table} order</h2><span class="pill">${ts.guests || 0} ${ts.guests === 1 ? "guest" : "guests"} ordering</span></div>
-      <label class="namefield" for="myname">You're ordering as <input id="myname" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
-      ${lines}
-      ${os.length ? `<div class="sum"><div><span>Subtotal</span><span>${fmt(sub)}</span></div><div><span>GST 5%</span><span>${fmt(tax)}</span></div><div class="tot"><span>Total so far</span><span>${fmt(sub + tax)}</span></div></div>` : ""}
-      ${paid}
-      ${os.length && !t.paid ? `<button class="btn pop block" data-act="ask-bill">${t.bill ? "Pay the bill" : "Ask for the bill"}</button>` : ""}
+  const { os } = ts;
+  const pending = basketLines();
+  const unsent = pending.length ? `<section class="panel unsent"><div class="xrow"><div><h2>Not sent yet</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Only you can see these until you send them.</p></div></div>
+      <ul class="lines">${pending.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="q">${l.qty}×</span><span class="n">${esc(DISH[l.id].name)}${l.note ? `<small>“${esc(l.note)}”</small>` : ""}</span><span class="p">${fmt(DISH[l.id].price * l.qty)}</span></li>`).join("")}</ul>
+      <button class="btn block" data-act="open-basket">Review and send</button></section>` : "";
+  const tracker = os.length ? `<div class="tracker">
+      <div class="${ts.nNew ? "on new" : ""}"><b class="mono">${ts.nNew}</b><span>Waiting for staff</span></div>
+      <div class="${ts.nCook ? "on cook" : ""}"><b class="mono">${ts.nCook}</b><span>Cooking</span></div>
+      <div class="${ts.nServed ? "on ok" : ""}"><b class="mono">${ts.nServed}</b><span>Served</span></div></div>` : "";
+  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = DISH[o.dish]; if (!d) return ""; return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state)}</li>`; }).join("")}</ul>`
+    : `<div class="emptybox"><b>Nothing sent to the kitchen yet</b><span>Everyone at table ${view.table} orders from their own phone onto one shared bill.</span><button class="btn sm" data-act="gtab" data-tab="menu">Browse the menu</button></div>`;
+  const pays = ts.pays.length ? `<div class="sec-h">Payments</div><ul class="lines">${ts.pays.map(p => `<li><span class="n">${p.by === me.id ? "You" : esc(p.name)}<small>${esc(p.method)} · ${ago(p.at)}${p.tip ? ` · tip ${fmt(p.tip)}` : ""}</small></span><span class="p">${fmt(p.amount)}</span></li>`).join("")}</ul>` : "";
+  const money = os.length ? `<div class="sum"><div><span>Subtotal</span><span>${fmt(ts.sub)}</span></div><div><span>GST 5%</span><span>${fmt(ts.due - ts.sub)}</span></div>${ts.paidAmt ? `<div><span>Paid so far</span><span>−${fmt(ts.paidAmt)}</span></div>` : ""}<div class="tot"><span>${ts.paid ? "Bill" : ts.paidAmt ? "Left to pay" : "Total so far"}</span><span>${ts.paid ? "Paid ✓" : fmt(ts.left)}</span></div></div>` : "";
+  const actions = os.length ? (ts.paid ? `<div class="alertbox paid"><div><b>All paid</b><div class="muted" style="font-size:13px">Thanks for dining at ${esc(R.name)}. Order more any time.</div></div></div>` : `<div class="two"><button class="btn ghost" data-act="gtab" data-tab="menu">Order more</button><button class="btn pop" data-act="ask-bill">${ts.t.bill ? "Pay now" : "Get the bill"}</button></div>`) : "";
+  return `${unsent}<section class="panel">
+      <div class="xrow"><h2>Table ${view.table} order</h2>${ts.guests ? `<span class="pill">${ts.guests} ${ts.guests === 1 ? "phone" : "phones"}</span>` : ""}</div>
+      <label class="namefield" for="myname">Ordering as <input id="myname" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
+      ${tracker}${lines}${money}${pays}${actions}
     </section>
-    <section class="panel"><h2>Wi-Fi</h2><div class="wifi" style="margin:0"><div><div class="k">Network</div><div class="v">${esc(R.wifi.ssid)}</div><div class="k" style="margin-top:6px">Password</div><div class="v">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm copy" data-act="copy-wifi">Copy</button></div></section>
+    <section class="panel"><div class="wifi" style="margin:0;border:0;padding:0">${ICON.wifi}<div><div class="k">Wi-Fi network</div><div class="v">${esc(R.wifi.ssid)}</div><div class="k" style="margin-top:6px">Password</div><div class="v wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm" data-act="copy-wifi">Copy</button></div></section>
     <p class="modeline" style="margin-top:14px">${modeLine()}</p>`;
 }
 function dockHTML(ts) {
-  const items = Object.values(basket).reduce((a, b) => a + b, 0);
-  const total = Object.entries(basket).reduce((s, [id, q]) => s + DISH[id].price * q, 0);
-  const t = ts.t;
-  const bar = items && ui.gtab === "menu" ? `<button class="basketbar" data-act="open-basket"><span><span class="mono">${items}</span> ${items === 1 ? "item" : "items"} · <span class="mono">${fmt(total)}</span></span><span>Review order →</span></button>` : "";
-  const call = t.waiter
-    ? `<div class="callbar"><button class="btn alert" data-act="cancel-waiter">Waiter is on the way · Cancel</button></div>`
-    : `<div class="callbar"><button class="btn ghost" data-act="call-waiter">Call waiter</button>${ts.os.length && !t.paid ? `<button class="btn ghost" data-act="ask-bill">${t.bill ? "Pay bill" : "Ask for bill"}</button>` : ""}</div>`;
+  const lines = basketLines(), items = lines.reduce((a, l) => a + l.qty, 0), total = lines.reduce((s, l) => s + DISH[l.id].price * l.qty, 0);
+  const bar = items && ui.gtab !== "play" ? `<button class="basketbar" data-act="open-basket"><span class="bb-c mono">${items}</span><span>Review order</span><span class="mono">${fmt(total)}</span></button>` : "";
   const tabCount = qtyOf(ts.os);
-  return `${bar}${game.running ? "" : call}
+  return `${bar}
     <nav class="nav" aria-label="Guest sections">
       <button class="${ui.gtab === "menu" ? "on" : ""}" data-act="gtab" data-tab="menu">${ICON.menu}Menu</button>
-      <button class="${ui.gtab === "table" ? "on" : ""}" data-act="gtab" data-tab="table">${ICON.table}Table & bill${tabCount ? `<span class="badge" id="tabbadge">${tabCount}</span>` : ""}</button>
+      <button class="${ui.gtab === "table" ? "on" : ""}" data-act="gtab" data-tab="table">${ICON.table}Order & bill${tabCount ? `<span class="badge">${tabCount}</span>` : ""}</button>
       <button class="${ui.gtab === "play" ? "on" : ""}" data-act="gtab" data-tab="play">${ICON.play}Play</button>
     </nav>`;
 }
-function renderNavBadges() { /* during a game, keep the board intact; the table badge refreshes after the round */ }
 
 /* ---------- Game: Dumpling Dash ---------- */
-const game = { running: false, score: 0, left: 0, timers: [], last: LS.get("rt-last", 0), best: LS.get("rt-best", 0) };
+const game = { running: false, counting: false, score: 0, left: 20, timers: [], last: LS.get("rt-last", 0), best: LS.get("rt-best", 0), newBest: false };
 function guestPlay() {
   const scores = Object.entries(S.scores).map(([id, s]) => ({ id, ...s }));
   const list = (ui.lbMode === "me" ? scores.filter(s => s.id === me.id) : ui.lbMode === "table" ? scores.filter(s => s.table === view.table) : scores).sort((a, b) => b.best - a.best).slice(0, 10);
   const lb = list.length ? `<ol class="lb">${list.map(s => `<li class="${s.id === me.id ? "me" : ""}"><span>${esc(s.name)}${s.id === me.id ? " (you)" : ""}</span><span class="muted" style="font-size:12px">Table ${s.table}</span><span class="s">${s.best}</span></li>`).join("")}</ol>` : `<p class="empty">${ui.lbMode === "table" ? "No scores at this table yet. Set the first one." : "Play a round to get on the board."}</p>`;
+  const cover = game.last ? `<h3>${game.newBest ? "New best: " + game.last + "!" : "You scored " + game.last}</h3><p>${game.newBest ? "Your score is on the board." : "Your best is " + game.best + ". Go again?"}</p><button class="btn pop" data-act="start-game">Play again</button>`
+    : `<h3>Dumpling Dash</h3><p>Tap dumplings as they pop up: +1.<br>Tap a chilli: −3. You have 20 seconds.</p><button class="btn pop" data-act="start-game">Start</button>`;
   return `<section class="panel game">
-    <div class="xrow"><div><h2>Dumpling Dash</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Tap the dumplings as they pop up. Skip the chillies. 20 seconds.</p></div></div>
-    <div class="hud"><div><small>Score</small><span id="g-score">${game.score}</span></div><div style="text-align:center"><small>Time</small><span id="g-time">${game.running ? game.left : 20}</span></div><div style="text-align:right"><small>Your best</small><span>${game.best}</span></div></div>
+    <div class="hud"><div><small>Score</small><span id="g-score">${game.score}</span></div><div style="text-align:right"><small>Your best</small><span>${game.best}</span></div></div>
+    <div class="tbar"><i id="g-bar"></i></div>
     <div class="board-wrap"><div class="board" id="board">${Array.from({ length: 9 }, (_, i) => `<button class="basket" data-cell="${i}" aria-label="Steamer ${i + 1}"><i></i></button>`).join("")}</div>
-      ${game.running ? "" : `<div class="board-cover"><div><h3>${game.last ? "You scored " + game.last : "Ready?"}</h3><p>${game.last ? "Beat the table." : "Score posts to your table and the whole restaurant."}</p><button class="btn pop" data-act="start-game">${game.last ? "Play again" : "Start"}</button></div></div>`}
+      <div class="board-cover" id="g-cover"><div>${cover}</div></div>
     </div>
   </section>
   <section class="panel">
@@ -682,21 +975,27 @@ function guestPlay() {
     ${lb}
   </section>`;
 }
-function mountGame() { /* board is plain markup; nothing to attach */ }
 function startGame() {
-  game.score = 0; game.left = 20;
-  render(); game.running = true;
-  const board = $("#board"); const cover = document.querySelector(".board-cover"); if (cover) cover.remove();
-  const cells = [...board.children];
-  const tick = setInterval(() => { game.left--; const t = $("#g-time"); if (t) t.textContent = game.left; if (game.left <= 0) endGame(); }, 1000);
-  game.timers.push(tick);
+  game.score = 0; game.left = 20; game.newBest = false; game.counting = true;
+  const s = $("#g-score"); if (s) s.textContent = "0";
+  const bar = $("#g-bar"); if (bar) { bar.style.transition = "none"; bar.style.width = "100%"; }
+  const cover = $("#g-cover"); let c = 3;
+  cover.innerHTML = `<div class="count">${c}</div>`;
+  const cd = setInterval(() => { c--; if (c > 0) cover.innerHTML = `<div class="count">${c}</div>`; else { clearInterval(cd); cover.remove(); game.counting = false; run(); } }, 650);
+  game.timers.push(cd);
+}
+function run() {
+  game.running = true;
+  const cells = [...$("#board").children], bar = $("#g-bar");
+  requestAnimationFrame(() => { bar.style.transition = "width 20s linear"; bar.style.width = "0%"; });
+  game.timers.push(setInterval(() => { game.left--; if (game.left <= 0) endGame(); }, 1000));
   const spawn = () => {
     if (!game.running) return;
-    const free = cells.filter(c => !c.classList.contains("up")); if (free.length) {
-      const c = free[Math.floor(Math.random() * free.length)]; const chili = Math.random() < .2;
+    const free = cells.filter(c => !c.classList.contains("up") && !c.classList.contains("hit"));
+    if (free.length) {
+      const c = free[Math.floor(Math.random() * free.length)], chili = Math.random() < .2;
       c.className = "basket up" + (chili ? " chili" : ""); c.dataset.kind = chili ? "chili" : "dumpling";
-      const life = Math.max(520, 1000 - (20 - game.left) * 22);
-      game.timers.push(setTimeout(() => { if (c.classList.contains("up")) c.className = "basket"; }, life));
+      game.timers.push(setTimeout(() => { if (c.classList.contains("up")) c.className = "basket"; }, Math.max(520, 1000 - (20 - game.left) * 22)));
     }
     game.timers.push(setTimeout(spawn, Math.max(300, 700 - (20 - game.left) * 18)));
   };
@@ -705,165 +1004,246 @@ function startGame() {
 function hitCell(c) {
   if (!game.running || !c.classList.contains("up")) return;
   const chili = c.dataset.kind === "chili"; game.score = Math.max(0, game.score + (chili ? -3 : 1));
-  c.className = "basket hit" + (chili ? " chili" : ""); setTimeout(() => { if (c.classList.contains("hit")) c.className = "basket"; }, 150);
+  c.className = "basket hit" + (chili ? " chili" : "");
+  const f = document.createElement("b"); f.className = "plus" + (chili ? " minus" : ""); f.textContent = chili ? "−3" : "+1"; c.appendChild(f);
+  setTimeout(() => { f.remove(); if (c.classList.contains("hit")) c.className = "basket"; }, 450);
   const s = $("#g-score"); if (s) s.textContent = game.score;
   if (navigator.vibrate) try { navigator.vibrate(chili ? 60 : 8); } catch {}
 }
-function stopGame() { game.running = false; game.timers.forEach(t => { clearInterval(t); clearTimeout(t); }); game.timers = []; }
+function stopGame() { game.running = false; game.counting = false; game.timers.forEach(t => { clearInterval(t); clearTimeout(t); }); game.timers = []; }
 async function endGame() {
   stopGame(); game.last = game.score; LS.set("rt-last", game.last);
   const prev = S.scores[me.id];
-  if (game.score > game.best) { game.best = game.score; LS.set("rt-best", game.best); }
+  game.newBest = game.score > game.best;
+  if (game.newBest) { game.best = game.score; LS.set("rt-best", game.best); }
   render();
-  if (!prev || game.score > prev.best || prev.table !== view.table || prev.name !== me.name) {
-    await put("scores", me.id, { name: me.name, table: view.table, best: Math.max(game.score, prev && prev.table === view.table ? prev.best : 0), at: Date.now() });
-  }
+  const best = Math.max(game.score, prev && prev.table === view.table ? prev.best : 0);
+  if (!prev || best !== prev.best || prev.table !== view.table || prev.name !== me.name) await put("scores", me.id, { name: me.name, table: view.table, best, at: Date.now() });
 }
 
 /* ---------- Sheets ---------- */
 function sheetHTML() {
   const s = ui.sheet;
+  if (s === "welcome") {
+    const shots = ["margherita", "butterchicken", "lassi"].map(id => `<img src="${photo(DISH[id])}" alt="">`).join("");
+    return `<div class="welcome-top"><div class="shots small" aria-hidden="true">${shots}</div><p class="eyebrow">${esc(R.name)}</p><h2>Welcome to table ${view.table}</h2></div>
+      <div class="sheet-b">
+        <label class="field" for="wname">What should we call you?<input id="wname" maxlength="20" value="${esc(me.name.startsWith("Guest ") ? "" : me.name)}" placeholder="Your first name" autocomplete="given-name"></label>
+        <ul class="howto">
+          <li>${ICON.menu}<span><b>Order from your phone.</b> Staff confirm it and the kitchen starts cooking.</span></li>
+          <li>${ICON.table}<span><b>One bill for the table.</b> Everyone adds from their own phone. Split it when you pay.</span></li>
+          <li>${ICON.bell}<span><b>Need something?</b> Call the waiter from the top of the screen.</span></li>
+        </ul>
+        <div class="wifi" style="margin:0">${ICON.wifi}<div><div class="k">Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm" data-act="copy-wifi">Copy</button></div>
+        <button class="btn block" data-act="welcome-done">See the menu</button>
+      </div>`;
+  }
   if (s.startsWith("dish:")) {
     const d = DISH[s.slice(5)];
-    return `<img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><div class="sheet-b">
-      <div class="xrow"><div><h2>${esc(d.name)}</h2><p class="mono" style="margin:4px 0 0;font-size:18px">${fmt(d.price)}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
-      <p class="muted" style="margin:0">${esc(d.desc)}</p>
-      <p style="margin:0;font-size:13px;display:flex;gap:8px;align-items:center"><span class="veg ${d.veg ? "" : "non"}"></span>${d.veg ? "Vegetarian" : "Non-vegetarian"}</p>
-      <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button data-act="q-" aria-label="Fewer">−</button><span>${ui.qty}</span><button data-act="q+" aria-label="More">+</button></div>
-      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}">Add ${ui.qty} · ${fmt(d.price * ui.qty)}</button></div></div>`;
+    const pairs = (d.pair || []).map(id => DISH[id]).filter(Boolean);
+    return `<div class="photo-wrap"><img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><button class="x float" data-act="close" aria-label="Close">×</button></div><div class="sheet-b">
+      <div>${d.tag ? `<span class="tag">${esc(d.tag)}</span>` : ""}<h2>${esc(d.name)}</h2>
+      <p class="muted" style="margin:6px 0 0">${esc(d.desc)}</p>
+      <p class="dmeta"><span class="mono">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}"></span>${d.veg ? "Vegetarian" : "Non-vegetarian"}</p></div>
+      <label class="field" for="dish-note"><span>Special request <span class="muted" style="font-weight:400">(optional)</span></span><input id="dish-note" maxlength="60" value="${esc(ui.note)}" placeholder="e.g. no chilli, extra crispy" autocomplete="off"></label>
+      ${pairs.length ? `<div><div class="sec-h" style="margin-bottom:8px">Goes well with</div><div class="pairs">${pairs.map(p => `<button class="pair" data-act="pair-add" data-id="${p.id}"><img src="${photo(p)}" alt=""><span><b>${esc(p.name)}</b><span class="mono">${fmt(p.price)}</span></span><i>${inBasket(p.id) ? inBasket(p.id) : "+"}</i></button>`).join("")}</div></div>` : ""}
+      <div class="addrow"><div class="stepper"><button data-act="q-" aria-label="Fewer">−</button><span>${ui.qty}</span><button data-act="q+" aria-label="More">+</button></div>
+      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}">Add · ${fmt(d.price * ui.qty)}</button></div></div>`;
   }
   if (s === "basket") {
-    const ids = Object.keys(basket).filter(id => basket[id] > 0); const total = ids.reduce((t, id) => t + DISH[id].price * basket[id], 0);
+    const lines = basketLines(), total = lines.reduce((t, l) => t + DISH[l.id].price * l.qty, 0);
     return `<div class="sheet-b"><div class="xrow"><div><h2>Your picks</h2><p class="muted" style="margin:2px 0 0;font-size:14px">They join table ${view.table}'s shared order and bill.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
-      <ul class="lines">${ids.map(id => `<li><img src="${photo(DISH[id])}" alt=""><span class="n">${esc(DISH[id].name)}<small class="mono">${fmt(DISH[id].price * basket[id])}</small></span><div class="stepper sm"><button data-act="b-" data-id="${id}" aria-label="Fewer">−</button><span>${basket[id]}</span><button data-act="b+" data-id="${id}" aria-label="More">+</button></div></li>`).join("")}</ul>
+      ${lines.length ? `<ul class="lines">${lines.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="n">${esc(DISH[l.id].name)}<small>${l.note ? "“" + esc(l.note) + "” · " : ""}<span class="mono">${fmt(DISH[l.id].price * l.qty)}</span></small></span><div class="stepper sm"><button data-act="b-" data-key="${esc(l.key)}" aria-label="Fewer">−</button><span>${l.qty}</span><button data-act="b+" data-key="${esc(l.key)}" aria-label="More">+</button></div></li>`).join("")}</ul>` : `<p class="empty">Your picks are empty.</p>`}
       <div class="sum"><div class="tot"><span>Subtotal</span><span>${fmt(total)}</span></div></div>
-      <label class="namefield" for="myname2">Name for the order <input id="myname2" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
-      <button class="btn block" data-act="send-order" ${ids.length ? "" : "disabled"}>Send order</button>
+      <label class="namefield" for="myname2">Name on the order <input id="myname2" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
+      <button class="btn block" data-act="send-order" ${lines.length ? "" : "disabled"}>Send order · ${fmt(total)}</button>
       <p class="note">Your waiter confirms it with one tap, then the kitchen starts cooking.</p></div>`;
   }
   if (s === "pay") {
-    const ts = tableState(view.table), sub = ts.total, tax = sub * R.tax, tip = Math.round(sub * ui.tip / 100), total = sub + tax + tip;
-    const busy = ui.paying;
-    return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${view.table} bill</h2><p class="muted" style="margin:2px 0 0;font-size:14px">One bill for everyone at the table.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
-      <ul class="lines">${ts.os.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}</span><span class="p">${fmt(DISH[o.dish].price * o.qty)}</span></li>`).join("")}</ul>
+    const ts = tableState(view.table);
+    if (ts.left <= 0) return `<div class="sheet-b" style="text-align:center"><div class="bigcheck">${ICON.check}</div><h2>Table ${view.table} is all paid</h2><button class="btn block" data-act="close">Done</button></div>`;
+    const mine = Math.min(ts.left, withTax(sumOf(ts.os.filter(o => o.by === me.id))));
+    if (ui.split === "mine" && !mine) ui.split = "all";
+    const ways = Math.max(2, ui.ways), amount = ui.split === "all" ? ts.left : ui.split === "split" ? Math.min(ts.left, Math.ceil(ts.due / ways)) : mine;
+    const tip = Math.round(amount * ui.tip / 100), charge = amount + tip, busy = ui.paying;
+    return `<div class="sheet-b"><div class="xrow"><div><h2>Pay table ${view.table}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${ts.paidAmt ? `${fmt(ts.paidAmt)} paid · ${fmt(ts.left)} left` : `Bill ${fmt(ts.due)} incl. GST`}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+      <div class="modes">
+        <button class="${ui.split === "all" ? "on" : ""}" data-act="split" data-v="all">${ts.paidAmt ? "The rest" : "Whole bill"}</button>
+        <button class="${ui.split === "split" ? "on" : ""}" data-act="split" data-v="split">Split equally</button>
+        <button class="${ui.split === "mine" ? "on" : ""}" data-act="split" data-v="mine" ${mine ? "" : "disabled"}>My items</button>
+      </div>
+      ${ui.split === "split" ? `<div class="splitrow"><span>Split between</span><div class="stepper sm"><button data-act="w-" aria-label="Fewer people">−</button><span>${ways}</span><button data-act="w+" aria-label="More people">+</button></div><span>people</span></div>` : ""}
+      ${ui.split === "mine" ? `<ul class="lines">${ts.os.filter(o => o.by === me.id).map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}</span><span class="p">${fmt(lineTotal(o))}</span></li>`).join("")}</ul>` : ""}
       <div class="sec-h">Tip for the team</div>
       <div class="tips">${[0, 5, 10, 15].map(p => `<button class="${ui.tip === p ? "on" : ""}" data-act="tip" data-p="${p}">${p ? p + "%" : "No tip"}</button>`).join("")}</div>
-      <div class="sum"><div><span>Subtotal</span><span>${fmt(sub)}</span></div><div><span>GST 5%</span><span>${fmt(tax)}</span></div><div><span>Tip</span><span>${fmt(tip)}</span></div><div class="tot"><span>Total</span><span>${fmt(total)}</span></div></div>
+      <div class="sum"><div><span>${ui.split === "split" ? "Your share" : ui.split === "mine" ? "Your items incl. GST" : "Amount"}</span><span>${fmt(amount)}</span></div><div><span>Tip</span><span>${fmt(tip)}</span></div><div class="tot"><span>You pay</span><span>${fmt(charge)}</span></div></div>
       <div class="methods">
-        <button class="btn block pay-apple" data-act="pay" data-m="Apple Pay" ${busy ? "disabled" : ""}>${busy === "Apple Pay" ? "Processing…" : "Pay with Apple Pay"}</button>
-        <button class="btn block pay-google" data-act="pay" data-m="Google Pay" ${busy ? "disabled" : ""}>${busy === "Google Pay" ? "Processing…" : "Pay with Google Pay"}</button>
-        <button class="btn block" data-act="pay" data-m="card" ${busy ? "disabled" : ""}>${busy === "card" ? "Processing…" : "Pay by card"}</button>
+        <button class="btn block pay-apple" data-act="pay" data-m="Apple Pay" data-amt="${amount}" data-tip="${tip}" ${busy ? "disabled" : ""}>${busy === "Apple Pay" ? "Processing…" : "Pay with Apple Pay"}</button>
+        <button class="btn block pay-google" data-act="pay" data-m="Google Pay" data-amt="${amount}" data-tip="${tip}" ${busy ? "disabled" : ""}>${busy === "Google Pay" ? "Processing…" : "Pay with Google Pay"}</button>
+        <button class="btn block" data-act="pay" data-m="Card" data-amt="${amount}" data-tip="${tip}" ${busy ? "disabled" : ""}>${busy === "Card" ? "Processing…" : "Pay by card"}</button>
       </div>
       <p class="note">Preview: no payment is taken. A real site connects these buttons to a payment provider.</p></div>`;
   }
   if (s === "paid") {
-    const t = tdoc(view.table);
-    return `<div class="sheet-b" style="text-align:center"><div class="bigcheck">✓</div><h2>Paid ${fmt(t.total || 0)}</h2><p class="muted" style="margin:0">with ${esc(t.method || "card")}. Thanks for dining at ${esc(R.name)}.</p><button class="btn block" data-act="close">Done</button></div>`;
+    const ts = tableState(view.table), p = ui.lastPay || { amount: 0, tip: 0, method: "card" };
+    return `<div class="sheet-b" style="text-align:center"><div class="bigcheck">${ICON.check}</div><h2>Paid ${fmt(p.amount + p.tip)}</h2>
+      <p class="muted" style="margin:0">with ${esc(p.method)}${p.tip ? `, including a ${fmt(p.tip)} tip` : ""}.</p>
+      <div class="alertbox ${ts.left ? "bill" : "paid"}" style="justify-content:center">${ts.left ? `<b>${fmt(ts.left)} still to pay on table ${view.table}</b>` : `<b>Table ${view.table} is fully paid. Thank you!</b>`}</div>
+      <button class="btn block" data-act="close">Done</button></div>`;
   }
   if (s.startsWith("table:")) return staffTableSheet(+s.slice(6));
   return "";
 }
 
 /* ---------- Staff ---------- */
+function attentionQueue(all) {
+  const q = [];
+  all.forEach(t => {
+    if (t.t.waiter) q.push({ at: t.t.waiter, n: t.n, kind: "alert", text: "Calling for a waiter", btn: "On my way", act: "ack-waiter" });
+    if (t.nNew) q.push({ at: t.os.find(o => o.state === "new").at, n: t.n, kind: "new", text: `${t.nNew} new ${t.nNew === 1 ? "item" : "items"} to confirm`, btn: "Send to kitchen", act: "to-kitchen" });
+    if (t.t.bill && !t.paid) q.push({ at: t.t.bill, n: t.n, kind: "bill", text: `Wants the bill · ${fmt(t.left)} left`, btn: "View", act: "open-table" });
+  });
+  return q.sort((a, b) => a.at - b.at);
+}
 function staffHTML() {
   const all = Array.from({ length: R.tables }, (_, i) => ({ n: i + 1, ...tableState(i + 1) }));
-  const attention = all.filter(t => ["call", "bill", "new"].includes(t.st)).length;
-  const cooking = all.reduce((s, t) => s + qtyOf(t.os, "cooking"), 0);
+  const queue = attentionQueue(all);
+  const cooking = all.reduce((s, t) => s + t.nCook, 0);
   const open = all.filter(t => t.st !== "empty").length;
-  const revenue = all.reduce((s, t) => s + t.total, 0);
+  const openBills = all.reduce((s, t) => s + t.left, 0);
+  const takings = all.reduce((s, t) => s + t.paidAmt, 0);
   let body = "";
   if (ui.stab === "floor") {
     body = `<div class="kpis">
-      <div class="kpi ${attention ? "hot" : ""}"><div class="k">Need you</div><div class="v">${attention}</div></div>
+      <div class="kpi ${queue.length ? "hot" : ""}"><div class="k">Need you</div><div class="v">${queue.length}</div></div>
       <div class="kpi"><div class="k">Items cooking</div><div class="v">${cooking}</div></div>
-      <div class="kpi"><div class="k">Tables seated</div><div class="v">${open}/${R.tables}</div></div>
-      <div class="kpi"><div class="k">Open bills</div><div class="v">${fmt(revenue)}</div></div></div>
-      <div class="floor">${all.map(t => {
-        const nNew = qtyOf(t.os, "new"), nCook = qtyOf(t.os, "cooking");
-        const pills = [t.t.waiter ? `<span class="pill alert">Waiter · ${ago(t.t.waiter)}</span>` : "", t.t.bill && !t.t.paid ? `<span class="pill new">Bill requested</span>` : "", nNew ? `<span class="pill new">${nNew} new</span>` : "", nCook ? `<span class="pill cook">${nCook} cooking</span>` : "", t.t.paid ? `<span class="pill ok">Paid · ${esc(t.t.method || "")}</span>` : ""].join("");
-        return `<button class="tcard s-${t.st}" data-act="open-table" data-n="${t.n}"><div class="top"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></div>
-          <div class="pills">${pills}</div>
-          <div class="foot">${t.st === "empty" ? "<span>Ready for guests</span>" : `<span>${t.guests} ${t.guests === 1 ? "guest" : "guests"} · ${ago(t.since)}</span><b>${fmt(t.total)}</b>`}</div></button>`;
-      }).join("")}</div>
-      <div class="legend"><span><i style="background:var(--alert)"></i>Calling waiter</span><span><i style="background:var(--pop)"></i>New order or bill</span><span><i style="background:var(--cook)"></i>Cooking</span><span><i style="background:var(--ok)"></i>Dining</span><span><i style="background:var(--accent)"></i>Paid</span></div>`;
+      <div class="kpi"><div class="k">Tables seated</div><div class="v">${open}<span class="of">/${R.tables}</span></div></div>
+      <div class="kpi"><div class="k">Open bills</div><div class="v">${fmt(openBills)}</div>${takings ? `<div class="kpi-s">${fmt(takings)} paid tonight</div>` : ""}</div></div>
+      <div class="floorwrap">
+        <section class="queue"><h2>Needs you <span class="mono muted">${queue.length}</span></h2>
+          ${queue.length ? `<ul>${queue.map(i => `<li class="q-${i.kind}"><span class="qt mono">${String(i.n).padStart(2, "0")}</span><span class="qx">${i.text}<small>${agoAgo(i.at)}</small></span><button class="btn sm ${i.kind === "alert" ? "alert" : i.kind === "new" ? "pop" : "ghost"}" data-act="${i.act}" data-n="${i.n}">${i.btn}</button></li>`).join("")}</ul>` : `<div class="allclear">${ICON.check}<b>All caught up</b><span>Waiter calls, new orders and bill requests appear here first, oldest at the top.</span></div>`}
+        </section>
+        <div><div class="floor">${all.map(t => {
+          const pills = [t.t.waiter ? `<span class="pill alert">Waiter · ${ago(t.t.waiter)}</span>` : "", t.nNew ? `<span class="pill new">${t.nNew} new</span>` : "", t.nCook ? `<span class="pill cook">${t.nCook} cooking</span>` : "", t.t.bill && !t.paid ? `<span class="pill new">Bill requested</span>` : "", t.paid ? `<span class="pill ok">Paid</span>` : t.paidAmt ? `<span class="pill ok">Part paid</span>` : ""].join("");
+          const qa = t.t.waiter ? `<button class="btn sm alert qa" data-act="ack-waiter" data-n="${t.n}">On my way</button>` : t.nNew ? `<button class="btn sm pop qa" data-act="to-kitchen" data-n="${t.n}">Send to kitchen</button>` : "";
+          return `<div class="tcard s-${t.st}" role="button" tabindex="0" data-act="open-table" data-n="${t.n}" aria-label="Table ${t.n}: ${STATE_LABEL[t.st]}"><div class="top"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></div>
+            ${pills ? `<div class="pills">${pills}</div>` : ""}${qa}
+            <div class="foot">${t.st === "empty" ? "<span>Ready for guests</span>" : `<span>${t.guests} ${t.guests === 1 ? "phone" : "phones"} · ${ago(t.since)}</span><b>${fmt(t.paid ? t.due : t.left)}</b>`}</div></div>`;
+        }).join("")}</div>
+        <div class="legend"><span><i style="background:var(--alert)"></i>Calling waiter</span><span><i style="background:var(--pop)"></i>New order or bill</span><span><i style="background:var(--cook)"></i>Cooking</span><span><i style="background:var(--ok)"></i>Dining</span><span><i style="background:var(--accent)"></i>Paid</span></div></div>
+      </div>`;
   } else if (ui.stab === "kitchen") {
-    const tickets = all.filter(t => qtyOf(t.os, "cooking"));
-    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const os = t.os.filter(o => o.state === "cooking"); return `<div class="ticket"><h3>Table ${t.n}<small>${ago(os[0].at)}</small></h3><ul class="lines">${os.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)}</small></span><button class="btn sm" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul></div>`; }).join("")}</div>` : `<p class="empty">The kitchen is clear. Confirmed orders show up here.</p>`;
+    const tickets = all.filter(t => t.nCook).map(t => ({ ...t, cook: t.os.filter(o => o.state === "cooking") })).sort((a, b) => a.cook[0].at - b.cook[0].at);
+    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const mins = (Date.now() - t.cook[0].at) / 60000, late = mins > 25 ? "late2" : mins > 15 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
+      : `<div class="allclear">${ICON.check}<b>The kitchen is clear</b><span>Orders appear here once staff send them to the kitchen, oldest first.</span></div>`;
   } else {
     body = `<p class="muted" style="margin:0">Replace the illustrations with real photos of your dishes. Guests see them right away.</p>
       ${assets ? "" : `<p class="note" style="text-align:left">Photo uploads need editor access to this page.</p>`}
       <div class="photos">${MENU.map(d => `<div class="item"><img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><div><span>${esc(d.name)}</span>${assets ? `<label class="btn ghost sm" for="up-${d.id}">${S.photos[d.id] ? "Replace" : "Upload"}<input type="file" id="up-${d.id}" accept="image/*" data-upload="${d.id}"></label>` : ""}</div></div>`).join("")}</div>`;
   }
-  return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)} · Floor</h1>
-    <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="mono">${cooking}</span>` : ""}</button>${canEdit ? `<button class="${ui.stab === "photos" ? "on" : ""}" data-act="stab" data-tab="photos">Photos</button>` : ""}</div>
+  return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)}</h1>
+    <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button>${canEdit ? `<button class="${ui.stab === "photos" ? "on" : ""}" data-act="stab" data-tab="photos">Photos</button>` : ""}</div>
+    <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}">${ui.sound ? ICON.sound + "Sound on" : ICON.mute + "Sound off"}</button>
     <a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
     <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
 function staffTableSheet(n) {
   const ts = tableState(n), { os, t } = ts;
-  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)} · ${ago(o.at)}</small></span>${btn ? btn(o) : `<span class="p">${fmt(DISH[o.dish].price * o.qty)}</span>`}</li>`).join("")}</ul>` : ""; };
-  const nNew = qtyOf(os, "new");
-  return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "guest" : "guests"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)} · ${ago(o.at)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
+  return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "phone" : "phones"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
     ${t.waiter ? `<div class="alertbox"><b>Called the waiter ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
-    ${t.bill && !t.paid ? `<div class="alertbox bill"><b>Asked for the bill · ${fmt(ts.total * (1 + R.tax))}</b><span class="muted" style="font-size:13px">They can pay from their phone</span></div>` : ""}
-    ${t.paid ? `<div class="alertbox paid"><div><b>Paid ${fmt(t.total || 0)}</b><div class="muted" style="font-size:13px">${esc(t.method || "")} · tip ${fmt(t.tip || 0)}</div></div></div>` : ""}
-    ${nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${nNew} ${nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
+    ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
     ${group("new", "New, not sent yet")}
-    ${group("cooking", "In the kitchen", o => `<button class="btn sm" data-act="served" data-id="${o.id}">Served</button>`)}
+    ${group("cooking", "In the kitchen", o => `<button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>`)}
     ${group("served", "Served")}
-    ${os.length ? `<div class="sum"><div class="tot"><span>Total with GST</span><span>${fmt(ts.total * (1 + R.tax))}</span></div></div>` : `<p class="empty">This table is free.</p>`}
-    ${os.length || t.waiter || t.bill ? `<button class="btn ${ui.clearArm === n ? "alert" : "ghost"} block" data-act="clear-table" data-n="${n}">${ui.clearArm === n ? "Tap again to clear table " + n : "Clear table for next guests"}</button>` : ""}
+    ${os.length ? `<div class="sum"><div><span>Bill incl. GST</span><span>${fmt(ts.due)}</span></div>${ts.pays.map(p => `<div><span>${esc(p.name)} · ${esc(p.method)}${p.tip ? ` (+${fmt(p.tip)} tip)` : ""}</span><span>−${fmt(p.amount)}</span></div>`).join("")}<div class="tot"><span>${ts.paid ? "Fully paid" : "Left to pay"}</span><span>${ts.paid ? "✓" : fmt(ts.left)}</span></div></div>` : `<p class="empty">This table is free.</p>`}
+    ${t.bill && !ts.paid ? `<p class="note" style="text-align:left">They asked for the bill ${ago(t.bill)} ago and can pay from their phones.</p>` : ""}
+    ${os.length || t.waiter || t.bill ? `<button class="btn ${ui.clearArm === n ? "alert" : "ghost"} block" data-act="clear-table" data-n="${n}">${ui.clearArm === n ? "Tap again to clear table " + n : ts.paid ? "Clear table for next guests" : "Clear table (bill not fully paid)"}</button>` : ""}
   </div>`;
 }
 
 /* ================= Actions ================= */
+async function sendToKitchen(n) {
+  for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking" })) return; }
+  toast("Table " + n + " sent to the kitchen");
+}
+function welcomeDone() {
+  const v = ($("#wname") && $("#wname").value.trim().slice(0, 20)) || "";
+  if (v) { me.name = v; LS.set("rt-name", v); }
+  LS.set("rt-welcomed-" + view.table, true);
+}
 document.addEventListener("click", async e => {
   if (e.target.closest("[data-cell]")) return;
-  const el = e.target.closest("[data-act]"); if (!el) return;
+  const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
   const act = el.dataset.act, id = el.dataset.id, n = +el.dataset.n;
   if (act === "close-sheet" && e.target !== el) return;
   switch (act) {
-    case "close": case "close-sheet": ui.sheet = null; ui.clearArm = 0; render(); break;
+    case "close": case "close-sheet": if (ui.sheet === "welcome") welcomeDone(); ui.sheet = null; ui.clearArm = 0; render(); break;
+    case "welcome-done": welcomeDone(); ui.sheet = null; render(); break;
     case "gtab": stopGame(); ui.gtab = el.dataset.tab; render(); scrollTo(0, 0); break;
-    case "jump": { const t = document.getElementById("cat-" + el.dataset.cat); t && t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); document.querySelectorAll(".cats button").forEach(b => b.classList.toggle("on", b === el)); break; }
-    case "dish": ui.qty = 1; ui.sheet = "dish:" + id; render(); break;
-    case "quick-add": basket[id] = (basket[id] || 0) + 1; saveBasket(); render(); toast(DISH[id].name + " added"); break;
+    case "jump": { const t = document.getElementById("cat-" + el.dataset.cat); if (t) scrollTo({ top: t.getBoundingClientRect().top + scrollY - 64, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); break; }
+    case "veg": ui.vegOnly = !ui.vegOnly; render(); break;
+    case "clear-q": ui.q = ""; render(); break;
+    case "dish": ui.qty = 1; ui.note = ""; ui.sheet = "dish:" + id; render(); break;
+    case "quick-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
+    case "pair-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
     case "q-": ui.qty = Math.max(1, ui.qty - 1); render(); break;
     case "q+": ui.qty = Math.min(20, ui.qty + 1); render(); break;
-    case "add-dish": basket[id] = (basket[id] || 0) + ui.qty; saveBasket(); ui.sheet = null; render(); toast(`${ui.qty} × ${DISH[id].name} added`); break;
+    case "add-dish": addToBasket(id, ui.qty, ui.note.trim()); toast(`${ui.qty} × ${DISH[id].name} added`); ui.sheet = null; render(); break;
     case "open-basket": ui.sheet = "basket"; render(); break;
-    case "b-": basket[id]--; if (basket[id] <= 0) delete basket[id]; saveBasket(); if (!Object.keys(basket).length) ui.sheet = null; render(); break;
-    case "b+": basket[id]++; saveBasket(); render(); break;
+    case "b-": { const k = el.dataset.key; basket[k]--; if (basket[k] <= 0) delete basket[k]; saveBasket(); if (!basketLines().length) ui.sheet = null; render(); break; }
+    case "b+": basket[el.dataset.key]++; saveBasket(); render(); break;
     case "send-order": {
-      el.disabled = true; let ok = true;
-      for (const [dish, qty] of Object.entries(basket)) { const oid = "o" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); ok = await put("orders", oid, { table: view.table, dish, qty, state: "new", at: Date.now(), by: me.id, name: me.name }) && ok; if (!ok) break; }
-      if (ok) { basket = {}; saveBasket(); ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); toast("Order sent. Your waiter will confirm it."); } else el.disabled = false;
+      el.disabled = true; const nm = $("#myname2"); if (nm && nm.value.trim()) { me.name = nm.value.trim().slice(0, 20); LS.set("rt-name", me.name); }
+      let ok = true;
+      for (const l of basketLines()) { ok = await put("orders", newId("o"), { table: view.table, dish: l.id, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
+      if (ok) { ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); toast("Order sent. Your waiter will confirm it."); } else { el.disabled = false; render(); }
       break;
     }
     case "call-waiter": { const t = tdoc(view.table); if (await put("tables", "t" + view.table, { ...t, table: view.table, waiter: Date.now() })) toast("Your waiter has been called to table " + view.table); break; }
-    case "cancel-waiter": { const t = tdoc(view.table); await put("tables", "t" + view.table, { ...t, waiter: 0 }); break; }
-    case "ask-bill": { const t = tdoc(view.table); if (!t.bill) await put("tables", "t" + view.table, { ...t, table: view.table, bill: Date.now() }); ui.sheet = "pay"; render(); break; }
+    case "cancel-waiter": { const t = tdoc(view.table); ui.selfCancel = true; await put("tables", "t" + view.table, { ...t, waiter: 0 }); toast("Waiter call cancelled"); break; }
+    case "ask-bill": { const t = tdoc(view.table); ui.split = "all"; ui.ways = Math.max(2, tableState(view.table).guests); ui.sheet = "pay"; render(); if (!t.bill) await put("tables", "t" + view.table, { ...t, table: view.table, bill: Date.now() }); break; }
+    case "split": ui.split = el.dataset.v; render(); break;
+    case "w-": ui.ways = Math.max(2, ui.ways - 1); render(); break;
+    case "w+": ui.ways = Math.min(20, ui.ways + 1); render(); break;
     case "tip": ui.tip = +el.dataset.p; render(); break;
     case "pay": {
-      const m = el.dataset.m; ui.paying = m; render();
+      const m = el.dataset.m, amount = +el.dataset.amt, tip = +el.dataset.tip; ui.paying = m; render();
       await new Promise(r => setTimeout(r, 1300));
-      const ts = tableState(view.table), sub = ts.total, total = Math.round(sub * (1 + R.tax) + sub * ui.tip / 100);
-      const ok = await put("tables", "t" + view.table, { ...ts.t, table: view.table, paid: Date.now(), method: m === "card" ? "card" : m, tip: Math.round(sub * ui.tip / 100), total, waiter: 0 });
-      ui.paying = null; ui.sheet = ok ? "paid" : "pay"; render(); break;
+      const ok = await put("payments", newId("p"), { table: view.table, amount, tip, method: m, by: me.id, name: me.name, at: Date.now() });
+      ui.paying = null; if (ok) { ui.lastPay = { amount, tip, method: m }; ui.sheet = "paid"; } render(); break;
     }
-    case "copy-wifi": try { await navigator.clipboard.writeText(R.wifi.pass); toast("Wi-Fi password copied"); } catch { const r = document.createRange(); const v = document.getElementById("wifi-pass") || el.parentElement.querySelector(".v:last-of-type"); if (v) { r.selectNodeContents(v); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast("Password selected. Copy it from here."); } break;
+    case "copy-wifi": try { await navigator.clipboard.writeText(R.wifi.pass); toast("Wi-Fi password copied"); } catch { const v = el.parentElement.querySelector(".wifi-pass"); if (v) { const r = document.createRange(); r.selectNodeContents(v); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast("Password selected. Copy it from here."); } break;
     case "start-game": startGame(); break;
     case "lb": ui.lbMode = el.dataset.mode; render(); break;
     case "stab": ui.stab = el.dataset.tab; render(); break;
+    case "sound": {
+      ui.sound = !ui.sound;
+      if (ui.sound) { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); await actx.resume(); } catch { actx = null; } chime(); toast(actx ? "Sound alerts on for new calls and orders" : "This browser can't play sound alerts"); }
+      render(); break;
+    }
     case "open-table": ui.clearArm = 0; ui.sheet = "table:" + n; render(); break;
-    case "ack-waiter": { const t = tdoc(n); await put("tables", "t" + n, { ...t, waiter: 0 }); toast("Table " + n + " knows you're coming"); break; }
-    case "to-kitchen": { el.disabled = true; for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking" })) break; } toast("Table " + n + " sent to the kitchen"); break; }
+    case "ack-waiter": { const t = tdoc(n); if (await put("tables", "t" + n, { ...t, waiter: 0 })) toast("Table " + n + " knows you're coming"); break; }
+    case "to-kitchen": el.disabled = true; await sendToKitchen(n); break;
     case "served": { const o = S.orders[id]; if (o) await put("orders", id, { ...o, state: "served" }); break; }
+    case "all-served": { for (const o of ordersFor(n).filter(o => o.state === "cooking")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "served" })) break; } toast("Table " + n + " served"); break; }
     case "clear-table": {
       if (ui.clearArm !== n) { ui.clearArm = n; render(); break; }
-      ui.clearArm = 0; for (const o of ordersFor(n)) await del("orders", o.id); await del("tables", "t" + n); ui.sheet = null; render(); toast("Table " + n + " is ready for new guests"); break;
+      ui.clearArm = 0;
+      for (const o of ordersFor(n)) await del("orders", o.id);
+      for (const p of paymentsFor(n)) await del("payments", p.id);
+      await del("tables", "t" + n); ui.sheet = null; render(); toast("Table " + n + " is ready for new guests"); break;
     }
   }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && ui.sheet) { if (ui.sheet === "welcome") welcomeDone(); ui.sheet = null; render(); return; }
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id === "q") { ui.q = t.value; render(); }
+  if (t.id === "dish-note") ui.note = t.value;
 });
 document.addEventListener("pointerdown", e => { const c = e.target.closest("[data-cell]"); if (c) { e.preventDefault(); hitCell(c); } });
 document.addEventListener("change", async e => {
@@ -875,8 +1255,7 @@ document.addEventListener("change", async e => {
     catch (err) { console.error(err); toast("That photo didn't upload. Try a JPG or PNG under 20 MB."); }
   }
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && ui.sheet) { ui.sheet = null; render(); } });
-setInterval(() => { if (!game.running && !ui.sheet && !(document.activeElement && document.activeElement.tagName === "INPUT")) render(); }, 30000);
+setInterval(() => { if (!game.running && !game.counting && !(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) render(); }, 30000);
 
 /* ================= Boot ================= */
 route();
@@ -890,4 +1269,5 @@ route();
   if (canEdit) { assets = await c.use("assets").catch(() => null); render(); }
 })();
 })();
+
 </script>
