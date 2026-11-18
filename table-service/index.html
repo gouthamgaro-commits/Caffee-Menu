@@ -385,12 +385,54 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 .ticket.late .age { background: color-mix(in srgb, var(--pop) 30%, transparent); color: var(--fg); }
 .ticket.late2 { border-top-color: var(--alert); }
 .ticket.late2 .age { background: var(--alert); color: #fff; }
+
+/* ===== admin ===== */
+.entry { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.intro { gap: 14px; }
+.linkline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; }
+.linkline .k { font-weight: 600; color: var(--muted); }
+.linkline code { flex: 1; min-width: 0; font: 500 13px var(--mono); overflow-wrap: anywhere; }
+.linkbox { display: block; padding: 12px; border-radius: 10px; background: var(--surface-2); font: 500 13px var(--mono); overflow-wrap: anywhere; user-select: all; }
+.tents { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.tent { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+.tent img { width: 100%; aspect-ratio: 600 / 820; border-radius: 10px; border: 1px solid var(--line); background: #fbfaf6; }
+.tent-a { display: flex; gap: 6px; flex-wrap: wrap; }
+.tent-a .btn { flex: 1; padding: 0 8px; }
+.mlist { list-style: none; margin: 0; padding: 0; display: grid; }
+.mlist li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.mlist li:first-child { border-top: 0; }
+.mlist img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex: none; }
+.mlist .n { flex: 1; min-width: 140px; }
+.mlist .n b { display: block; font-weight: 600; }
+.mlist .n small { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.mlist li.off img { filter: grayscale(1); opacity: .55; }
+.mlist li.off .n b { color: var(--muted); text-decoration: line-through; }
+.avail { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: color-mix(in srgb, var(--alert) 12%, var(--surface)); color: var(--alert); border: 1px solid color-mix(in srgb, var(--alert) 35%, transparent); }
+.avail i { width: 28px; height: 16px; border-radius: 8px; background: currentColor; opacity: .35; position: relative; }
+.avail i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); }
+.avail.on { background: color-mix(in srgb, var(--ok) 12%, var(--surface)); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+.avail.on i { opacity: 1; }
+.avail.on i::after { left: 14px; }
+.form { gap: 16px; max-width: 760px; }
+.form h2 { font-size: 17px; margin-top: 4px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.field select { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font: inherit; font-size: 16px; font-weight: 400; color: var(--fg); }
+.field input, .field select { width: 100%; min-width: 0; }
+.formerr { margin: 0; color: var(--alert); font-weight: 600; font-size: 14px; }
+.photo.rounded { border-radius: 14px; aspect-ratio: 16 / 9; }
+.photoctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.photoctl label { cursor: pointer; }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.dish.soldout img { filter: grayscale(1); opacity: .6; }
+.dish.soldout .h3 { color: var(--muted); }
+.sold { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 12px; font-weight: 700; }
 </style>
 
 <div id="app"></div>
 <div id="sheet"></div>
 <div id="toast" class="toast" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 (() => {
 /* ================= Menu data ================= */
@@ -607,13 +649,14 @@ const PHOTO = {};
 function photo(d) {
   const up = S.photos[d.id];
   if (up && up.url) return up.url;
-  if (!PHOTO[d.id]) {
+  const key = [d.id, d.kind, d.top || "", d.color ? d.color[0] : "", d.cat].join("|");
+  if (!PHOTO[key]) {
     const c = document.createElement("canvas"); c.width = 480; c.height = 360; const x = c.getContext("2d"); const Rn = rng(hash(d.id));
-    surface(x, CATS.find(k => k.id === d.cat).surface, Rn);
+    surface(x, (CATS.find(k => k.id === d.cat) || CATS[1]).surface, Rn);
     try { DRAW[d.kind](x, Rn, d); } catch (e) { console.error(e); }
-    PHOTO[d.id] = c.toDataURL("image/jpeg", .86);
+    PHOTO[key] = c.toDataURL("image/jpeg", .86);
   }
-  return PHOTO[d.id];
+  return PHOTO[key];
 }
 
 /* ================= Menu extras: badges and pairings ================= */
@@ -626,9 +669,208 @@ const EXTRA = {
   gelato: { pair: ["cappuccino"] }, lassi: { tag: "House special" }, cappuccino: { pair: ["tiramisu"] },
 };
 MENU.forEach(d => Object.assign(d, EXTRA[d.id] || {}));
+/* ================= Admin: settings, menu editor, QR codes ================= */
+const DEFAULT_LINK = "https://claude.ai/artifact/SrTfysVbmmRug5VLymD9MW";
+const STYLES = [
+  { id: "pizza-basil", label: "Pizza with basil", kind: "pizza", top: "basil" },
+  { id: "pizza-mushroom", label: "Pizza with mushrooms", kind: "pizza", top: "mushroom" },
+  { id: "pasta", label: "Pasta", kind: "pasta" }, { id: "curry", label: "Curry with rice", kind: "curry" },
+  { id: "burger", label: "Burger and fries", kind: "burger" }, { id: "salmon", label: "Grilled fish", kind: "salmon" },
+  { id: "burrata", label: "Salad", kind: "burrata" }, { id: "soup", label: "Soup", kind: "soup" },
+  { id: "rings", label: "Fried rings", kind: "rings" }, { id: "satay", label: "Skewers", kind: "satay" },
+  { id: "tiramisu", label: "Cake slice", kind: "tiramisu" }, { id: "lava", label: "Chocolate cake", kind: "lava" },
+  { id: "gelato", label: "Ice cream", kind: "gelato" }, { id: "coffee", label: "Hot coffee", kind: "coffee" },
+  { id: "drink-lime", label: "Green drink", kind: "drink", color: ["#e9f5c8", "#b9da6a"], garnish: "lime" },
+  { id: "drink-mango", label: "Yellow drink", kind: "drink", color: ["#ffd36a", "#f0a21c"], garnish: "mint" },
+  { id: "drink-berry", label: "Pink drink", kind: "drink", color: ["#ff8f9a", "#e2324a"], garnish: "mint" },
+];
+const styleOf = d => (STYLES.find(s => s.kind === d.kind && (!s.top || s.top === d.top) && (!s.color || (d.color && s.color[0] === d.color[0]))) || STYLES[0]).id;
+const DEFAULT_R = JSON.parse(JSON.stringify(R));
+const DEFAULT_MENU = JSON.parse(JSON.stringify(MENU));
+const clampInt = (v, lo, hi, d) => { v = parseInt(v, 10); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+function applyConfig() {
+  const st = S.config.settings || {};
+  R.name = st.name || DEFAULT_R.name;
+  R.tagline = st.tagline != null ? st.tagline : DEFAULT_R.tagline;
+  R.tables = clampInt(st.tables, 1, 60, DEFAULT_R.tables);
+  R.wifi = { ssid: st.wifiSsid != null ? st.wifiSsid : DEFAULT_R.wifi.ssid, pass: st.wifiPass != null ? st.wifiPass : DEFAULT_R.wifi.pass };
+  R.tax = typeof st.taxPct === "number" ? st.taxPct / 100 : DEFAULT_R.tax;
+  R.link = st.link || DEFAULT_LINK;
+  const mn = S.config.menu, items = mn && Array.isArray(mn.items) ? mn.items : DEFAULT_MENU;
+  MENU.length = 0; items.forEach(d => MENU.push({ ...d }));
+  for (const k in DISH) delete DISH[k];
+  MENU.forEach(d => DISH[d.id] = d);
+}
+const taxLabel = () => `GST ${+(R.tax * 100).toFixed(1)}%`;
+const soldOut = d => d && d.available === false;
+const adminAllowed = () => canEdit || (mode === "local" && !(window.claude && window.claude.use));
+let downloads = null;
+
+/* ---- QR table cards ---- */
+const tableUrl = n => (R.link || DEFAULT_LINK).split("#")[0] + "#table-" + n;
+const qrReady = () => typeof window.qrcode === "function";
+function rrect(x, X, Y, w, h, r) { x.beginPath(); x.roundRect(X, Y, w, h, r); }
+function drawTent(n) {
+  const W = 600, H = 820, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  x.fillStyle = "#fbfaf6"; x.fillRect(0, 0, W, H);
+  x.fillStyle = "#17201b"; x.fillRect(0, 0, W, 210); x.fillStyle = "#f2b632"; x.fillRect(0, 206, W, 6);
+  x.textAlign = "center"; x.fillStyle = "#b9c4bc"; x.font = "600 22px Inter, Arial, sans-serif"; try { x.letterSpacing = "4px"; } catch {}
+  x.fillText(R.name.toUpperCase(), W / 2, 62); try { x.letterSpacing = "0px"; } catch {}
+  x.fillStyle = "#ffffff"; x.font = "800 108px 'Bricolage Grotesque', Arial, sans-serif"; x.fillText("Table " + n, W / 2, 172);
+  const size = 380, ox = (W - size) / 2, oy = 262;
+  x.fillStyle = "#ffffff"; rrect(x, ox - 22, oy - 22, size + 44, size + 44, 26); x.fill(); x.strokeStyle = "#d6dbcf"; x.lineWidth = 2; x.stroke();
+  if (qrReady()) {
+    const q = window.qrcode(0, "M"); q.addData(tableUrl(n)); q.make(); const m = q.getModuleCount(), cell = size / m;
+    x.fillStyle = "#17201b";
+    for (let r = 0; r < m; r++) for (let k = 0; k < m; k++) if (q.isDark(r, k)) x.fillRect(Math.floor(ox + k * cell), Math.floor(oy + r * cell), Math.ceil(cell), Math.ceil(cell));
+  } else { x.fillStyle = "#59645c"; x.font = "500 20px Inter, Arial, sans-serif"; x.fillText("QR code unavailable", W / 2, oy + size / 2); }
+  x.fillStyle = "#17201b"; x.font = "700 36px 'Bricolage Grotesque', Arial, sans-serif"; x.fillText("Scan to order", W / 2, 726);
+  x.fillStyle = "#59645c"; x.font = "400 19px Inter, Arial, sans-serif"; x.fillText("Menu with photos · call the waiter · pay at the table", W / 2, 762);
+  x.font = "500 16px Inter, Arial, sans-serif"; x.fillText("No app needed. You can also tap your phone on the NFC tag.", W / 2, 794);
+  return c;
+}
+const TENT = {};
+function tentURL(n) { const k = [n, R.name, tableUrl(n), qrReady()].join("|"); if (!TENT[k]) TENT[k] = drawTent(n).toDataURL("image/png"); return TENT[k]; }
+function drawSheet() {
+  const cols = 3, cw = 300, ch = 410, gap = 24, rows = Math.ceil(R.tables / cols);
+  const c = document.createElement("canvas"); c.width = cols * cw + (cols + 1) * gap; c.height = rows * ch + (rows + 1) * gap; const x = c.getContext("2d");
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
+  for (let i = 0; i < R.tables; i++) { const X = gap + (i % cols) * (cw + gap), Y = gap + Math.floor(i / cols) * (ch + gap); x.drawImage(drawTent(i + 1), X, Y, cw, ch); x.strokeStyle = "#cccccc"; x.setLineDash([6, 6]); x.strokeRect(X - .5, Y - .5, cw + 1, ch + 1); x.setLineDash([]); }
+  return c;
+}
+async function saveCanvas(canvas, filename) {
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+  if (downloads && blob) {
+    try { await downloads.save({ filename, data: blob }); toast("Saved " + filename); return; }
+    catch (e) { if (e && (e.code === "declined" || e.code === "rate_limited")) { if (e.code === "rate_limited") toast("A save is already waiting for you. Try again in a moment."); return; } }
+  }
+  ui.sheet = "img:" + filename; ui.imgData = canvas.toDataURL("image/png"); render();
+}
+
+/* ---- Admin view ---- */
+function adminHTML() {
+  const head = `<header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)} · Admin</h1>
+    ${adminAllowed() ? `<div class="stabs">${[["qr", "Tables & QR codes"], ["menu", "Menu"], ["settings", "Settings"]].map(([k, l]) => `<button class="${ui.atab === k ? "on" : ""}" data-act="atab" data-tab="${k}">${l}</button>`).join("")}</div>` : ""}
+    <a href="#staff" class="btn sm ghost" style="text-decoration:none">Staff floor</a><a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>`;
+  if (!adminAllowed()) return `<div class="staff">${head}<main class="sbody wrap"><div class="allclear">${ICON.check}<b>Admin is for the owner and editors</b><span>Ask the owner to give you Editor access to this page. Staff can still use the floor.</span><a class="btn sm" href="#staff" style="text-decoration:none">Open the staff floor</a></div></main></div>`;
+  let body = "";
+  if (ui.atab === "qr") {
+    const tables = Array.from({ length: R.tables }, (_, i) => i + 1);
+    body = `<section class="panel intro">
+        <div><h2>A code on every table</h2><p class="muted" style="margin:4px 0 0">Each table has its own link. Guests point their phone camera at the code, or tap the NFC tag, and the menu opens for that table. There's no app to install.</p></div>
+        <div class="linkline"><span class="k">Guest link</span><code>${esc((R.link || DEFAULT_LINK).split("#")[0])}#table-<i>N</i></code><button class="btn sm ghost" data-act="atab" data-tab="settings">Change</button></div>
+        ${mode === "live" && (R.link || DEFAULT_LINK).includes("claude.ai/") ? `<p class="note" style="text-align:left;margin:0">Guests open this link on claude.ai, so they need access to it. Share the page with Contributor access, or host the site on your own domain and put its address in Settings.</p>` : ""}
+        ${qrReady() ? "" : `<p class="alertbox" style="margin:0">QR codes couldn't load. Check your internet connection and reload the page.</p>`}
+        <div><button class="btn" data-act="dl-all" ${qrReady() ? "" : "disabled"}>Download all ${R.tables} codes on one sheet</button></div>
+      </section>
+      <div class="tents">${tables.map(n => `<div class="tent"><img src="${tentURL(n)}" alt="QR code card for table ${n}"><div class="tent-a"><button class="btn sm" data-act="dl-one" data-n="${n}" ${qrReady() ? "" : "disabled"}>Download</button><button class="btn sm ghost" data-act="copy-link" data-n="${n}">Copy link</button><a class="btn sm ghost" href="#table-${n}" style="text-decoration:none">Open</a></div></div>`).join("")}</div>
+      <section class="panel"><h2>NFC tags</h2><p class="muted" style="margin:0">Use any NFC writer app, for example NFC Tools. Choose <b>Write</b>, add a <b>URL</b> record, paste the table's link from <b>Copy link</b>, then hold the tag to your phone. Stick the tag under the QR code so guests can tap or scan.</p></section>`;
+  } else if (ui.atab === "menu") {
+    body = `<div class="xrow"><div><h2 style="font-size:22px">Menu</h2><p class="muted" style="margin:2px 0 0">${MENU.length} dishes. Changes show on every table straight away.</p></div><button class="btn" data-act="ad-new">Add dish</button></div>
+      ${CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id); return `<section class="panel"><div class="xrow"><h2>${c.label}</h2><span class="muted" style="font-size:13px">${ds.filter(d => !soldOut(d)).length} of ${ds.length} available</span></div>
+        ${ds.length ? `<ul class="mlist">${ds.map(d => `<li class="${soldOut(d) ? "off" : ""}"><img src="${photo(d)}" alt=""><span class="n"><b>${esc(d.name)}</b><small><span class="veg ${d.veg ? "" : "non"}"></span>${d.tag ? esc(d.tag) : d.veg ? "Vegetarian" : "Non-vegetarian"}</small></span><span class="mono">${fmt(d.price)}</span><button class="avail ${soldOut(d) ? "" : "on"}" data-act="ad-toggle" data-id="${d.id}" aria-pressed="${!soldOut(d)}"><i></i>${soldOut(d) ? "Sold out" : "Available"}</button><button class="btn sm ghost" data-act="ad-edit" data-id="${d.id}">Edit</button></li>`).join("")}</ul>` : `<p class="empty">No dishes here yet.</p>`}</section>`; }).join("")}
+      <p class="note" style="text-align:left">Prices on bills already sent to the kitchen don't change when you edit a price.</p>`;
+  } else {
+    const s = ui.sdraft || (ui.sdraft = { name: R.name, tagline: R.tagline, tables: R.tables, ssid: R.wifi.ssid, pass: R.wifi.pass, tax: +(R.tax * 100).toFixed(1), link: R.link === DEFAULT_LINK ? "" : R.link, err: "" });
+    body = `<section class="panel form">
+      <h2>Restaurant</h2>
+      <div class="grid2">
+        <label class="field" for="st-name">Name<input id="st-name" maxlength="40" value="${esc(s.name)}"></label>
+        <label class="field" for="st-tagline">Tagline<input id="st-tagline" maxlength="60" value="${esc(s.tagline)}"></label>
+        <label class="field" for="st-tables">Number of tables<input id="st-tables" type="number" inputmode="numeric" min="1" max="60" value="${esc(s.tables)}"></label>
+        <label class="field" for="st-tax">GST (%)<input id="st-tax" type="number" inputmode="decimal" min="0" max="28" step="0.5" value="${esc(s.tax)}"></label>
+      </div>
+      <h2>Guest Wi-Fi</h2>
+      <div class="grid2">
+        <label class="field" for="st-ssid">Network name<input id="st-ssid" maxlength="40" value="${esc(s.ssid)}"></label>
+        <label class="field" for="st-pass">Password<input id="st-pass" maxlength="63" value="${esc(s.pass)}"></label>
+      </div>
+      <h2>Guest link</h2>
+      <label class="field" for="st-link"><span>Website address the QR codes open <span class="muted" style="font-weight:400">(leave empty to use this page)</span></span><input id="st-link" type="url" inputmode="url" placeholder="${esc(DEFAULT_LINK)}" value="${esc(s.link)}"></label>
+      <p class="note" style="text-align:left;margin:0">Use your own domain once you host the site there. Each table adds #table-1, #table-2 and so on. Reprint the codes after changing it.</p>
+      ${s.err ? `<p class="formerr">${esc(s.err)}</p>` : ""}
+      <div><button class="btn" data-act="st-save">Save settings</button></div>
+    </section>`;
+  }
+  return `<div class="staff">${head}<main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
+}
+function adminDishSheet() {
+  const d = ui.draft, st = STYLES.find(s => s.id === d.style) || STYLES[0];
+  const preview = photo({ id: d.id || "draft", cat: d.cat, kind: st.kind, top: st.top, color: st.color, garnish: st.garnish });
+  const hasPhoto = d.id && S.photos[d.id];
+  return `<div class="sheet-b"><div class="xrow"><h2>${d.id ? "Edit dish" : "Add a dish"}</h2><button class="x" data-act="close" aria-label="Close">×</button></div>
+    <img class="photo rounded" src="${preview}" alt="">
+    <div class="photoctl">${!d.id ? `<span class="muted">Save the dish first, then you can add a real photo.</span>` : assets ? `<label class="btn sm ghost" for="up-${d.id}">${hasPhoto ? "Replace photo" : "Upload photo"}<input type="file" id="up-${d.id}" accept="image/*" data-upload="${d.id}" class="vh"></label>${hasPhoto ? `<button class="btn sm ghost" data-act="ad-unphoto">Use illustration</button>` : ""}` : `<span class="muted">Photo uploads need editor access.</span>`}</div>
+    <label class="field" for="ad-name">Name<input id="ad-name" maxlength="50" value="${esc(d.name)}" placeholder="e.g. Paneer Tikka Pizza"></label>
+    <label class="field" for="ad-desc">Description<input id="ad-desc" maxlength="120" value="${esc(d.desc)}" placeholder="One line about the dish"></label>
+    <div class="grid2">
+      <label class="field" for="ad-price">Price (₹)<input id="ad-price" type="number" inputmode="numeric" min="1" step="1" value="${esc(d.price)}"></label>
+      <label class="field" for="ad-cat">Section<select id="ad-cat">${CATS.map(c => `<option value="${c.id}" ${c.id === d.cat ? "selected" : ""}>${c.label}</option>`).join("")}</select></label>
+      <label class="field" for="ad-veg">Type<select id="ad-veg"><option value="1" ${d.veg ? "selected" : ""}>Vegetarian</option><option value="0" ${d.veg ? "" : "selected"}>Non-vegetarian</option></select></label>
+      <label class="field" for="ad-tag">Badge <input id="ad-tag" maxlength="20" value="${esc(d.tag)}" placeholder="e.g. Chef's pick"></label>
+    </div>
+    <label class="field" for="ad-style"><span>Illustration <span class="muted" style="font-weight:400">(shown when there's no photo)</span></span><select id="ad-style">${STYLES.map(s => `<option value="${s.id}" ${s.id === d.style ? "selected" : ""}>${s.label}</option>`).join("")}</select></label>
+    ${d.err ? `<p class="formerr">${esc(d.err)}</p>` : ""}
+    <div class="two">${d.id ? `<button class="btn ${d.delArm ? "alert" : "ghost"}" data-act="ad-del">${d.delArm ? "Tap again to delete" : "Delete dish"}</button>` : `<button class="btn ghost" data-act="close">Cancel</button>`}<button class="btn" data-act="ad-save">${d.id ? "Save changes" : "Add to menu"}</button></div>
+  </div>`;
+}
+async function saveMenu(items, msg) {
+  const clean = items.map(d => { const o = {}; for (const [k, v] of Object.entries(d)) if (v !== undefined && v !== "") o[k] = v; return o; });
+  if (await put("config", "menu", { items: clean, updatedAt: Date.now() })) { toast(msg); return true; }
+  return false;
+}
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
+  const act = el.dataset.act, n = +el.dataset.n, id = el.dataset.id;
+  switch (act) {
+    case "atab": ui.atab = el.dataset.tab; if (ui.atab === "settings") ui.sdraft = null; render(); scrollTo(0, 0); break;
+    case "dl-one": await saveCanvas(drawTent(n), `${R.name.replace(/[^\w]+/g, "-").toLowerCase()}-table-${n}-qr.png`); break;
+    case "dl-all": await saveCanvas(drawSheet(), `${R.name.replace(/[^\w]+/g, "-").toLowerCase()}-all-tables-qr.png`); break;
+    case "copy-link": { const u = tableUrl(n); try { await navigator.clipboard.writeText(u); toast("Table " + n + " link copied"); } catch { ui.sheet = "link:" + n; render(); } break; }
+    case "ad-new": ui.draft = { id: null, name: "", desc: "", price: "", cat: "mains", veg: 1, tag: "", style: "curry", err: "", delArm: false }; ui.sheet = "ad-dish"; render(); break;
+    case "ad-edit": { const d = DISH[id]; ui.draft = { id: d.id, name: d.name, desc: d.desc || "", price: d.price, cat: d.cat, veg: d.veg ? 1 : 0, tag: d.tag || "", style: styleOf(d), err: "", delArm: false }; ui.sheet = "ad-dish"; render(); break; }
+    case "ad-toggle": { const d = DISH[id]; await saveMenu(MENU.map(x => x.id === id ? { ...x, available: soldOut(x) } : x), soldOut(d) ? d.name + " is available again" : d.name + " is marked sold out"); break; }
+    case "ad-save": {
+      const d = ui.draft, name = d.name.trim(), price = parseInt(d.price, 10);
+      if (!name) { d.err = "Give the dish a name."; render(); break; }
+      if (!(price > 0)) { d.err = "Enter a price in whole rupees, like 450."; render(); break; }
+      const st = STYLES.find(s => s.id === d.style) || STYLES[0], old = d.id ? DISH[d.id] : null;
+      const item = { id: d.id || (name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "dish") + "-" + Math.random().toString(36).slice(2, 6),
+        cat: d.cat, name, desc: d.desc.trim(), price, veg: +d.veg ? 1 : 0, kind: st.kind, top: st.top, color: st.color, garnish: st.garnish, tag: d.tag.trim(), pair: old && old.pair, available: old ? old.available : undefined };
+      const items = old ? MENU.map(x => x.id === item.id ? item : x) : [...MENU, item];
+      if (await saveMenu(items, old ? "Saved " + name : name + " added to the menu")) { ui.sheet = null; ui.draft = null; render(); }
+      break;
+    }
+    case "ad-del": {
+      const d = ui.draft; if (!d.delArm) { d.delArm = true; render(); break; }
+      const name = DISH[d.id] ? DISH[d.id].name : "Dish";
+      if (await saveMenu(MENU.filter(x => x.id !== d.id), name + " removed from the menu")) { ui.sheet = null; ui.draft = null; render(); }
+      break;
+    }
+    case "ad-unphoto": if (await del("photos", ui.draft.id)) toast("Showing the illustration again"); break;
+    case "st-save": {
+      const s = ui.sdraft, tables = parseInt(s.tables, 10), tax = parseFloat(s.tax), link = String(s.link || "").trim();
+      if (!String(s.name).trim()) { s.err = "Enter the restaurant's name."; render(); break; }
+      if (!(tables >= 1 && tables <= 60)) { s.err = "Number of tables must be between 1 and 60."; render(); break; }
+      if (!(tax >= 0 && tax <= 28)) { s.err = "GST must be between 0 and 28 percent."; render(); break; }
+      if (link && !/^https:\/\/[^\s]+\.[^\s]+/.test(link)) { s.err = "The guest link must be a full https:// address."; render(); break; }
+      s.err = "";
+      if (await put("config", "settings", { name: String(s.name).trim(), tagline: String(s.tagline).trim(), tables, taxPct: tax, wifiSsid: String(s.ssid).trim(), wifiPass: String(s.pass), link, updatedAt: Date.now() })) { ui.sdraft = null; toast("Settings saved"); }
+      break;
+    }
+  }
+});
+function adminInput(t) {
+  if (t.id && t.id.startsWith("ad-") && ui.draft) { const k = t.id.slice(3); ui.draft[k] = t.value; ui.draft.err = ""; if (k === "style" || k === "cat") render(); return true; }
+  if (t.id && t.id.startsWith("st-") && ui.sdraft) { const map = { "st-name": "name", "st-tagline": "tagline", "st-tables": "tables", "st-tax": "tax", "st-ssid": "ssid", "st-pass": "pass", "st-link": "link" }; if (map[t.id]) ui.sdraft[map[t.id]] = t.value; return true; }
+  return false;
+}
+document.addEventListener("input", e => adminInput(e.target));
+document.addEventListener("change", e => { if (e.target.tagName === "SELECT") adminInput(e.target); });
+
 
 /* ================= Shared state ================= */
-const S = { orders: {}, tables: {}, scores: {}, photos: {}, payments: {} };
+const S = { orders: {}, tables: {}, scores: {}, photos: {}, payments: {}, config: {} };
 const COLLS = Object.keys(S);
 let mode = "connecting", db = null, assets = null, canEdit = false, loadedRemote = false;
 const bc = (() => { try { return new BroadcastChannel("olive-ember-demo"); } catch { return null; } })();
@@ -644,7 +886,7 @@ function localSeed() {
     orders: o,
     tables: { t3: { table: 3, waiter: now - 2 * m, bill: 0 }, t9: { table: 9, waiter: 0, bill: now - 4 * m } },
     scores: { "seed-a": { name: "Raj", table: 2, best: 31, at: now }, "seed-b": { name: "Meera", table: 3, best: 27, at: now }, "seed-c": { name: "Leo", table: 7, best: 24, at: now }, "seed-d": { name: "Ana", table: 2, best: 19, at: now } },
-    photos: {}, payments: {},
+    photos: {}, payments: {}, config: {},
   };
 }
 function loadLocal() { const s = LS.get("rt-demo", null); if (s) COLLS.forEach(c => S[c] = s[c] || {}); }
@@ -686,7 +928,8 @@ const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slic
 const ordersFor = n => Object.entries(S.orders).filter(([, o]) => o.table === n).map(([id, o]) => ({ id, ...o })).sort((a, b) => a.at - b.at);
 const paymentsFor = n => Object.entries(S.payments).filter(([, p]) => p.table === n).map(([id, p]) => ({ id, ...p })).sort((a, b) => a.at - b.at);
 const tdoc = n => S.tables["t" + n] || { table: n, waiter: 0, bill: 0 };
-const lineTotal = o => DISH[o.dish] ? DISH[o.dish].price * o.qty : 0;
+const dishOf = o => DISH[o.dish] || { id: o.dish, name: o.dname || "Removed dish", price: o.price || 0, kind: "curry", cat: "mains", desc: "" };
+const lineTotal = o => (typeof o.price === "number" ? o.price : DISH[o.dish] ? DISH[o.dish].price : 0) * o.qty;
 const sumOf = os => os.reduce((s, o) => s + lineTotal(o), 0);
 const qtyOf = (os, st) => os.filter(o => !st || o.state === st).reduce((s, o) => s + o.qty, 0);
 const withTax = n => Math.round(n * (1 + R.tax));
@@ -702,12 +945,13 @@ const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + "
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const ui = { atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
 const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
   const m = /^table-(\d{1,2})$/.exec(h);
   if (h === "staff") view = { name: "staff" };
+  else if (h === "admin") view = { name: "admin" };
   else if (m && +m[1] >= 1 && +m[1] <= R.tables) view = { name: "guest", table: +m[1] };
   else view = { name: "home" };
   ui.sheet = null; ui.q = ""; stopGame(); prevOrders = null; prevWaiter = null; staffSeen = null; document.title = BASE_TITLE;
@@ -734,7 +978,7 @@ function detect() {
     os.forEach(o => cur[o.id] = o.state);
     if (prevOrders) {
       const cooking = [], served = [];
-      os.forEach(o => { const p = prevOrders[o.id]; if (p && p !== o.state && o.by === me.id && DISH[o.dish]) (o.state === "cooking" ? cooking : o.state === "served" ? served : []).push(DISH[o.dish].name); });
+      os.forEach(o => { const p = prevOrders[o.id]; if (p && p !== o.state && o.by === me.id && DISH[o.dish]) (o.state === "cooking" ? cooking : o.state === "served" ? served : []).push(dishOf(o).name); });
       if (cooking.length || served.length) { notice.cooking.push(...cooking); notice.served.push(...served); clearTimeout(notice.t); notice.t = setTimeout(flushNotice, 450); }
     }
     prevOrders = cur;
@@ -763,7 +1007,7 @@ function flushNotice() {
   else if (cooking.length) toast("The kitchen started on " + listText(cooking));
   notice.cooking = []; notice.served = [];
 }
-function dataChanged() { detect(); render(); }
+function dataChanged() { applyConfig(); detect(); render(); }
 function chime() {
   if (!ui.sound || !actx) return;
   try {
@@ -778,7 +1022,7 @@ function render() {
   if (game.running || game.counting) return;
   const a = document.activeElement, aid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
   const old = document.querySelector(".sheet"), keep = old && ui.sheet === lastSheet ? old.scrollTop : 0;
-  $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : homeHTML();
+  $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : view.name === "admin" ? adminHTML() : homeHTML();
   $("#sheet").innerHTML = ui.sheet ? `<div class="scrim${ui.sheet === lastSheet ? " still" : ""}" data-act="close-sheet"><div class="sheet" role="dialog" aria-modal="true">${sheetHTML()}</div></div>` : "";
   if (keep) document.querySelector(".sheet").scrollTop = keep;
   lastSheet = ui.sheet;
@@ -822,6 +1066,11 @@ function homeHTML() {
         <p class="muted" style="margin:0">Every table's status, a queue of what needs you, the kitchen board and bills.</p>
         <a class="btn block" href="#staff" style="text-decoration:none">Open the staff floor</a>
         <p class="muted" style="margin:0;font-size:13px">Try it: table 5 on your phone, the staff floor on a laptop.</p>
+      </section>
+      <section>
+        <h2>Admin</h2>
+        <p class="muted" style="margin:0">Print a QR code for every table, edit dishes and prices, mark items sold out, and set the Wi-Fi.</p>
+        <a class="btn block ghost" href="#admin" style="text-decoration:none">Open admin</a>
       </section>
     </div>
     <ol class="flow">
@@ -877,11 +1126,11 @@ function popularDishes() {
   const c = {}; Object.values(S.orders).forEach(o => { if (DISH[o.dish]) c[o.dish] = (c[o.dish] || 0) + o.qty; });
   const ranked = Object.keys(c).sort((a, b) => c[b] - c[a]).slice(0, 5);
   MENU.filter(d => d.tag && !ranked.includes(d.id)).forEach(d => { if (ranked.length < 5) ranked.push(d.id); });
-  return ranked.map(id => ({ d: DISH[id], count: c[id] || 0 }));
+  return ranked.filter(id => DISH[id] && !soldOut(DISH[id])).map(id => ({ d: DISH[id], count: c[id] || 0 }));
 }
 function dishCard(d) {
-  const q = inBasket(d.id);
-  return `<article class="dish">
+  const q = inBasket(d.id), off = soldOut(d);
+  return `<article class="dish${off ? " soldout" : ""}">
     <button class="dish-open" data-act="dish" data-id="${d.id}" aria-label="${esc(d.name)}, ${fmt(d.price)}">
       <img src="${photo(d)}" alt="" loading="lazy">
       <span class="meta">
@@ -891,7 +1140,7 @@ function dishCard(d) {
         <span class="row"><span class="price">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}" title="${d.veg ? "Vegetarian" : "Non-vegetarian"}"></span></span>
       </span>
     </button>
-    <button class="add ${q ? "has" : ""}" data-act="quick-add" data-id="${d.id}" aria-label="Add ${esc(d.name)}">${q ? q : "+"}</button>
+    ${off ? `<span class="sold">Sold out</span>` : `<button class="add ${q ? "has" : ""}" data-act="quick-add" data-id="${d.id}" aria-label="Add ${esc(d.name)}">${q ? q : "+"}</button>`}
   </article>`;
 }
 function guestMenu() {
@@ -925,10 +1174,10 @@ function guestTable(ts) {
       <div class="${ts.nNew ? "on new" : ""}"><b class="mono">${ts.nNew}</b><span>Waiting for staff</span></div>
       <div class="${ts.nCook ? "on cook" : ""}"><b class="mono">${ts.nCook}</b><span>Cooking</span></div>
       <div class="${ts.nServed ? "on ok" : ""}"><b class="mono">${ts.nServed}</b><span>Served</span></div></div>` : "";
-  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = DISH[o.dish]; if (!d) return ""; return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state)}</li>`; }).join("")}</ul>`
+  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = dishOf(o); return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state)}</li>`; }).join("")}</ul>`
     : `<div class="emptybox"><b>Nothing sent to the kitchen yet</b><span>Everyone at table ${view.table} orders from their own phone onto one shared bill.</span><button class="btn sm" data-act="gtab" data-tab="menu">Browse the menu</button></div>`;
   const pays = ts.pays.length ? `<div class="sec-h">Payments</div><ul class="lines">${ts.pays.map(p => `<li><span class="n">${p.by === me.id ? "You" : esc(p.name)}<small>${esc(p.method)} · ${ago(p.at)}${p.tip ? ` · tip ${fmt(p.tip)}` : ""}</small></span><span class="p">${fmt(p.amount)}</span></li>`).join("")}</ul>` : "";
-  const money = os.length ? `<div class="sum"><div><span>Subtotal</span><span>${fmt(ts.sub)}</span></div><div><span>GST 5%</span><span>${fmt(ts.due - ts.sub)}</span></div>${ts.paidAmt ? `<div><span>Paid so far</span><span>−${fmt(ts.paidAmt)}</span></div>` : ""}<div class="tot"><span>${ts.paid ? "Bill" : ts.paidAmt ? "Left to pay" : "Total so far"}</span><span>${ts.paid ? "Paid ✓" : fmt(ts.left)}</span></div></div>` : "";
+  const money = os.length ? `<div class="sum"><div><span>Subtotal</span><span>${fmt(ts.sub)}</span></div><div><span>${taxLabel()}</span><span>${fmt(ts.due - ts.sub)}</span></div>${ts.paidAmt ? `<div><span>Paid so far</span><span>−${fmt(ts.paidAmt)}</span></div>` : ""}<div class="tot"><span>${ts.paid ? "Bill" : ts.paidAmt ? "Left to pay" : "Total so far"}</span><span>${ts.paid ? "Paid ✓" : fmt(ts.left)}</span></div></div>` : "";
   const actions = os.length ? (ts.paid ? `<div class="alertbox paid"><div><b>All paid</b><div class="muted" style="font-size:13px">Thanks for dining at ${esc(R.name)}. Order more any time.</div></div></div>` : `<div class="two"><button class="btn ghost" data-act="gtab" data-tab="menu">Order more</button><button class="btn pop" data-act="ask-bill">${ts.t.bill ? "Pay now" : "Get the bill"}</button></div>`) : "";
   return `${unsent}<section class="panel">
       <div class="xrow"><h2>Table ${view.table} order</h2>${ts.guests ? `<span class="pill">${ts.guests} ${ts.guests === 1 ? "phone" : "phones"}</span>` : ""}</div>
@@ -1040,7 +1289,7 @@ function sheetHTML() {
   }
   if (s.startsWith("dish:")) {
     const d = DISH[s.slice(5)];
-    const pairs = (d.pair || []).map(id => DISH[id]).filter(Boolean);
+    const pairs = (d.pair || []).map(id => DISH[id]).filter(p => p && !soldOut(p));
     return `<div class="photo-wrap"><img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><button class="x float" data-act="close" aria-label="Close">×</button></div><div class="sheet-b">
       <div>${d.tag ? `<span class="tag">${esc(d.tag)}</span>` : ""}<h2>${esc(d.name)}</h2>
       <p class="muted" style="margin:6px 0 0">${esc(d.desc)}</p>
@@ -1048,7 +1297,7 @@ function sheetHTML() {
       <label class="field" for="dish-note"><span>Special request <span class="muted" style="font-weight:400">(optional)</span></span><input id="dish-note" maxlength="60" value="${esc(ui.note)}" placeholder="e.g. no chilli, extra crispy" autocomplete="off"></label>
       ${pairs.length ? `<div><div class="sec-h" style="margin-bottom:8px">Goes well with</div><div class="pairs">${pairs.map(p => `<button class="pair" data-act="pair-add" data-id="${p.id}"><img src="${photo(p)}" alt=""><span><b>${esc(p.name)}</b><span class="mono">${fmt(p.price)}</span></span><i>${inBasket(p.id) ? inBasket(p.id) : "+"}</i></button>`).join("")}</div></div>` : ""}
       <div class="addrow"><div class="stepper"><button data-act="q-" aria-label="Fewer">−</button><span>${ui.qty}</span><button data-act="q+" aria-label="More">+</button></div>
-      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}">Add · ${fmt(d.price * ui.qty)}</button></div></div>`;
+      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}" ${soldOut(d) ? "disabled" : ""}>${soldOut(d) ? "Sold out today" : "Add · " + fmt(d.price * ui.qty)}</button></div></div>`;
   }
   if (s === "basket") {
     const lines = basketLines(), total = lines.reduce((t, l) => t + DISH[l.id].price * l.qty, 0);
@@ -1073,7 +1322,7 @@ function sheetHTML() {
         <button class="${ui.split === "mine" ? "on" : ""}" data-act="split" data-v="mine" ${mine ? "" : "disabled"}>My items</button>
       </div>
       ${ui.split === "split" ? `<div class="splitrow"><span>Split between</span><div class="stepper sm"><button data-act="w-" aria-label="Fewer people">−</button><span>${ways}</span><button data-act="w+" aria-label="More people">+</button></div><span>people</span></div>` : ""}
-      ${ui.split === "mine" ? `<ul class="lines">${ts.os.filter(o => o.by === me.id).map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}</span><span class="p">${fmt(lineTotal(o))}</span></li>`).join("")}</ul>` : ""}
+      ${ui.split === "mine" ? `<ul class="lines">${ts.os.filter(o => o.by === me.id).map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}</span><span class="p">${fmt(lineTotal(o))}</span></li>`).join("")}</ul>` : ""}
       <div class="sec-h">Tip for the team</div>
       <div class="tips">${[0, 5, 10, 15].map(p => `<button class="${ui.tip === p ? "on" : ""}" data-act="tip" data-p="${p}">${p ? p + "%" : "No tip"}</button>`).join("")}</div>
       <div class="sum"><div><span>${ui.split === "split" ? "Your share" : ui.split === "mine" ? "Your items incl. GST" : "Amount"}</span><span>${fmt(amount)}</span></div><div><span>Tip</span><span>${fmt(tip)}</span></div><div class="tot"><span>You pay</span><span>${fmt(charge)}</span></div></div>
@@ -1092,6 +1341,9 @@ function sheetHTML() {
       <button class="btn block" data-act="close">Done</button></div>`;
   }
   if (s.startsWith("table:")) return staffTableSheet(+s.slice(6));
+  if (s === "ad-dish") return adminDishSheet();
+  if (s.startsWith("img:")) return `<div class="sheet-b"><div class="xrow"><div><h2>Save the QR code</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Press and hold the image (or right-click it) and choose Save image.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div><img src="${ui.imgData}" alt="QR codes" style="width:100%;border-radius:12px;border:1px solid var(--line)"></div>`;
+  if (s.startsWith("link:")) { const n = +s.slice(5); return `<div class="sheet-b"><div class="xrow"><h2>Table ${n} link</h2><button class="x" data-act="close" aria-label="Close">×</button></div><p class="muted" style="margin:0">Select the link and copy it.</p><code class="linkbox">${esc(tableUrl(n))}</code></div>`; }
   return "";
 }
 
@@ -1134,7 +1386,7 @@ function staffHTML() {
       </div>`;
   } else if (ui.stab === "kitchen") {
     const tickets = all.filter(t => t.nCook).map(t => ({ ...t, cook: t.os.filter(o => o.state === "cooking") })).sort((a, b) => a.cook[0].at - b.cook[0].at);
-    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const mins = (Date.now() - t.cook[0].at) / 60000, late = mins > 25 ? "late2" : mins > 15 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
+    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const mins = (Date.now() - t.cook[0].at) / 60000, late = mins > 25 ? "late2" : mins > 15 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
       : `<div class="allclear">${ICON.check}<b>The kitchen is clear</b><span>Orders appear here once staff send them to the kitchen, oldest first.</span></div>`;
   } else {
     body = `<p class="muted" style="margin:0">Replace the illustrations with real photos of your dishes. Guests see them right away.</p>
@@ -1142,14 +1394,14 @@ function staffHTML() {
       <div class="photos">${MENU.map(d => `<div class="item"><img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><div><span>${esc(d.name)}</span>${assets ? `<label class="btn ghost sm" for="up-${d.id}">${S.photos[d.id] ? "Replace" : "Upload"}<input type="file" id="up-${d.id}" accept="image/*" data-upload="${d.id}"></label>` : ""}</div></div>`).join("")}</div>`;
   }
   return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)}</h1>
-    <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button>${canEdit ? `<button class="${ui.stab === "photos" ? "on" : ""}" data-act="stab" data-tab="photos">Photos</button>` : ""}</div>
+    <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button></div>
     <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}">${ui.sound ? ICON.sound + "Sound on" : ICON.mute + "Sound off"}</button>
-    <a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
+    ${adminAllowed() ? `<a href="#admin" class="btn sm ghost" style="text-decoration:none">Admin</a>` : ""}<a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
     <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
 function staffTableSheet(n) {
   const ts = tableState(n), { os, t } = ts;
-  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)} · ${ago(o.at)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
+  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${ago(o.at)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
   return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "phone" : "phones"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
     ${t.waiter ? `<div class="alertbox"><b>Called the waiter ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
     ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
@@ -1185,7 +1437,7 @@ document.addEventListener("click", async e => {
     case "veg": ui.vegOnly = !ui.vegOnly; render(); break;
     case "clear-q": ui.q = ""; render(); break;
     case "dish": ui.qty = 1; ui.note = ""; ui.sheet = "dish:" + id; render(); break;
-    case "quick-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
+    case "quick-add": if (soldOut(DISH[id])) break; addToBasket(id); render(); toast(DISH[id].name + " added"); break;
     case "pair-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
     case "q-": ui.qty = Math.max(1, ui.qty - 1); render(); break;
     case "q+": ui.qty = Math.min(20, ui.qty + 1); render(); break;
@@ -1196,7 +1448,11 @@ document.addEventListener("click", async e => {
     case "send-order": {
       el.disabled = true; const nm = $("#myname2"); if (nm && nm.value.trim()) { me.name = nm.value.trim().slice(0, 20); LS.set("rt-name", me.name); }
       let ok = true;
-      for (const l of basketLines()) { ok = await put("orders", newId("o"), { table: view.table, dish: l.id, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
+      const gone = basketLines().filter(l => soldOut(DISH[l.id]));
+      gone.forEach(l => delete basket[l.key]); saveBasket();
+      if (gone.length) toast(listText(gone.map(l => DISH[l.id].name)) + " just sold out and " + (gone.length > 1 ? "were" : "was") + " removed");
+      if (!basketLines().length) { ui.sheet = null; render(); break; }
+      for (const l of basketLines()) { const dd = DISH[l.id]; ok = await put("orders", newId("o"), { table: view.table, dish: l.id, dname: dd.name, price: dd.price, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
       if (ok) { ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); toast("Order sent. Your waiter will confirm it."); } else { el.disabled = false; render(); }
       break;
     }
@@ -1258,6 +1514,8 @@ document.addEventListener("change", async e => {
 setInterval(() => { if (!game.running && !game.counting && !(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) render(); }, 30000);
 
 /* ================= Boot ================= */
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { for (const k in TENT) delete TENT[k]; if (view.name === "admin") render(); });
+addEventListener("load", () => { if (view.name === "admin") render(); });
 route();
 (async () => {
   const c = window.claude;
@@ -1266,6 +1524,7 @@ route();
   let canWrite = null;
   if (user) { try { canWrite = await user.can("data.write"); } catch {} try { canEdit = !!(await user.canEdit()); } catch {} }
   if (d && canWrite !== false) { db = d; startRemote(); } else startLocal();
+  downloads = await c.use("downloads").catch(() => null);
   if (canEdit) { assets = await c.use("assets").catch(() => null); render(); }
 })();
 })();
