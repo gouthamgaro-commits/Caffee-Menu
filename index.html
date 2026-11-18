@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b1d14" />
+  <title>Café Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Welcome to</p>
+      <h1 id="cafe-name">Café</h1>
+      <p id="cafe-tagline" class="tagline"></p>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Search coffee, cakes, sandwiches…" autocomplete="off" />
+      </label>
+    </div>
+  </header>
+
+  <nav class="cats" id="cats" aria-label="Menu categories"></nav>
+
+  <div class="filters">
+    <button class="chip" id="veg-toggle" aria-pressed="false"><span class="veg-dot"></span> Veg only</button>
+  </div>
+
+  <main id="menu" class="menu"></main>
+  <p id="empty" class="empty" hidden>Nothing matches your search.</p>
+
+  <button id="cart-bar" class="cart-bar" hidden>
+    <span><b id="cart-count">0</b> items · <span id="cart-total"></span></span>
+    <span>View order →</span>
+  </button>
+
+  <!-- Item sheet -->
+  <div class="overlay" id="item-overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="item-title">
+      <button class="close" data-close aria-label="Close">×</button>
+      <div class="sheet-art" id="item-art"></div>
+      <div class="sheet-body">
+        <div class="row-between">
+          <h2 id="item-title"></h2>
+          <span class="price big" id="item-price"></span>
+        </div>
+        <p class="desc" id="item-desc"></p>
+        <div id="item-sizes" class="opt-group"></div>
+        <div id="item-extras" class="opt-group"></div>
+        <label class="note-label">Special request
+          <textarea id="item-note" rows="2" placeholder="e.g. less sugar, extra hot"></textarea>
+        </label>
+      </div>
+      <footer class="sheet-foot">
+        <div class="stepper">
+          <button id="qty-minus" aria-label="Decrease">−</button>
+          <span id="qty">1</span>
+          <button id="qty-plus" aria-label="Increase">+</button>
+        </div>
+        <button class="primary" id="add-btn">Add · <span id="add-total"></span></button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- Cart sheet -->
+  <div class="overlay" id="cart-overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <button class="close" data-close aria-label="Close">×</button>
+      <div class="sheet-body">
+        <h2 id="cart-title">Your order</h2>
+        <ul id="cart-list" class="cart-list"></ul>
+        <div class="totals">
+          <div><span>Subtotal</span><span id="sub"></span></div>
+          <div><span>Taxes (5%)</span><span id="tax"></span></div>
+          <div class="grand"><span>Total</span><span id="grand"></span></div>
+        </div>
+        <label class="note-label" id="table-wrap">Table number
+          <input id="table" inputmode="numeric" placeholder="e.g. 7" />
+        </label>
+      </div>
+      <footer class="sheet-foot">
+        <button class="primary wide" id="place-btn">Place order</button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- Confirmation -->
+  <div class="overlay" id="done-overlay" hidden>
+    <section class="sheet done">
+      <div class="check">✓</div>
+      <h2>Order placed!</h2>
+      <p id="done-msg" class="desc"></p>
+      <button class="primary wide" data-close>Back to menu</button>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="menu.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
