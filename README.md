@@ -21,3 +21,9 @@ python3 -m http.server 8000
 Edit `menu.js` to change the café name, currency, categories, items, sizes and add-ons.
 
 Deploy the folder to any static host (GitHub Pages, Netlify, Vercel), then print a QR code that points to the URL.
+
+## Table service (`table-service/`)
+
+A restaurant table-ordering website, published as a live Claude artifact. Guests open `#table-5` (a QR code or NFC tag per table), order from a photo menu, share one order and bill across phones at the same table, call the waiter, play a game with table and restaurant leaderboards, and pay at the table. Staff open `#staff` to see the whole floor, send orders to the kitchen with one tap, mark items served and clear tables.
+
+Payments are simulated. Hook the pay buttons to a provider such as Razorpay or Stripe for real use.

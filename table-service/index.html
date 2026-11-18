@@ -1,0 +1,893 @@
+<title>Olive &amp; Ember Tables</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: phone-first guest app (single column, bottom nav) and a wide staff floor grid. */
+:root {
+  --bg: #f3f4ef; --surface: #ffffff; --surface-2: #e8ebe2; --fg: #17201b; --muted: #59645c; --line: #d6dbcf;
+  --accent: #1d6a4c; --accent-fg: #ffffff; --pop: #f2b632; --pop-fg: #2a1d00;
+  --alert: #d0402a; --ok: #2b8a57; --cook: #c97a0f; --scrim: rgba(10, 16, 12, .55);
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1311; --surface: #181d1a; --surface-2: #222a25; --fg: #edf1ea; --muted: #9ba79e; --line: #2c3530;
+  --accent: #4fbf8b; --accent-fg: #06120c; --pop: #f2b632; --pop-fg: #2a1d00;
+  --alert: #ff6a50; --ok: #4fbf8b; --cook: #f0a43a; --scrim: rgba(0, 0, 0, .65); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1311; --surface: #181d1a; --surface-2: #222a25; --fg: #edf1ea; --muted: #9ba79e; --line: #2c3530;
+  --accent: #4fbf8b; --accent-fg: #06120c; --pop: #f2b632; --pop-fg: #2a1d00;
+  --alert: #ff6a50; --ok: #4fbf8b; --cook: #f0a43a; --scrim: rgba(0, 0, 0, .65); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font: 15px/1.45 var(--body); -webkit-tap-highlight-color: transparent; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 12px; font-weight: 600; background: var(--accent); color: var(--accent-fg); }
+.btn.ghost { background: var(--surface-2); color: var(--fg); }
+.btn.pop { background: var(--pop); color: var(--pop-fg); }
+.btn.alert { background: var(--alert); color: #fff; }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 14px; border-radius: 10px; }
+.btn.block { width: 100%; }
+.btn:disabled { opacity: .5; cursor: default; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.pill.new { background: color-mix(in srgb, var(--pop) 30%, transparent); color: var(--fg); }
+.pill.cook { background: color-mix(in srgb, var(--cook) 22%, transparent); color: var(--cook); }
+.pill.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.pill.alert { background: var(--alert); color: #fff; }
+.veg { width: 13px; height: 13px; border: 1.5px solid var(--ok); border-radius: 3px; display: inline-grid; place-items: center; flex: none; }
+.veg::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--ok); }
+.veg.non { border-color: var(--alert); } .veg.non::after { background: var(--alert); }
+
+/* ---------- Home ---------- */
+.home { max-width: 980px; margin: 0 auto; padding-block: 40px 56px; display: grid; gap: 28px; }
+.home h1 { font-size: clamp(36px, 7vw, 64px); line-height: 1; font-weight: 800; }
+.home .lede { font-size: 18px; max-width: 60ch; color: var(--muted); margin: 14px 0 0; }
+.entry { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.entry > section { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; gap: 14px; align-content: start; }
+.entry h2 { font-size: 22px; }
+.tpick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.tpick a { display: grid; place-items: center; aspect-ratio: 1; border-radius: 12px; background: var(--surface-2); color: var(--fg); text-decoration: none; font: 700 18px var(--mono); }
+.tpick a:hover { background: var(--accent); color: var(--accent-fg); }
+.flow { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin: 0; padding: 0; list-style: none; counter-reset: s; }
+.flow li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-size: 14px; color: var(--muted); }
+.flow li b { display: block; color: var(--fg); font-size: 15px; margin-bottom: 2px; }
+.flow li::before { content: counter(s); font: 700 12px var(--mono); color: var(--accent); }
+.modeline { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.live { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 25%, transparent); }
+
+/* ---------- Guest ---------- */
+.guest { max-width: 560px; margin: 0 auto; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+.ghead { padding-block: 18px 8px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.ghead h1 { font-size: 26px; font-weight: 800; }
+.tableno { display: grid; place-items: center; min-width: 64px; padding: 6px 10px; border-radius: 14px; background: var(--fg); color: var(--bg); line-height: 1.05; text-align: center; }
+.tableno small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+.tableno b { font: 700 24px var(--mono); }
+.cats { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 10px; background: var(--bg); }
+.cats::-webkit-scrollbar { display: none; }
+.cats button { flex: none; padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-weight: 500; font-size: 14px; }
+.cats button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.dishes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-block: 6px; }
+.catname { grid-column: 1 / -1; font-size: 20px; margin-top: 12px; scroll-margin-top: 70px; }
+.dish { position: relative; display: flex; flex-direction: column; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; min-width: 0; }
+.dish > button { text-align: left; }
+.dish img, .photo { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--surface-2); max-width: 100%; }
+.dish .meta { padding: 10px 12px 12px; display: grid; gap: 4px; flex: 1; align-content: start; }
+.dish h3 { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.dish .row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 4px; }
+.dish .price { font: 600 14px var(--mono); }
+.add { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); color: var(--accent); font-size: 22px; font-weight: 600; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.add.has { background: var(--accent); color: var(--accent-fg); font: 700 15px var(--mono); }
+.wifi { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; margin-top: 8px; }
+.wifi .k { font-size: 12px; color: var(--muted); }
+.wifi .v { font: 600 15px var(--mono); }
+.wifi > div { flex: 1; min-width: 0; }
+
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; pointer-events: none; }
+.dock-in { max-width: 560px; margin: 0 auto; display: grid; gap: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.dock-in > * { pointer-events: auto; }
+.basketbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 16px; background: var(--accent); color: var(--accent-fg); font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.callbar { display: flex; gap: 8px; }
+.callbar .btn { flex: 1; box-shadow: 0 8px 20px rgba(0,0,0,.18); }
+.nav { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.nav button { padding: 9px 4px; border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--muted); display: grid; justify-items: center; gap: 2px; position: relative; }
+.nav button.on { background: var(--surface-2); color: var(--fg); }
+.nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav .badge { position: absolute; top: 4px; right: calc(50% - 26px); min-width: 18px; height: 18px; border-radius: 9px; background: var(--pop); color: var(--pop-fg); font: 700 11px/18px var(--mono); padding: 0 5px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; margin-top: 12px; }
+.panel h2 { font-size: 19px; }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; }
+.lines li { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.lines li:first-child { border-top: 0; }
+.lines .q { font: 700 14px var(--mono); min-width: 28px; }
+.lines .n { flex: 1; min-width: 0; }
+.lines .n small { display: block; color: var(--muted); font-size: 12px; }
+.lines .p { font: 500 14px var(--mono); }
+.lines img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex: none; }
+.sum { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.sum div { display: flex; justify-content: space-between; }
+.sum span:last-child { font-family: var(--mono); }
+.sum .tot { color: var(--fg); font-weight: 700; font-size: 18px; padding-top: 6px; }
+.namefield { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.namefield input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: 16px; color: var(--fg); }
+.empty { text-align: center; color: var(--muted); padding: 18px 8px; font-size: 14px; }
+.copy { flex: none; }
+
+/* Game */
+.game { display: grid; gap: 12px; }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface-2); padding: 4px; border-radius: 12px; }
+.modes button { padding: 8px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.modes button.on { background: var(--surface); color: var(--fg); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px; border-radius: 20px; background: #3b2a1c; }
+.basket { position: relative; aspect-ratio: 1; border-radius: 50%; background: repeating-radial-gradient(circle, #c99a5c 0 6px, #b48447 6px 9px); box-shadow: inset 0 -6px 0 rgba(0,0,0,.25), inset 0 0 0 6px #9c6d34; display: grid; place-items: center; overflow: hidden; }
+.basket i { width: 64%; aspect-ratio: 1.15; border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%; background: radial-gradient(circle at 40% 30%, #fffdf6, #efe6d2 60%, #d9ccb0); box-shadow: 0 4px 0 rgba(0,0,0,.18); transform: scale(0); transition: transform .12s; position: relative; }
+.basket i::before { content: ""; position: absolute; left: 50%; top: 4%; width: 34%; height: 30%; transform: translateX(-50%); border-radius: 50%; background: repeating-conic-gradient(from 200deg, #d6c9ab 0 8deg, transparent 8deg 24deg); }
+.basket.up i { transform: scale(1); }
+.basket.chili i { background: radial-gradient(circle at 40% 30%, #ff7a5c, #d7261b 60%, #9e1610); border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%; aspect-ratio: .7; }
+.basket.chili i::before { background: #2f8f3a; border-radius: 40% 40% 10% 10%; width: 30%; height: 18%; top: -6%; }
+.basket.hit i { transform: scale(1.25); opacity: 0; transition: transform .15s, opacity .15s; }
+.hud { display: flex; justify-content: space-between; align-items: center; font: 700 22px var(--mono); }
+.hud small { font: 500 12px var(--body); color: var(--muted); display: block; }
+.board-wrap { position: relative; }
+.board-cover { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: color-mix(in srgb, #1b120a 72%, transparent); border-radius: 20px; color: #fff4e2; padding: 20px; }
+.board-cover h3 { font-size: 26px; }
+.board-cover p { margin: 6px 0 14px; opacity: .85; }
+.lb { list-style: none; margin: 0; padding: 0; counter-reset: r; }
+.lb li { counter-increment: r; display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.lb li:first-child { border-top: 0; }
+.lb li::before { content: counter(r); font: 700 13px var(--mono); color: var(--muted); width: 22px; }
+.lb li.me { font-weight: 700; }
+.lb li.me::before { color: var(--accent); }
+.lb .s { margin-left: auto; font: 700 15px var(--mono); }
+
+/* Sheets */
+.scrim { position: fixed; inset: 0; z-index: 20; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; animation: fade .18s both; }
+.sheet { width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto; background: var(--bg); border-radius: 24px 24px 0 0; animation: up .28s cubic-bezier(.2, .8, .2, 1) both; padding-bottom: env(safe-area-inset-bottom, 0px); }
+@media (min-width: 720px) { .scrim { align-items: center; } .sheet { border-radius: 24px; } }
+.sheet-b { padding: 18px 20px 20px; display: grid; gap: 14px; }
+.sheet .photo { border-radius: 24px 24px 0 0; aspect-ratio: 16 / 10; }
+.sheet h2 { font-size: 24px; }
+.xrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.x { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); font-size: 20px; flex: none; }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; }
+.stepper button { width: 40px; height: 42px; font-size: 20px; color: var(--accent); }
+.stepper span { min-width: 24px; text-align: center; font: 700 15px var(--mono); }
+.stepper.sm button { width: 32px; height: 34px; font-size: 17px; }
+.tips, .methods { display: grid; gap: 8px; }
+.tips { grid-template-columns: repeat(4, 1fr); }
+.tips button { padding: 10px 4px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; }
+.tips button.on { border-color: var(--accent); color: var(--accent); }
+.methods .btn { min-height: 52px; }
+.pay-apple { background: #000 !important; color: #fff !important; }
+.pay-google { background: var(--surface) !important; color: var(--fg) !important; border: 1.5px solid var(--line); }
+.note { font-size: 12px; color: var(--muted); text-align: center; }
+.bigcheck { width: 72px; height: 72px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 36px; margin: 8px auto 0; }
+@keyframes fade { from { opacity: 0 } }
+@keyframes up { from { transform: translateY(40px); opacity: 0 } }
+
+/* ---------- Staff ---------- */
+.staff { min-height: 100%; }
+.shead { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--fg); color: var(--bg); }
+.shead-in { max-width: 1280px; margin: 0 auto; padding-block: 12px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.shead h1 { font-size: 20px; margin-right: auto; }
+.stabs { display: flex; gap: 4px; background: color-mix(in srgb, var(--bg) 14%, transparent); padding: 4px; border-radius: 12px; }
+.stabs button { padding: 7px 12px; border-radius: 9px; font-weight: 600; font-size: 14px; opacity: .75; }
+.stabs button.on { background: var(--bg); color: var(--fg); opacity: 1; }
+.sbody { max-width: 1280px; margin: 0 auto; padding-block: 18px 40px; display: grid; gap: 18px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.kpi .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.kpi .v { font: 700 26px var(--mono); }
+.kpi.hot .v { color: var(--alert); }
+.floor { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.tcard { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: grid; gap: 10px; min-height: 150px; align-content: start; position: relative; border-top: 5px solid var(--line); }
+.tcard.s-call { border-top-color: var(--alert); animation: ring 1.4s infinite; }
+.tcard.s-bill { border-top-color: var(--pop); }
+.tcard.s-new { border-top-color: var(--pop); }
+.tcard.s-cooking { border-top-color: var(--cook); }
+.tcard.s-seated { border-top-color: var(--ok); }
+.tcard.s-paid { border-top-color: var(--accent); }
+.tcard.s-empty { opacity: .7; }
+@keyframes ring { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--alert) 35%, transparent); } }
+.tcard .top { display: flex; justify-content: space-between; align-items: baseline; }
+.tcard .num { font: 700 28px var(--mono); }
+.tcard .state { font-size: 13px; font-weight: 600; }
+.tcard .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.tcard .foot { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: auto; }
+.tcard .foot b { color: var(--fg); font-family: var(--mono); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
+.tickets { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; align-items: start; }
+.ticket { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; }
+.ticket h3 { font: 700 20px var(--mono); display: flex; justify-content: space-between; align-items: baseline; }
+.ticket h3 small { font: 500 13px var(--body); color: var(--muted); }
+.sec-h { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 4px 0 -4px; }
+.alertbox { background: color-mix(in srgb, var(--alert) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--alert) 40%, transparent); border-radius: 12px; padding: 12px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.alertbox.bill { background: color-mix(in srgb, var(--pop) 18%, var(--surface)); border-color: color-mix(in srgb, var(--pop) 60%, transparent); }
+.alertbox.paid { background: color-mix(in srgb, var(--ok) 14%, var(--surface)); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.photos .item { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.photos .item div { padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.photos label { cursor: pointer; }
+.photos input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(170px + env(safe-area-inset-bottom, 0px)); z-index: 30; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; max-width: calc(100% - 32px); animation: up .2s both; }
+.scrim.still, .scrim.still .sheet { animation: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+@media (max-width: 380px) { .dishes { gap: 8px; } .tpick { grid-template-columns: repeat(4, 1fr); } }
+</style>
+
+<div id="app"></div>
+<div id="sheet"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(() => {
+/* ================= Menu data ================= */
+const R = { name: "Olive & Ember", tagline: "Wood-fired kitchen & bar", tables: 12, wifi: { ssid: "OliveEmber-Guest", pass: "embers2026" }, tax: 0.05 };
+const CATS = [
+  { id: "starters", label: "Starters", surface: "#2d3a31" },
+  { id: "mains", label: "Mains", surface: "#3a2c22" },
+  { id: "desserts", label: "Desserts", surface: "#b9ad9b" },
+  { id: "drinks", label: "Drinks", surface: "#22303a" },
+];
+const MENU = [
+  { id: "burrata", cat: "starters", name: "Burrata & Heirloom Tomato", price: 420, veg: 1, kind: "burrata", desc: "Creamy burrata, sweet tomatoes, basil oil and cracked pepper." },
+  { id: "soup", cat: "starters", name: "Roast Tomato Soup", price: 260, veg: 1, kind: "soup", desc: "Slow-roasted tomatoes, a swirl of cream and garlic croutons." },
+  { id: "calamari", cat: "starters", name: "Crispy Calamari", price: 440, veg: 0, kind: "rings", desc: "Light, crisp rings with lemon and smoked paprika aioli." },
+  { id: "satay", cat: "starters", name: "Chicken Satay", price: 380, veg: 0, kind: "satay", desc: "Grilled skewers, peanut sauce and cucumber." },
+  { id: "margherita", cat: "mains", name: "Margherita Pizza", price: 520, veg: 1, kind: "pizza", top: "basil", desc: "San Marzano tomato, fior di latte and fresh basil from the wood oven." },
+  { id: "funghi", cat: "mains", name: "Truffle Funghi Pizza", price: 640, veg: 1, kind: "pizza", top: "mushroom", desc: "Wild mushrooms, mozzarella and a drizzle of truffle oil." },
+  { id: "aglio", cat: "mains", name: "Spaghetti Aglio Olio", price: 480, veg: 1, kind: "pasta", desc: "Garlic, chilli, parsley and good olive oil." },
+  { id: "butterchicken", cat: "mains", name: "Butter Chicken & Rice", price: 560, veg: 0, kind: "curry", desc: "Smoky tandoori chicken in a silky tomato butter gravy with basmati." },
+  { id: "burger", cat: "mains", name: "Smash Burger & Fries", price: 540, veg: 0, kind: "burger", desc: "Two smashed patties, cheddar, house pickles and a potato bun." },
+  { id: "salmon", cat: "mains", name: "Grilled Salmon", price: 890, veg: 0, kind: "salmon", desc: "Chargrilled fillet, asparagus and lemon butter." },
+  { id: "tiramisu", cat: "desserts", name: "Tiramisu", price: 360, veg: 1, kind: "tiramisu", desc: "Espresso-soaked sponge and mascarpone, dusted with cocoa." },
+  { id: "lava", cat: "desserts", name: "Chocolate Lava Cake", price: 340, veg: 1, kind: "lava", desc: "Warm, molten centre with fresh raspberries." },
+  { id: "gelato", cat: "desserts", name: "Gelato Trio", price: 300, veg: 1, kind: "gelato", desc: "Pistachio, strawberry and vanilla bean." },
+  { id: "lime", cat: "drinks", name: "Fresh Lime Soda", price: 140, veg: 1, kind: "drink", color: ["#e9f5c8", "#b9da6a"], garnish: "lime", desc: "Sweet, salted or mixed." },
+  { id: "lassi", cat: "drinks", name: "Mango Lassi", price: 180, veg: 1, kind: "drink", color: ["#ffd36a", "#f0a21c"], garnish: "mint", desc: "Alphonso mango and chilled yogurt." },
+  { id: "cooler", cat: "drinks", name: "Watermelon Cooler", price: 190, veg: 1, kind: "drink", color: ["#ff8f9a", "#e2324a"], garnish: "mint", desc: "Watermelon, mint and a squeeze of lime." },
+  { id: "cappuccino", cat: "drinks", name: "Cappuccino", price: 180, veg: 1, kind: "coffee", desc: "Double shot with velvety foam." },
+];
+const DISH = Object.fromEntries(MENU.map(d => [d.id, d]));
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const fmt = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const ago = t => { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; };
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2400); }
+
+const me = { id: LS.get("rt-id", null), name: LS.get("rt-name", null) };
+if (!me.id) { me.id = "d" + Math.random().toString(36).slice(2, 10); LS.set("rt-id", me.id); }
+if (!me.name) { me.name = "Guest " + (10 + Math.floor(Math.random() * 90)); LS.set("rt-name", me.name); }
+
+/* ================= Dish illustrations (procedural, replaced by uploaded photos) ================= */
+function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const TAU = Math.PI * 2;
+function circ(x, cx, cy, r, fill) { x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fillStyle = fill; x.fill(); }
+function rad(x, cx, cy, r, a, b) { const g = x.createRadialGradient(cx - r * .3, cy - r * .35, r * .1, cx, cy, r); g.addColorStop(0, a); g.addColorStop(1, b); return g; }
+function blob(x, cx, cy, r, R, fill, n = 9, sq = 1) {
+  const p = []; for (let i = 0; i < n; i++) { const a = i / n * TAU, rr = r * (.8 + R() * .35); p.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * sq]); }
+  const mid = i => { const A = p[i % n], B = p[(i + 1) % n]; return [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]; };
+  x.beginPath(); let s = mid(0); x.moveTo(s[0], s[1]);
+  for (let i = 1; i <= n; i++) { const c = p[i % n], e = mid(i); x.quadraticCurveTo(c[0], c[1], e[0], e[1]); }
+  x.closePath(); x.fillStyle = fill; x.fill();
+}
+function leaf(x, cx, cy, len, ang, fill) {
+  x.save(); x.translate(cx, cy); x.rotate(ang); x.beginPath(); x.ellipse(0, 0, len, len * .42, 0, 0, TAU); x.fillStyle = fill; x.fill();
+  x.strokeStyle = "rgba(255,255,255,.25)"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(-len * .85, 0); x.lineTo(len * .85, 0); x.stroke(); x.restore();
+}
+function inDisc(R, r) { const a = R() * TAU, d = Math.sqrt(R()) * r; return [Math.cos(a) * d, Math.sin(a) * d]; }
+function shadow(x, on) { if (on) { x.shadowColor = "rgba(0,0,0,.38)"; x.shadowBlur = 28; x.shadowOffsetY = 12; } else { x.shadowColor = "transparent"; x.shadowBlur = 0; x.shadowOffsetY = 0; } }
+function surface(x, base, R) {
+  x.fillStyle = base; x.fillRect(0, 0, 480, 360);
+  for (let i = 0; i < 1800; i++) { x.fillStyle = R() < .5 ? "rgba(255,255,255,.035)" : "rgba(0,0,0,.05)"; x.fillRect(R() * 480, R() * 360, 1 + R() * 3, 1); }
+  const g = x.createRadialGradient(240, 180, 120, 240, 180, 330); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.35)"); x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+}
+function plate(x, cx = 240, cy = 182, r = 150) {
+  shadow(x, 1); circ(x, cx, cy, r, "#f3f1ec"); shadow(x, 0);
+  circ(x, cx, cy, r * .76, rad(x, cx, cy, r * .76, "#fdfcf9", "#e8e4dc"));
+  x.strokeStyle = "rgba(255,255,255,.7)"; x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, r - 6, Math.PI * 1.1, Math.PI * 1.6); x.stroke();
+}
+function bowl(x, cx, cy, r, rim, inner) { shadow(x, 1); circ(x, cx, cy, r, rim); shadow(x, 0); circ(x, cx, cy, r * .86, inner); }
+function dots(x, R, n, cx, cy, r, colors, s = 2) { for (let i = 0; i < n; i++) { const [dx, dy] = inDisc(R, r); x.fillStyle = colors[Math.floor(R() * colors.length)]; x.beginPath(); x.ellipse(cx + dx, cy + dy, s * (.6 + R()), s * (.4 + R() * .6), R() * 3, 0, TAU); x.fill(); } }
+function lemon(x, cx, cy, r) { circ(x, cx, cy, r, "#f5d64a"); circ(x, cx, cy, r * .86, "#fbec9a"); x.strokeStyle = "#f2d24a"; x.lineWidth = 2; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * r * .84, cy + Math.sin(a) * r * .84); x.stroke(); } }
+
+const DRAW = {
+  pizza(x, R, d) {
+    shadow(x, 1); circ(x, 240, 182, 166, "#9c6a3a"); shadow(x, 0);
+    x.strokeStyle = "rgba(60,30,10,.25)"; x.lineWidth = 1.5; for (let r = 30; r < 166; r += 14 + R() * 10) { x.beginPath(); x.arc(250, 176, r, 0, TAU); x.stroke(); }
+    circ(x, 240, 182, 150, rad(x, 240, 182, 150, "#efb96f", "#c47b33"));
+    dots(x, R, 40, 240, 182, 148, ["rgba(70,35,10,.55)"], 4);
+    circ(x, 240, 182, 128, rad(x, 240, 182, 128, "#d9512f", "#b23b22"));
+    for (let i = 0; i < 26; i++) { const [dx, dy] = inDisc(R, 108); blob(x, 240 + dx, 182 + dy, 12 + R() * 16, R, R() < .5 ? "#f7ebc2" : "#f2dfa6"); }
+    dots(x, R, 30, 240, 182, 110, ["rgba(190,90,40,.5)"], 3);
+    if (d.top === "basil") for (let i = 0; i < 8; i++) { const [dx, dy] = inDisc(R, 95); leaf(x, 240 + dx, 182 + dy, 15 + R() * 6, R() * 6, R() < .5 ? "#2f7a2f" : "#3f8f35"); }
+    if (d.top === "mushroom") for (let i = 0; i < 14; i++) { const [dx, dy] = inDisc(R, 100); x.save(); x.translate(240 + dx, 182 + dy); x.rotate(R() * 6); x.beginPath(); x.arc(0, 0, 14, Math.PI, 0); x.lineTo(5, 0); x.lineTo(5, 10); x.lineTo(-5, 10); x.lineTo(-5, 0); x.closePath(); x.fillStyle = "#b08a62"; x.fill(); x.strokeStyle = "#6d4a2b"; x.lineWidth = 2; x.stroke(); x.restore(); }
+    x.strokeStyle = "rgba(90,30,10,.3)"; x.lineWidth = 2; for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI + .3; x.beginPath(); x.moveTo(240 - Math.cos(a) * 148, 182 - Math.sin(a) * 148); x.lineTo(240 + Math.cos(a) * 148, 182 + Math.sin(a) * 148); x.stroke(); }
+  },
+  burrata(x, R) {
+    plate(x);
+    for (let i = 0; i < 16; i++) { const [dx, dy] = inDisc(R, 92); leaf(x, 240 + dx, 182 + dy, 24 + R() * 14, R() * 6, ["#3f7d3a", "#5d9b3f", "#7cb342", "#2f6b34"][i % 4]); }
+    for (let i = 0; i < 7; i++) { const [dx, dy] = inDisc(R, 88); const cx = 240 + dx, cy = 182 + dy, y = R() < .35; circ(x, cx, cy, 22, y ? "#f2b632" : "#d8392b"); circ(x, cx, cy, 16, y ? "#f7cf62" : "#ec5b45"); dots(x, R, 6, cx, cy, 10, [y ? "#fff1b8" : "#ffd0a8"], 2); }
+    circ(x, 236, 176, 46, rad(x, 236, 176, 46, "#ffffff", "#e9e3d0"));
+    blob(x, 244, 170, 20, R, "#f6f0dc", 7);
+    x.strokeStyle = "rgba(170,150,20,.7)"; x.lineWidth = 3; x.beginPath(); x.moveTo(150, 140); x.bezierCurveTo(220, 100, 260, 260, 340, 210); x.stroke();
+    dots(x, R, 40, 240, 182, 110, ["#222"], 1.3);
+  },
+  soup(x, R) {
+    shadow(x, 1); circ(x, 240, 182, 158, "#efece6"); shadow(x, 0);
+    bowl(x, 240, 182, 128, "#f7f5f0", rad(x, 240, 182, 110, "#e66b33", "#b23f1c"));
+    x.strokeStyle = "rgba(255,248,236,.85)"; x.lineWidth = 5; x.beginPath(); for (let t = 0; t < 14; t += .1) { const r = 4 + t * 4.5; const px = 240 + Math.cos(t) * r, py = 182 + Math.sin(t) * r; t ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+    for (let i = 0; i < 6; i++) { const [dx, dy] = inDisc(R, 80); x.save(); x.translate(240 + dx, 182 + dy); x.rotate(R() * 3); x.fillStyle = "#d9a456"; x.fillRect(-8, -8, 16, 16); x.fillStyle = "#b9823a"; x.fillRect(-8, 4, 16, 4); x.restore(); }
+    leaf(x, 270, 160, 16, .5, "#2f7a2f"); leaf(x, 286, 176, 13, 1.8, "#3f8f35");
+  },
+  rings(x, R) {
+    plate(x);
+    shadow(x, 1); circ(x, 330, 110, 40, "#f3f1ec"); shadow(x, 0); circ(x, 330, 110, 32, "#f4e6c4"); dots(x, R, 14, 330, 110, 24, ["#c4442a"], 1.6);
+    for (let i = 0; i < 16; i++) { const [dx, dy] = inDisc(R, 82); const cx = 220 + dx, cy = 200 + dy, r = 14 + R() * 8; x.strokeStyle = "#b88433"; x.lineWidth = 12; x.beginPath(); x.ellipse(cx, cy + 2, r, r * .85, R(), 0, TAU); x.stroke(); x.strokeStyle = R() < .5 ? "#e7b862" : "#dca552"; x.lineWidth = 9; x.beginPath(); x.ellipse(cx, cy, r, r * .85, R(), 0, TAU); x.stroke(); }
+    x.save(); x.translate(150, 130); x.rotate(-.6); x.beginPath(); x.arc(0, 0, 30, 0, Math.PI); x.closePath(); x.fillStyle = "#f2cd2e"; x.fill(); x.beginPath(); x.arc(0, 0, 24, 0, Math.PI); x.closePath(); x.fillStyle = "#fbe98c"; x.fill(); x.restore();
+  },
+  satay(x, R) {
+    plate(x);
+    shadow(x, 1); circ(x, 320, 250, 42, "#f3f1ec"); shadow(x, 0); circ(x, 320, 250, 34, rad(x, 320, 250, 34, "#c98a46", "#9a5e25")); dots(x, R, 12, 320, 250, 26, ["#6d3d14"], 2);
+    for (let s = 0; s < 3; s++) {
+      const y0 = 110 + s * 45; x.strokeStyle = "#d8b77e"; x.lineWidth = 5; x.beginPath(); x.moveTo(110, y0 + 40); x.lineTo(330, y0 - 20); x.stroke();
+      for (let k = 0; k < 4; k++) { const t = .15 + k * .2; const cx = 110 + 220 * t, cy = y0 + 40 - 60 * t; blob(x, cx, cy, 20, R, "#a4561f", 8); blob(x, cx - 3, cy - 3, 13, R, "#c36f30", 7); dots(x, R, 4, cx, cy, 14, ["#3a1a08"], 2.4); }
+    }
+    for (let i = 0; i < 4; i++) { const cx = 170 + i * 30, cy = 260 + (i % 2) * 10; circ(x, cx, cy, 15, "#6ea548"); circ(x, cx, cy, 12, "#d8efb2"); }
+  },
+  pasta(x, R) {
+    plate(x);
+    for (let i = 0; i < 80; i++) {
+      const [dx, dy] = inDisc(R, 70); const sx = 240 + dx, sy = 182 + dy; const a = R() * TAU, l = 40 + R() * 50;
+      const c1 = [sx + Math.cos(a) * l, sy + Math.sin(a) * l], c2 = [sx + Math.cos(a + 1.5) * l, sy + Math.sin(a + 1.5) * l], e = [240 + inDisc(R, 80)[0], 182 + inDisc(R, 80)[1]];
+      x.strokeStyle = "#c9a24f"; x.lineWidth = 6; x.beginPath(); x.moveTo(sx, sy); x.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], e[0], e[1]); x.stroke();
+      x.strokeStyle = R() < .5 ? "#f4da8e" : "#efd07a"; x.lineWidth = 4; x.stroke();
+    }
+    dots(x, R, 14, 240, 182, 70, ["#f8ecc9"], 5);
+    dots(x, R, 40, 240, 182, 80, ["#c62d1d"], 1.6);
+    dots(x, R, 50, 240, 182, 84, ["#3a8a2c", "#4ea33a"], 2);
+  },
+  curry(x, R) {
+    plate(x);
+    blob(x, 185, 192, 72, R, "#f5f1e6", 10);
+    for (let i = 0; i < 260; i++) { const [dx, dy] = inDisc(R, 66); x.fillStyle = R() < .5 ? "#fffdf7" : "#e6dec9"; x.beginPath(); x.ellipse(185 + dx, 192 + dy, 4, 1.4, R() * 3, 0, TAU); x.fill(); }
+    blob(x, 298, 176, 78, R, rad(x, 298, 176, 78, "#e8812f", "#b4471b"), 10);
+    for (let i = 0; i < 7; i++) { const [dx, dy] = inDisc(R, 52); blob(x, 298 + dx, 176 + dy, 13 + R() * 6, R, "#c96a2c", 7); blob(x, 296 + dx, 173 + dy, 7, R, "#e39a5c", 6); }
+    x.strokeStyle = "rgba(255,246,230,.85)"; x.lineWidth = 4; x.beginPath(); x.moveTo(260, 150); x.bezierCurveTo(300, 130, 340, 190, 300, 210); x.stroke();
+    for (let i = 0; i < 6; i++) { const [dx, dy] = inDisc(R, 55); leaf(x, 298 + dx, 176 + dy, 7, R() * 6, "#3f8f35"); }
+  },
+  burger(x, R) {
+    plate(x);
+    for (let i = 0; i < 20; i++) { x.save(); x.translate(312 + R() * 50, 120 + R() * 130); x.rotate(-.4 + R() * .8); x.fillStyle = "#d9a23a"; x.fillRect(-6, -30, 13, 60); x.fillStyle = "#f3c75c"; x.fillRect(-5, -29, 9, 57); x.restore(); }
+    blob(x, 205, 190, 98, R, "#5f9c34", 12);
+    x.beginPath(); x.moveTo(150, 250); x.lineTo(205, 290); x.lineTo(260, 245); x.closePath(); x.fillStyle = "#f2b52b"; x.fill();
+    shadow(x, 1); circ(x, 205, 185, 88, rad(x, 205, 185, 88, "#eeae62", "#b46524")); shadow(x, 0);
+    for (let i = 0; i < 34; i++) { const [dx, dy] = inDisc(R, 70); x.fillStyle = "#f8edd2"; x.beginPath(); x.ellipse(205 + dx, 185 + dy, 4, 2, R() * 3, 0, TAU); x.fill(); }
+  },
+  salmon(x, R) {
+    plate(x);
+    for (let i = 0; i < 6; i++) { const y = 230 + i * 9; x.strokeStyle = "#4f8a30"; x.lineWidth = 8; x.lineCap = "round"; x.beginPath(); x.moveTo(140, y); x.lineTo(320, y - 18); x.stroke(); x.strokeStyle = "#6fae45"; x.lineWidth = 4; x.stroke(); }
+    x.save(); x.translate(232, 160); x.rotate(-.12);
+    x.beginPath(); x.roundRect(-95, -50, 190, 100, 40); shadow(x, 1); x.fillStyle = "#e9784b"; x.fill(); shadow(x, 0); x.clip();
+    const g = x.createLinearGradient(0, -50, 0, 50); g.addColorStop(0, "#f59a6c"); g.addColorStop(1, "#d8623a"); x.fillStyle = g; x.fillRect(-95, -50, 190, 100);
+    x.strokeStyle = "rgba(255,235,220,.55)"; x.lineWidth = 3; for (let i = -80; i < 100; i += 22) { x.beginPath(); x.moveTo(i, -50); x.quadraticCurveTo(i + 14, 0, i, 50); x.stroke(); }
+    x.strokeStyle = "rgba(50,20,10,.55)"; x.lineWidth = 7; for (let i = -120; i < 120; i += 34) { x.beginPath(); x.moveTo(i, -60); x.lineTo(i + 60, 60); x.stroke(); }
+    x.restore(); x.lineCap = "butt";
+    lemon(x, 330, 116, 28);
+  },
+  tiramisu(x, R) {
+    plate(x);
+    dots(x, R, 120, 240, 182, 125, ["rgba(90,50,25,.5)"], 1.5);
+    x.save(); x.translate(236, 182); x.rotate(-.18);
+    x.fillStyle = "#f0e2c4"; x.fillRect(-72, -60, 144, 136); x.fillStyle = "#8a5a35"; x.fillRect(-72, 66, 144, 6); x.fillRect(-72, 46, 144, 4);
+    x.fillStyle = "#6a3e24"; x.fillRect(-72, -72, 144, 132);
+    for (let i = 0; i < 500; i++) { x.fillStyle = R() < .5 ? "#4b2a16" : "#875634"; x.fillRect(-72 + R() * 144, -72 + R() * 132, 2, 2); }
+    x.restore();
+    leaf(x, 268, 140, 14, .8, "#3f8f35"); leaf(x, 282, 150, 12, 2.2, "#2f7a2f");
+    x.fillStyle = "#3a1d0c"; x.beginPath(); x.ellipse(206, 210, 9, 6, .4, 0, TAU); x.fill();
+  },
+  lava(x, R) {
+    plate(x);
+    blob(x, 244, 190, 88, R, "#3a1b0e", 11);
+    shadow(x, 1); circ(x, 236, 176, 60, rad(x, 236, 176, 60, "#6a3820", "#2c1209")); shadow(x, 0);
+    dots(x, R, 160, 230, 166, 42, ["rgba(255,255,255,.8)"], 1.4);
+    for (let k = 0; k < 3; k++) { const cx = 314 + k * 16, cy = 230 - k * 22; for (let i = 0; i < 9; i++) { const [dx, dy] = inDisc(R, 9); circ(x, cx + dx, cy + dy, 5, i % 2 ? "#c2183a" : "#e0365a"); } }
+    leaf(x, 300, 248, 12, .4, "#3f8f35");
+  },
+  gelato(x, R) {
+    shadow(x, 1); circ(x, 240, 182, 156, "#e9e6df"); shadow(x, 0);
+    bowl(x, 240, 182, 128, "#2f3b44", "#26313a");
+    [["#b8cf7c", "#86a64a", 200, 150], ["#f4a6ae", "#d8687a", 285, 160], ["#f8efd6", "#dccba0", 238, 225]].forEach(([a, b, cx, cy]) => { shadow(x, 1); blob(x, cx, cy, 50, R, rad(x, cx, cy, 52, a, b), 10); shadow(x, 0); dots(x, R, 20, cx, cy, 36, ["rgba(255,255,255,.35)", "rgba(0,0,0,.08)"], 2.4); });
+    x.save(); x.translate(320, 236); x.rotate(.7); x.fillStyle = "#e0b56d"; x.fillRect(-14, -46, 28, 92); x.strokeStyle = "#b9893f"; x.lineWidth = 2; for (let i = -40; i < 46; i += 12) { x.beginPath(); x.moveTo(-14, i); x.lineTo(14, i); x.stroke(); } x.restore();
+  },
+  drink(x, R, d) {
+    shadow(x, 1); circ(x, 240, 182, 140, "#1d1a17"); shadow(x, 0); circ(x, 240, 182, 128, "#2b2622");
+    circ(x, 240, 182, 108, "rgba(255,255,255,.18)");
+    circ(x, 240, 182, 98, rad(x, 240, 182, 98, d.color[0], d.color[1]));
+    for (let i = 0; i < 5; i++) { const [dx, dy] = inDisc(R, 58); x.save(); x.translate(240 + dx, 182 + dy); x.rotate(R() * 3); x.beginPath(); x.roundRect(-20, -20, 40, 40, 9); x.fillStyle = "rgba(255,255,255,.32)"; x.fill(); x.strokeStyle = "rgba(255,255,255,.7)"; x.lineWidth = 2; x.stroke(); x.restore(); }
+    if (d.garnish === "lime") { circ(x, 300, 128, 32, "#7fb83a"); circ(x, 300, 128, 27, "#cfe98a"); x.strokeStyle = "#a6cf5c"; x.lineWidth = 2; for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; x.beginPath(); x.moveTo(300, 128); x.lineTo(300 + Math.cos(a) * 26, 128 + Math.sin(a) * 26); x.stroke(); } }
+    else { leaf(x, 286, 140, 18, .6, "#2f8a35"); leaf(x, 300, 156, 15, 2, "#3ea043"); leaf(x, 276, 160, 13, 3.6, "#2f8a35"); }
+    x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 12; x.lineCap = "round"; x.beginPath(); x.moveTo(214, 196); x.lineTo(120, 290); x.stroke();
+    x.strokeStyle = "#f2f2ec"; x.lineWidth = 10; x.beginPath(); x.moveTo(214, 192); x.lineTo(118, 286); x.stroke(); x.lineCap = "butt";
+    x.strokeStyle = "rgba(255,255,255,.75)"; x.lineWidth = 4; x.beginPath(); x.arc(240, 182, 106, Math.PI * 1.05, Math.PI * 1.55); x.stroke();
+  },
+  coffee(x, R) {
+    shadow(x, 1); circ(x, 240, 182, 140, "#f4f2ee"); shadow(x, 0); circ(x, 240, 182, 112, "#e8e5df");
+    x.save(); x.translate(330, 182); x.beginPath(); x.roundRect(0, -16, 48, 32, 14); x.fillStyle = "#fbfaf7"; x.fill(); x.restore();
+    shadow(x, 1); circ(x, 240, 182, 92, "#fbfaf7"); shadow(x, 0);
+    circ(x, 240, 182, 76, rad(x, 240, 182, 76, "#b77a45", "#6e3f1c"));
+    circ(x, 240, 182, 58, "#d9b48c");
+    x.fillStyle = "#fbf3e6"; x.beginPath(); x.moveTo(240, 214); x.bezierCurveTo(196, 186, 204, 146, 230, 152); x.bezierCurveTo(236, 154, 240, 160, 240, 166); x.bezierCurveTo(240, 160, 244, 154, 250, 152); x.bezierCurveTo(276, 146, 284, 186, 240, 214); x.fill();
+    x.strokeStyle = "#c9c9c4"; x.lineWidth = 6; x.lineCap = "round"; x.beginPath(); x.moveTo(150, 270); x.lineTo(110, 300); x.stroke(); x.lineCap = "butt";
+    x.fillStyle = "#d7d7d2"; x.beginPath(); x.ellipse(162, 262, 14, 9, -.6, 0, TAU); x.fill();
+  },
+};
+const PHOTO = {};
+function photo(d) {
+  const up = S.photos[d.id];
+  if (up && up.url) return up.url;
+  if (!PHOTO[d.id]) {
+    const c = document.createElement("canvas"); c.width = 480; c.height = 360; const x = c.getContext("2d"); const Rn = rng(hash(d.id));
+    surface(x, CATS.find(k => k.id === d.cat).surface, Rn);
+    try { DRAW[d.kind](x, Rn, d); } catch (e) { console.error(e); }
+    PHOTO[d.id] = c.toDataURL("image/jpeg", .86);
+  }
+  return PHOTO[d.id];
+}
+
+/* ================= Shared state ================= */
+const S = { orders: {}, tables: {}, scores: {}, photos: {} };
+const COLLS = Object.keys(S);
+let mode = "connecting", db = null, assets = null, canEdit = false, loadedRemote = false;
+const bc = (() => { try { return new BroadcastChannel("olive-ember-demo"); } catch { return null; } })();
+
+function localSeed() {
+  const now = Date.now(), m = 60000, o = {};
+  const add = (id, table, dish, qty, state, mins, name) => o[id] = { table, dish, qty, state, at: now - mins * m, by: "seed-" + table + name, name };
+  add("s1", 2, "margherita", 1, "served", 38, "Ana"); add("s2", 2, "lime", 2, "served", 38, "Ana"); add("s3", 2, "tiramisu", 2, "cooking", 6, "Raj");
+  add("s4", 3, "butterchicken", 2, "cooking", 12, "Meera"); add("s5", 3, "lassi", 2, "served", 15, "Meera");
+  add("s6", 7, "burger", 1, "new", 1, "Sam"); add("s7", 7, "calamari", 1, "new", 1, "Sam"); add("s8", 7, "cooler", 2, "new", 1, "Leo");
+  add("s9", 9, "salmon", 1, "served", 52, "Priya"); add("s10", 9, "funghi", 1, "served", 52, "Priya"); add("s11", 9, "cappuccino", 2, "served", 20, "Kiran");
+  return {
+    orders: o,
+    tables: { t3: { table: 3, waiter: now - 2 * m, bill: 0, paid: 0 }, t9: { table: 9, waiter: 0, bill: now - 4 * m, paid: 0 } },
+    scores: { "seed-a": { name: "Raj", table: 2, best: 31, at: now }, "seed-b": { name: "Meera", table: 3, best: 27, at: now }, "seed-c": { name: "Leo", table: 7, best: 24, at: now }, "seed-d": { name: "Ana", table: 2, best: 19, at: now } },
+    photos: {},
+  };
+}
+function startLocal() {
+  mode = "local";
+  const saved = LS.get("rt-demo", null) || localSeed();
+  COLLS.forEach(c => S[c] = saved[c] || {});
+  LS.set("rt-demo", S);
+  if (bc) bc.onmessage = () => { const s = LS.get("rt-demo", null); if (s) { COLLS.forEach(c => S[c] = s[c] || {}); render(); } };
+  addEventListener("storage", e => { if (e.key === "rt-demo") { const s = LS.get("rt-demo", null); if (s) { COLLS.forEach(c => S[c] = s[c] || {}); render(); } } });
+  render();
+}
+function startRemote() {
+  mode = "live";
+  const timer = setTimeout(() => { if (!loadedRemote) toast("Can't reach live orders yet. Check your connection."); }, 10000);
+  COLLS.forEach(c => {
+    db.collection(c).onSnapshot(snap => {
+      const next = {}; snap.docs.forEach(d => next[d.id] = d.data()); S[c] = next;
+      if (!snap.metadata.fromCache) { loadedRemote = true; clearTimeout(timer); }
+      render();
+    }, err => { clearTimeout(timer); console.error(err); toast("Live updates stopped. Reload to reconnect."); });
+  });
+  render();
+}
+async function put(coll, id, data) {
+  if (mode === "live") {
+    try { await db.collection(coll).doc(id).set(data); return true; }
+    catch (e) { console.error(e); toast(e && e.code === "invalid_argument" ? "You can't change this page's data. Ask the owner for Contributor access." : "That didn't save. Try again."); return false; }
+  }
+  S[coll] = { ...S[coll], [id]: data }; LS.set("rt-demo", S); bc && bc.postMessage(1); render(); return true;
+}
+async function del(coll, id) {
+  if (mode === "live") { try { await db.collection(coll).doc(id).delete(); return true; } catch (e) { console.error(e); toast("That didn't save. Try again."); return false; } }
+  const n = { ...S[coll] }; delete n[id]; S[coll] = n; LS.set("rt-demo", S); bc && bc.postMessage(1); render(); return true;
+}
+
+/* ================= Derived ================= */
+const ordersFor = n => Object.entries(S.orders).filter(([, o]) => o.table === n).map(([id, o]) => ({ id, ...o })).sort((a, b) => a.at - b.at);
+const tdoc = n => S.tables["t" + n] || { table: n, waiter: 0, bill: 0, paid: 0 };
+const sumOf = os => os.reduce((s, o) => s + (DISH[o.dish] ? DISH[o.dish].price * o.qty : 0), 0);
+const qtyOf = (os, st) => os.filter(o => !st || o.state === st).reduce((s, o) => s + o.qty, 0);
+function tableState(n) {
+  const os = ordersFor(n), t = tdoc(n);
+  const st = t.paid ? "paid" : t.waiter ? "call" : t.bill ? "bill" : qtyOf(os, "new") ? "new" : qtyOf(os, "cooking") ? "cooking" : os.length ? "seated" : "empty";
+  return { os, t, st, total: sumOf(os), guests: new Set(os.map(o => o.name)).size, since: os.length ? os[0].at : 0 };
+}
+const STATE_LABEL = { paid: "Paid", call: "Calling waiter", bill: "Wants the bill", new: "New order", cooking: "Food cooking", seated: "Dining", empty: "Free" };
+
+/* ================= Routing & UI state ================= */
+let view = { name: "home" };
+const ui = { gtab: "menu", stab: "floor", sheet: null, qty: 1, tip: 10, paying: null, lbMode: "table", clearArm: 0 };
+function route() {
+  const h = location.hash.slice(1);
+  const m = /^table-(\d{1,2})$/.exec(h);
+  if (h === "staff") view = { name: "staff" };
+  else if (m && +m[1] >= 1 && +m[1] <= R.tables) view = { name: "guest", table: +m[1] };
+  else view = { name: "home" };
+  ui.sheet = null; stopGame(); if (view.name === "guest") loadBasket(); render(); scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+
+const basketKey = () => "rt-basket-" + view.table;
+let basket = {};
+function loadBasket() { basket = LS.get(basketKey(), {}); }
+function saveBasket() { LS.set(basketKey(), basket); }
+
+/* ================= Render ================= */
+let lastSheet = null;
+function render() {
+  if (game.running) { renderNavBadges(); return; }
+  const a = document.activeElement, aid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
+  $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : homeHTML();
+  const old = document.querySelector(".sheet"), keep = old && ui.sheet === lastSheet ? old.scrollTop : 0;
+  $("#sheet").innerHTML = ui.sheet ? `<div class="scrim${ui.sheet === lastSheet ? " still" : ""}" data-act="close-sheet"><div class="sheet" role="dialog" aria-modal="true">${sheetHTML()}</div></div>` : "";
+  if (keep) document.querySelector(".sheet").scrollTop = keep;
+  lastSheet = ui.sheet;
+  $("#toast").style.bottom = view.name === "guest" ? "" : "calc(24px + env(safe-area-inset-bottom, 0px))";
+  if (aid) { const el = document.getElementById(aid); if (el) { el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch {} } }
+  if (view.name === "guest" && ui.gtab === "play") mountGame();
+}
+function modeLine() {
+  if (mode === "live") return `<span class="dot live"></span> Live: orders sync to every phone and the staff floor.`;
+  if (mode === "local") return `<span class="dot"></span> Demo mode: orders are saved on this device and shared between its open tabs.`;
+  return `<span class="dot"></span> Connecting…`;
+}
+
+function homeHTML() {
+  return `<main class="home wrap">
+    <div>
+      <p class="mono muted" style="margin:0 0 8px">${esc(R.name)} · ${esc(R.tagline)}</p>
+      <h1>Your waiter can't be at every table. Your website can.</h1>
+      <p class="lede">Guests scan the table's QR code or tap its NFC tag. The menu opens with a photo of every dish. They order, call the waiter, play while they wait, and pay at the table. Staff see the whole room at a glance.</p>
+    </div>
+    <div class="entry">
+      <section>
+        <h2>Sit at a table</h2>
+        <p class="muted" style="margin:0">Open the guest view as if you scanned the code on that table.</p>
+        <div class="tpick">${Array.from({ length: R.tables }, (_, i) => `<a href="#table-${i + 1}">${i + 1}</a>`).join("")}</div>
+      </section>
+      <section>
+        <h2>Staff floor</h2>
+        <p class="muted" style="margin:0">Every table's status, new orders to send to the kitchen, waiter calls and bills.</p>
+        <a class="btn block" href="#staff" style="text-decoration:none">Open the staff floor</a>
+        <p class="muted" style="margin:0;font-size:13px">Try it: open table 5 on your phone and the staff floor on a laptop.</p>
+      </section>
+    </div>
+    <ol class="flow">
+      <li><b>Scan or tap</b>No app and no account. Each table has its own link.</li>
+      <li><b>Order with photos</b>Two phones at one table share one order and one bill.</li>
+      <li><b>One tap to the kitchen</b>Staff confirm the order and the kitchen starts cooking.</li>
+      <li><b>Wi-Fi and games</b>Play alone, against your table, or the whole restaurant.</li>
+      <li><b>Call the waiter</b>Staff see exactly which table needs them.</li>
+      <li><b>Pay at the table</b>Card, Apple Pay or Google Pay.</li>
+    </ol>
+    <p class="modeline">${modeLine()}</p>
+  </main>`;
+}
+
+/* ---------- Guest ---------- */
+const ICON = {
+  menu: `<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>`,
+  table: `<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>`,
+  play: `<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 11v3M6.5 12.5h3M15.5 12h.01M17.5 14h.01"/></svg>`,
+};
+function guestHTML() {
+  const n = view.table, ts = tableState(n);
+  return `<div class="guest wrap">
+    <header class="ghead">
+      <div><p class="muted" style="margin:0;font-size:13px">${esc(R.tagline)}</p><h1>${esc(R.name)}</h1></div>
+      <div class="tableno"><small>Table</small><b>${n}</b></div>
+    </header>
+    ${ui.gtab === "menu" ? guestMenu() : ui.gtab === "table" ? guestTable(ts) : guestPlay()}
+  </div>
+  <div class="dock"><div class="dock-in wrap">${dockHTML(ts)}</div></div>`;
+}
+function guestMenu() {
+  const cats = CATS.map(c => `<button data-act="jump" data-cat="${c.id}">${c.label}</button>`).join("");
+  const body = CATS.map(c => `<h2 class="catname" id="cat-${c.id}">${c.label}</h2>` + MENU.filter(d => d.cat === c.id).map(d => {
+    const q = basket[d.id] || 0;
+    return `<article class="dish">
+      <button data-act="dish" data-id="${d.id}" style="display:contents"><img src="${photo(d)}" alt="${esc(d.name)}" loading="lazy">
+      <div class="meta"><h3>${esc(d.name)}</h3><div class="row"><span class="price">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}" title="${d.veg ? "Vegetarian" : "Non-vegetarian"}"></span></div></div></button>
+      <button class="add ${q ? "has" : ""}" data-act="quick-add" data-id="${d.id}" aria-label="Add ${esc(d.name)}">${q ? q : "+"}</button>
+    </article>`;
+  }).join("")).join("");
+  return `<div class="wifi"><div><div class="k">Free Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v" id="wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm copy" data-act="copy-wifi">Copy password</button></div>
+    <nav class="cats" aria-label="Menu sections">${cats}</nav>
+    <div class="dishes">${body}</div>`;
+}
+function statePill(s) { return s === "new" ? `<span class="pill new">Waiting for staff</span>` : s === "cooking" ? `<span class="pill cook">Cooking</span>` : `<span class="pill ok">Served</span>`; }
+function guestTable(ts) {
+  const { os, t } = ts;
+  const sub = ts.total, tax = sub * R.tax;
+  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = DISH[o.dish]; if (!d) return ""; return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}</small></span>${statePill(o.state)}</li>`; }).join("")}</ul>` : `<p class="empty">Nothing ordered yet. Pick something from the menu.</p>`;
+  const paid = t.paid ? `<div class="alertbox paid"><div><b>Paid ${fmt(t.total || 0)}</b><div class="muted" style="font-size:13px">with ${esc(t.method || "card")} · thank you for dining with us</div></div></div>` : "";
+  return `<section class="panel">
+      <div class="xrow"><h2>Table ${view.table} order</h2><span class="pill">${ts.guests || 0} ${ts.guests === 1 ? "guest" : "guests"} ordering</span></div>
+      <label class="namefield" for="myname">You're ordering as <input id="myname" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
+      ${lines}
+      ${os.length ? `<div class="sum"><div><span>Subtotal</span><span>${fmt(sub)}</span></div><div><span>GST 5%</span><span>${fmt(tax)}</span></div><div class="tot"><span>Total so far</span><span>${fmt(sub + tax)}</span></div></div>` : ""}
+      ${paid}
+      ${os.length && !t.paid ? `<button class="btn pop block" data-act="ask-bill">${t.bill ? "Pay the bill" : "Ask for the bill"}</button>` : ""}
+    </section>
+    <section class="panel"><h2>Wi-Fi</h2><div class="wifi" style="margin:0"><div><div class="k">Network</div><div class="v">${esc(R.wifi.ssid)}</div><div class="k" style="margin-top:6px">Password</div><div class="v">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm copy" data-act="copy-wifi">Copy</button></div></section>
+    <p class="modeline" style="margin-top:14px">${modeLine()}</p>`;
+}
+function dockHTML(ts) {
+  const items = Object.values(basket).reduce((a, b) => a + b, 0);
+  const total = Object.entries(basket).reduce((s, [id, q]) => s + DISH[id].price * q, 0);
+  const t = ts.t;
+  const bar = items && ui.gtab === "menu" ? `<button class="basketbar" data-act="open-basket"><span><span class="mono">${items}</span> ${items === 1 ? "item" : "items"} · <span class="mono">${fmt(total)}</span></span><span>Review order →</span></button>` : "";
+  const call = t.waiter
+    ? `<div class="callbar"><button class="btn alert" data-act="cancel-waiter">Waiter is on the way · Cancel</button></div>`
+    : `<div class="callbar"><button class="btn ghost" data-act="call-waiter">Call waiter</button>${ts.os.length && !t.paid ? `<button class="btn ghost" data-act="ask-bill">${t.bill ? "Pay bill" : "Ask for bill"}</button>` : ""}</div>`;
+  const tabCount = qtyOf(ts.os);
+  return `${bar}${game.running ? "" : call}
+    <nav class="nav" aria-label="Guest sections">
+      <button class="${ui.gtab === "menu" ? "on" : ""}" data-act="gtab" data-tab="menu">${ICON.menu}Menu</button>
+      <button class="${ui.gtab === "table" ? "on" : ""}" data-act="gtab" data-tab="table">${ICON.table}Table & bill${tabCount ? `<span class="badge" id="tabbadge">${tabCount}</span>` : ""}</button>
+      <button class="${ui.gtab === "play" ? "on" : ""}" data-act="gtab" data-tab="play">${ICON.play}Play</button>
+    </nav>`;
+}
+function renderNavBadges() { /* during a game, keep the board intact; the table badge refreshes after the round */ }
+
+/* ---------- Game: Dumpling Dash ---------- */
+const game = { running: false, score: 0, left: 0, timers: [], last: LS.get("rt-last", 0), best: LS.get("rt-best", 0) };
+function guestPlay() {
+  const scores = Object.entries(S.scores).map(([id, s]) => ({ id, ...s }));
+  const list = (ui.lbMode === "me" ? scores.filter(s => s.id === me.id) : ui.lbMode === "table" ? scores.filter(s => s.table === view.table) : scores).sort((a, b) => b.best - a.best).slice(0, 10);
+  const lb = list.length ? `<ol class="lb">${list.map(s => `<li class="${s.id === me.id ? "me" : ""}"><span>${esc(s.name)}${s.id === me.id ? " (you)" : ""}</span><span class="muted" style="font-size:12px">Table ${s.table}</span><span class="s">${s.best}</span></li>`).join("")}</ol>` : `<p class="empty">${ui.lbMode === "table" ? "No scores at this table yet. Set the first one." : "Play a round to get on the board."}</p>`;
+  return `<section class="panel game">
+    <div class="xrow"><div><h2>Dumpling Dash</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Tap the dumplings as they pop up. Skip the chillies. 20 seconds.</p></div></div>
+    <div class="hud"><div><small>Score</small><span id="g-score">${game.score}</span></div><div style="text-align:center"><small>Time</small><span id="g-time">${game.running ? game.left : 20}</span></div><div style="text-align:right"><small>Your best</small><span>${game.best}</span></div></div>
+    <div class="board-wrap"><div class="board" id="board">${Array.from({ length: 9 }, (_, i) => `<button class="basket" data-cell="${i}" aria-label="Steamer ${i + 1}"><i></i></button>`).join("")}</div>
+      ${game.running ? "" : `<div class="board-cover"><div><h3>${game.last ? "You scored " + game.last : "Ready?"}</h3><p>${game.last ? "Beat the table." : "Score posts to your table and the whole restaurant."}</p><button class="btn pop" data-act="start-game">${game.last ? "Play again" : "Start"}</button></div></div>`}
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Leaderboard</h2>
+    <div class="modes" role="tablist">
+      <button class="${ui.lbMode === "me" ? "on" : ""}" data-act="lb" data-mode="me">Just me</button>
+      <button class="${ui.lbMode === "table" ? "on" : ""}" data-act="lb" data-mode="table">Table ${view.table}</button>
+      <button class="${ui.lbMode === "all" ? "on" : ""}" data-act="lb" data-mode="all">Restaurant</button>
+    </div>
+    ${lb}
+  </section>`;
+}
+function mountGame() { /* board is plain markup; nothing to attach */ }
+function startGame() {
+  game.score = 0; game.left = 20;
+  render(); game.running = true;
+  const board = $("#board"); const cover = document.querySelector(".board-cover"); if (cover) cover.remove();
+  const cells = [...board.children];
+  const tick = setInterval(() => { game.left--; const t = $("#g-time"); if (t) t.textContent = game.left; if (game.left <= 0) endGame(); }, 1000);
+  game.timers.push(tick);
+  const spawn = () => {
+    if (!game.running) return;
+    const free = cells.filter(c => !c.classList.contains("up")); if (free.length) {
+      const c = free[Math.floor(Math.random() * free.length)]; const chili = Math.random() < .2;
+      c.className = "basket up" + (chili ? " chili" : ""); c.dataset.kind = chili ? "chili" : "dumpling";
+      const life = Math.max(520, 1000 - (20 - game.left) * 22);
+      game.timers.push(setTimeout(() => { if (c.classList.contains("up")) c.className = "basket"; }, life));
+    }
+    game.timers.push(setTimeout(spawn, Math.max(300, 700 - (20 - game.left) * 18)));
+  };
+  spawn();
+}
+function hitCell(c) {
+  if (!game.running || !c.classList.contains("up")) return;
+  const chili = c.dataset.kind === "chili"; game.score = Math.max(0, game.score + (chili ? -3 : 1));
+  c.className = "basket hit" + (chili ? " chili" : ""); setTimeout(() => { if (c.classList.contains("hit")) c.className = "basket"; }, 150);
+  const s = $("#g-score"); if (s) s.textContent = game.score;
+  if (navigator.vibrate) try { navigator.vibrate(chili ? 60 : 8); } catch {}
+}
+function stopGame() { game.running = false; game.timers.forEach(t => { clearInterval(t); clearTimeout(t); }); game.timers = []; }
+async function endGame() {
+  stopGame(); game.last = game.score; LS.set("rt-last", game.last);
+  const prev = S.scores[me.id];
+  if (game.score > game.best) { game.best = game.score; LS.set("rt-best", game.best); }
+  render();
+  if (!prev || game.score > prev.best || prev.table !== view.table || prev.name !== me.name) {
+    await put("scores", me.id, { name: me.name, table: view.table, best: Math.max(game.score, prev && prev.table === view.table ? prev.best : 0), at: Date.now() });
+  }
+}
+
+/* ---------- Sheets ---------- */
+function sheetHTML() {
+  const s = ui.sheet;
+  if (s.startsWith("dish:")) {
+    const d = DISH[s.slice(5)];
+    return `<img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><div class="sheet-b">
+      <div class="xrow"><div><h2>${esc(d.name)}</h2><p class="mono" style="margin:4px 0 0;font-size:18px">${fmt(d.price)}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+      <p class="muted" style="margin:0">${esc(d.desc)}</p>
+      <p style="margin:0;font-size:13px;display:flex;gap:8px;align-items:center"><span class="veg ${d.veg ? "" : "non"}"></span>${d.veg ? "Vegetarian" : "Non-vegetarian"}</p>
+      <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button data-act="q-" aria-label="Fewer">−</button><span>${ui.qty}</span><button data-act="q+" aria-label="More">+</button></div>
+      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}">Add ${ui.qty} · ${fmt(d.price * ui.qty)}</button></div></div>`;
+  }
+  if (s === "basket") {
+    const ids = Object.keys(basket).filter(id => basket[id] > 0); const total = ids.reduce((t, id) => t + DISH[id].price * basket[id], 0);
+    return `<div class="sheet-b"><div class="xrow"><div><h2>Your picks</h2><p class="muted" style="margin:2px 0 0;font-size:14px">They join table ${view.table}'s shared order and bill.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+      <ul class="lines">${ids.map(id => `<li><img src="${photo(DISH[id])}" alt=""><span class="n">${esc(DISH[id].name)}<small class="mono">${fmt(DISH[id].price * basket[id])}</small></span><div class="stepper sm"><button data-act="b-" data-id="${id}" aria-label="Fewer">−</button><span>${basket[id]}</span><button data-act="b+" data-id="${id}" aria-label="More">+</button></div></li>`).join("")}</ul>
+      <div class="sum"><div class="tot"><span>Subtotal</span><span>${fmt(total)}</span></div></div>
+      <label class="namefield" for="myname2">Name for the order <input id="myname2" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
+      <button class="btn block" data-act="send-order" ${ids.length ? "" : "disabled"}>Send order</button>
+      <p class="note">Your waiter confirms it with one tap, then the kitchen starts cooking.</p></div>`;
+  }
+  if (s === "pay") {
+    const ts = tableState(view.table), sub = ts.total, tax = sub * R.tax, tip = Math.round(sub * ui.tip / 100), total = sub + tax + tip;
+    const busy = ui.paying;
+    return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${view.table} bill</h2><p class="muted" style="margin:2px 0 0;font-size:14px">One bill for everyone at the table.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+      <ul class="lines">${ts.os.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}</span><span class="p">${fmt(DISH[o.dish].price * o.qty)}</span></li>`).join("")}</ul>
+      <div class="sec-h">Tip for the team</div>
+      <div class="tips">${[0, 5, 10, 15].map(p => `<button class="${ui.tip === p ? "on" : ""}" data-act="tip" data-p="${p}">${p ? p + "%" : "No tip"}</button>`).join("")}</div>
+      <div class="sum"><div><span>Subtotal</span><span>${fmt(sub)}</span></div><div><span>GST 5%</span><span>${fmt(tax)}</span></div><div><span>Tip</span><span>${fmt(tip)}</span></div><div class="tot"><span>Total</span><span>${fmt(total)}</span></div></div>
+      <div class="methods">
+        <button class="btn block pay-apple" data-act="pay" data-m="Apple Pay" ${busy ? "disabled" : ""}>${busy === "Apple Pay" ? "Processing…" : "Pay with Apple Pay"}</button>
+        <button class="btn block pay-google" data-act="pay" data-m="Google Pay" ${busy ? "disabled" : ""}>${busy === "Google Pay" ? "Processing…" : "Pay with Google Pay"}</button>
+        <button class="btn block" data-act="pay" data-m="card" ${busy ? "disabled" : ""}>${busy === "card" ? "Processing…" : "Pay by card"}</button>
+      </div>
+      <p class="note">Preview: no payment is taken. A real site connects these buttons to a payment provider.</p></div>`;
+  }
+  if (s === "paid") {
+    const t = tdoc(view.table);
+    return `<div class="sheet-b" style="text-align:center"><div class="bigcheck">✓</div><h2>Paid ${fmt(t.total || 0)}</h2><p class="muted" style="margin:0">with ${esc(t.method || "card")}. Thanks for dining at ${esc(R.name)}.</p><button class="btn block" data-act="close">Done</button></div>`;
+  }
+  if (s.startsWith("table:")) return staffTableSheet(+s.slice(6));
+  return "";
+}
+
+/* ---------- Staff ---------- */
+function staffHTML() {
+  const all = Array.from({ length: R.tables }, (_, i) => ({ n: i + 1, ...tableState(i + 1) }));
+  const attention = all.filter(t => ["call", "bill", "new"].includes(t.st)).length;
+  const cooking = all.reduce((s, t) => s + qtyOf(t.os, "cooking"), 0);
+  const open = all.filter(t => t.st !== "empty").length;
+  const revenue = all.reduce((s, t) => s + t.total, 0);
+  let body = "";
+  if (ui.stab === "floor") {
+    body = `<div class="kpis">
+      <div class="kpi ${attention ? "hot" : ""}"><div class="k">Need you</div><div class="v">${attention}</div></div>
+      <div class="kpi"><div class="k">Items cooking</div><div class="v">${cooking}</div></div>
+      <div class="kpi"><div class="k">Tables seated</div><div class="v">${open}/${R.tables}</div></div>
+      <div class="kpi"><div class="k">Open bills</div><div class="v">${fmt(revenue)}</div></div></div>
+      <div class="floor">${all.map(t => {
+        const nNew = qtyOf(t.os, "new"), nCook = qtyOf(t.os, "cooking");
+        const pills = [t.t.waiter ? `<span class="pill alert">Waiter · ${ago(t.t.waiter)}</span>` : "", t.t.bill && !t.t.paid ? `<span class="pill new">Bill requested</span>` : "", nNew ? `<span class="pill new">${nNew} new</span>` : "", nCook ? `<span class="pill cook">${nCook} cooking</span>` : "", t.t.paid ? `<span class="pill ok">Paid · ${esc(t.t.method || "")}</span>` : ""].join("");
+        return `<button class="tcard s-${t.st}" data-act="open-table" data-n="${t.n}"><div class="top"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></div>
+          <div class="pills">${pills}</div>
+          <div class="foot">${t.st === "empty" ? "<span>Ready for guests</span>" : `<span>${t.guests} ${t.guests === 1 ? "guest" : "guests"} · ${ago(t.since)}</span><b>${fmt(t.total)}</b>`}</div></button>`;
+      }).join("")}</div>
+      <div class="legend"><span><i style="background:var(--alert)"></i>Calling waiter</span><span><i style="background:var(--pop)"></i>New order or bill</span><span><i style="background:var(--cook)"></i>Cooking</span><span><i style="background:var(--ok)"></i>Dining</span><span><i style="background:var(--accent)"></i>Paid</span></div>`;
+  } else if (ui.stab === "kitchen") {
+    const tickets = all.filter(t => qtyOf(t.os, "cooking"));
+    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const os = t.os.filter(o => o.state === "cooking"); return `<div class="ticket"><h3>Table ${t.n}<small>${ago(os[0].at)}</small></h3><ul class="lines">${os.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)}</small></span><button class="btn sm" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul></div>`; }).join("")}</div>` : `<p class="empty">The kitchen is clear. Confirmed orders show up here.</p>`;
+  } else {
+    body = `<p class="muted" style="margin:0">Replace the illustrations with real photos of your dishes. Guests see them right away.</p>
+      ${assets ? "" : `<p class="note" style="text-align:left">Photo uploads need editor access to this page.</p>`}
+      <div class="photos">${MENU.map(d => `<div class="item"><img class="photo" src="${photo(d)}" alt="${esc(d.name)}"><div><span>${esc(d.name)}</span>${assets ? `<label class="btn ghost sm" for="up-${d.id}">${S.photos[d.id] ? "Replace" : "Upload"}<input type="file" id="up-${d.id}" accept="image/*" data-upload="${d.id}"></label>` : ""}</div></div>`).join("")}</div>`;
+  }
+  return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)} · Floor</h1>
+    <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="mono">${cooking}</span>` : ""}</button>${canEdit ? `<button class="${ui.stab === "photos" ? "on" : ""}" data-act="stab" data-tab="photos">Photos</button>` : ""}</div>
+    <a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
+    <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
+}
+function staffTableSheet(n) {
+  const ts = tableState(n), { os, t } = ts;
+  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(DISH[o.dish].name)}<small>${esc(o.name)} · ${ago(o.at)}</small></span>${btn ? btn(o) : `<span class="p">${fmt(DISH[o.dish].price * o.qty)}</span>`}</li>`).join("")}</ul>` : ""; };
+  const nNew = qtyOf(os, "new");
+  return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "guest" : "guests"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+    ${t.waiter ? `<div class="alertbox"><b>Called the waiter ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
+    ${t.bill && !t.paid ? `<div class="alertbox bill"><b>Asked for the bill · ${fmt(ts.total * (1 + R.tax))}</b><span class="muted" style="font-size:13px">They can pay from their phone</span></div>` : ""}
+    ${t.paid ? `<div class="alertbox paid"><div><b>Paid ${fmt(t.total || 0)}</b><div class="muted" style="font-size:13px">${esc(t.method || "")} · tip ${fmt(t.tip || 0)}</div></div></div>` : ""}
+    ${nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${nNew} ${nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
+    ${group("new", "New, not sent yet")}
+    ${group("cooking", "In the kitchen", o => `<button class="btn sm" data-act="served" data-id="${o.id}">Served</button>`)}
+    ${group("served", "Served")}
+    ${os.length ? `<div class="sum"><div class="tot"><span>Total with GST</span><span>${fmt(ts.total * (1 + R.tax))}</span></div></div>` : `<p class="empty">This table is free.</p>`}
+    ${os.length || t.waiter || t.bill ? `<button class="btn ${ui.clearArm === n ? "alert" : "ghost"} block" data-act="clear-table" data-n="${n}">${ui.clearArm === n ? "Tap again to clear table " + n : "Clear table for next guests"}</button>` : ""}
+  </div>`;
+}
+
+/* ================= Actions ================= */
+document.addEventListener("click", async e => {
+  if (e.target.closest("[data-cell]")) return;
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act, id = el.dataset.id, n = +el.dataset.n;
+  if (act === "close-sheet" && e.target !== el) return;
+  switch (act) {
+    case "close": case "close-sheet": ui.sheet = null; ui.clearArm = 0; render(); break;
+    case "gtab": stopGame(); ui.gtab = el.dataset.tab; render(); scrollTo(0, 0); break;
+    case "jump": { const t = document.getElementById("cat-" + el.dataset.cat); t && t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); document.querySelectorAll(".cats button").forEach(b => b.classList.toggle("on", b === el)); break; }
+    case "dish": ui.qty = 1; ui.sheet = "dish:" + id; render(); break;
+    case "quick-add": basket[id] = (basket[id] || 0) + 1; saveBasket(); render(); toast(DISH[id].name + " added"); break;
+    case "q-": ui.qty = Math.max(1, ui.qty - 1); render(); break;
+    case "q+": ui.qty = Math.min(20, ui.qty + 1); render(); break;
+    case "add-dish": basket[id] = (basket[id] || 0) + ui.qty; saveBasket(); ui.sheet = null; render(); toast(`${ui.qty} × ${DISH[id].name} added`); break;
+    case "open-basket": ui.sheet = "basket"; render(); break;
+    case "b-": basket[id]--; if (basket[id] <= 0) delete basket[id]; saveBasket(); if (!Object.keys(basket).length) ui.sheet = null; render(); break;
+    case "b+": basket[id]++; saveBasket(); render(); break;
+    case "send-order": {
+      el.disabled = true; let ok = true;
+      for (const [dish, qty] of Object.entries(basket)) { const oid = "o" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); ok = await put("orders", oid, { table: view.table, dish, qty, state: "new", at: Date.now(), by: me.id, name: me.name }) && ok; if (!ok) break; }
+      if (ok) { basket = {}; saveBasket(); ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); toast("Order sent. Your waiter will confirm it."); } else el.disabled = false;
+      break;
+    }
+    case "call-waiter": { const t = tdoc(view.table); if (await put("tables", "t" + view.table, { ...t, table: view.table, waiter: Date.now() })) toast("Your waiter has been called to table " + view.table); break; }
+    case "cancel-waiter": { const t = tdoc(view.table); await put("tables", "t" + view.table, { ...t, waiter: 0 }); break; }
+    case "ask-bill": { const t = tdoc(view.table); if (!t.bill) await put("tables", "t" + view.table, { ...t, table: view.table, bill: Date.now() }); ui.sheet = "pay"; render(); break; }
+    case "tip": ui.tip = +el.dataset.p; render(); break;
+    case "pay": {
+      const m = el.dataset.m; ui.paying = m; render();
+      await new Promise(r => setTimeout(r, 1300));
+      const ts = tableState(view.table), sub = ts.total, total = Math.round(sub * (1 + R.tax) + sub * ui.tip / 100);
+      const ok = await put("tables", "t" + view.table, { ...ts.t, table: view.table, paid: Date.now(), method: m === "card" ? "card" : m, tip: Math.round(sub * ui.tip / 100), total, waiter: 0 });
+      ui.paying = null; ui.sheet = ok ? "paid" : "pay"; render(); break;
+    }
+    case "copy-wifi": try { await navigator.clipboard.writeText(R.wifi.pass); toast("Wi-Fi password copied"); } catch { const r = document.createRange(); const v = document.getElementById("wifi-pass") || el.parentElement.querySelector(".v:last-of-type"); if (v) { r.selectNodeContents(v); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast("Password selected. Copy it from here."); } break;
+    case "start-game": startGame(); break;
+    case "lb": ui.lbMode = el.dataset.mode; render(); break;
+    case "stab": ui.stab = el.dataset.tab; render(); break;
+    case "open-table": ui.clearArm = 0; ui.sheet = "table:" + n; render(); break;
+    case "ack-waiter": { const t = tdoc(n); await put("tables", "t" + n, { ...t, waiter: 0 }); toast("Table " + n + " knows you're coming"); break; }
+    case "to-kitchen": { el.disabled = true; for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking" })) break; } toast("Table " + n + " sent to the kitchen"); break; }
+    case "served": { const o = S.orders[id]; if (o) await put("orders", id, { ...o, state: "served" }); break; }
+    case "clear-table": {
+      if (ui.clearArm !== n) { ui.clearArm = n; render(); break; }
+      ui.clearArm = 0; for (const o of ordersFor(n)) await del("orders", o.id); await del("tables", "t" + n); ui.sheet = null; render(); toast("Table " + n + " is ready for new guests"); break;
+    }
+  }
+});
+document.addEventListener("pointerdown", e => { const c = e.target.closest("[data-cell]"); if (c) { e.preventDefault(); hitCell(c); } });
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.id === "myname" || t.id === "myname2") { const v = t.value.trim().slice(0, 20); if (v) { me.name = v; LS.set("rt-name", v); } }
+  if (t.dataset.upload && assets && t.files[0]) {
+    const id = t.dataset.upload; toast("Uploading photo…");
+    try { const a = await assets.upload(t.files[0]); await put("photos", id, { asset: a.id, url: a.url }); toast("Photo updated for " + DISH[id].name); }
+    catch (err) { console.error(err); toast("That photo didn't upload. Try a JPG or PNG under 20 MB."); }
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && ui.sheet) { ui.sheet = null; render(); } });
+setInterval(() => { if (!game.running && !ui.sheet && !(document.activeElement && document.activeElement.tagName === "INPUT")) render(); }, 30000);
+
+/* ================= Boot ================= */
+route();
+(async () => {
+  const c = window.claude;
+  if (!c || !c.use) { startLocal(); return; }
+  const [d, user] = await Promise.all([c.use("db").catch(() => null), c.use("user").catch(() => null)]);
+  let canWrite = null;
+  if (user) { try { canWrite = await user.can("data.write"); } catch {} try { canEdit = !!(await user.canEdit()); } catch {} }
+  if (d && canWrite !== false) { db = d; startRemote(); } else startLocal();
+  if (canEdit) { assets = await c.use("assets").catch(() => null); render(); }
+})();
+})();
+</script>
