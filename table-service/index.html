@@ -635,8 +635,105 @@ img.tile { animation: none; }
 .kpi .v { font-family: var(--display); font-weight: 700; font-size: 24px; }
 
 @media (prefers-reduced-motion: reduce) { .pcard img.tile, .spin-hint { animation: none !important; } .dish { transition: none; } }
+
+/* ===== v6: more colour, motion and polish ===== */
+:root { --accent-2: #8b5cff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent-2: #b48cff; } }
+:root[data-theme="dark"] { --accent-2: #b48cff; }
+.c-starters { --cat: #12a66a; --catg: var(--t-starters); }
+.c-mains { --cat: #ff6a3d; --catg: var(--t-mains); }
+.c-desserts { --cat: #d63fa0; --catg: var(--t-desserts); }
+.c-drinks { --cat: #3b5bff; --catg: var(--t-drinks); }
+
+/* moving colour background behind guest and home screens */
+.aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none; }
+body[data-view="guest"] .aurora, body[data-view="home"] .aurora { display: block; }
+#app { position: relative; z-index: 1; }
+.aurora i { position: absolute; width: 75vmax; height: 75vmax; border-radius: 50%; filter: blur(70px); opacity: .6; animation: drift 22s ease-in-out infinite alternate; }
+.aurora i:nth-child(1) { background: #c6f7da; left: -30vmax; top: -25vmax; }
+.aurora i:nth-child(2) { background: #ffd0e6; right: -32vmax; top: 10vh; animation-delay: -7s; }
+.aurora i:nth-child(3) { background: #d3d8ff; left: -20vmax; bottom: -35vmax; animation-delay: -12s; }
+.aurora i:nth-child(4) { background: #fff1b8; right: -25vmax; bottom: -30vmax; animation-delay: -4s; opacity: .45; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .aurora i { opacity: .28; } :root:not([data-theme="light"]) .aurora i:nth-child(1) { background: #12c98a; } :root:not([data-theme="light"]) .aurora i:nth-child(2) { background: #ff2f8e; } :root:not([data-theme="light"]) .aurora i:nth-child(3) { background: #4b3bff; } :root:not([data-theme="light"]) .aurora i:nth-child(4) { background: #ffb020; opacity: .15; } }
+:root[data-theme="dark"] .aurora i { opacity: .28; } :root[data-theme="dark"] .aurora i:nth-child(1) { background: #12c98a; } :root[data-theme="dark"] .aurora i:nth-child(2) { background: #ff2f8e; } :root[data-theme="dark"] .aurora i:nth-child(3) { background: #4b3bff; } :root[data-theme="dark"] .aurora i:nth-child(4) { background: #ffb020; opacity: .15; }
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(8vmax, 6vmax) scale(1.15); } }
+.cats { background: transparent; }
+.cats::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.cats { position: sticky; isolation: isolate; }
+
+/* gradient primary buttons */
+.btn:not(.ghost):not(.pop):not(.alert):not(.pay-google):not(.pay-apple) { background: linear-gradient(120deg, var(--accent), var(--accent-2)); }
+.btn.pop { background: linear-gradient(120deg, #d4f53c, #9ff06a); color: #15112b; }
+
+/* section colours */
+.cats button { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); }
+.cats button .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cat); box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat) 25%, transparent); }
+.cats button.on, :root[data-theme="dark"] .cats button.on { background: var(--catg); color: #15112b; border-color: #15112b; box-shadow: 2px 2px 0 #15112b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cats button.on { background: var(--catg); color: #15112b; border-color: #15112b; } }
+.cats button.on .dot { background: #15112b; box-shadow: none; }
+.catname { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.catname::before { content: ""; width: 14px; height: 14px; border-radius: 5px; background: var(--catg); border: 2px solid var(--ink); transform: rotate(12deg); align-self: center; }
+.catname small { font: 600 13px var(--body); color: var(--muted); letter-spacing: 0; }
+.dish { background: linear-gradient(180deg, var(--surface) 58%, color-mix(in srgb, var(--cat) 13%, var(--surface))); }
+.dish .meta .price { color: var(--fg); }
+
+/* loading shimmer for 3D */
+.tile { --tc: var(--t-mains); background: var(--tc); }
+.tile.c-starters { --tc: var(--t-starters); } .tile.c-mains { --tc: var(--t-mains); } .tile.c-desserts { --tc: var(--t-desserts); } .tile.c-drinks { --tc: var(--t-drinks); }
+img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .6) 50%, transparent 65%) 150% 0 / 250% 100% no-repeat, var(--tc); animation: sheen 1.3s linear infinite; }
+@keyframes sheen { to { background-position: -50% 0, 0 0; } }
+
+/* coloured status strip */
+.status { border: 1.5px solid #15112b; box-shadow: 3px 3px 0 #15112b; color: #15112b; background: linear-gradient(100deg, #e9e5ff, #fbe3ff); }
+.status.new { background: linear-gradient(100deg, #e9fbb0, #c9f7d6); border-color: #15112b; }
+.status.cook { background: linear-gradient(100deg, #ffe0bf, #ffd1e6); border-color: #15112b; }
+.status.ok { background: linear-gradient(100deg, #c9f7e0, #d6eaff); border-color: #15112b; }
+.status .st-l { color: #4a4460; }
+.status .pulse { box-shadow: 0 0 0 2px #15112b; }
+
+/* order & bill */
+.tracker div { border: 1.5px solid transparent; }
+.tracker .on.new { background: linear-gradient(140deg, #e9fbb0, #d4f53c); border-color: #15112b; color: #15112b; box-shadow: 2px 2px 0 #15112b; }
+.tracker .on.cook { background: linear-gradient(140deg, #ffe0bf, #ffb36b); border-color: #15112b; color: #15112b; box-shadow: 2px 2px 0 #15112b; }
+.tracker .on.ok { background: linear-gradient(140deg, #d3f7e4, #8ee3b8); border-color: #15112b; color: #15112b; box-shadow: 2px 2px 0 #15112b; }
+.tracker .on b { color: #15112b; }
+.tracker b { font-family: var(--display); font-size: 22px; }
+.sum .tot { font-family: var(--display); font-size: 19px; }
+.namefield input { border-radius: 999px; padding-inline: 16px; }
+.lines img { border-radius: 14px; }
+.pill.new { background: #e9fbb0; color: #15112b; } .pill.cook { background: #ffe0bf; color: #9a4a00; } .pill.ok { background: #d3f7e4; color: #0b7a4b; }
+.wifi { background: linear-gradient(120deg, color-mix(in srgb, #d3d8ff 45%, var(--surface)), var(--surface)); }
+
+/* welcome sheet: same colourful hero as the table header */
+.welcome-top { color: #15112b; background: radial-gradient(120% 140% at 0% 0%, #d4f53c 0 22%, transparent 48%), radial-gradient(90% 120% at 100% 0%, #ff9ac9 0 24%, transparent 55%), radial-gradient(120% 120% at 70% 130%, #8f8bff 0 30%, transparent 62%), #ece9ff; }
+.welcome-top .eyebrow { color: #15112b; opacity: .7; }
+.howto li svg { width: 34px; height: 34px; padding: 7px; border-radius: 12px; border: 1.5px solid #15112b; color: #15112b; }
+.howto li:nth-child(1) svg { background: #d4f53c; } .howto li:nth-child(2) svg { background: #ffc2dd; } .howto li:nth-child(3) svg { background: #c9d0ff; }
+.howto li { align-items: center; }
+
+/* game: candy board */
+.board { background: linear-gradient(145deg, #6b4bff, #ff5fa2); box-shadow: inset 0 0 0 2px #15112b; }
+.basket { background: repeating-radial-gradient(circle, #f2c27a 0 6px, #e0a85a 6px 9px); box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18), inset 0 0 0 6px #ffd23f, 0 0 0 2px #15112b; }
+.board-cover { background: color-mix(in srgb, #15112b 62%, transparent); border-radius: 26px; }
+.board-cover h3 { color: #d4f53c; }
+.hud span { font-family: var(--display); }
+.lb li.me { background: linear-gradient(90deg, #e9fbb0, transparent); border-radius: 12px; padding-inline: 8px; color: #15112b; }
+
+/* staff floor: tinted cards so state reads at a glance */
+.tcard.s-call { background: color-mix(in srgb, var(--alert) 12%, var(--surface)); }
+.tcard.s-new, .tcard.s-bill, .tcard.s-confirm { background: color-mix(in srgb, #d4f53c 18%, var(--surface)); }
+.tcard.s-cooking { background: color-mix(in srgb, var(--cook) 12%, var(--surface)); }
+.tcard.s-seated { background: color-mix(in srgb, var(--ok) 10%, var(--surface)); }
+.tcard.s-paid { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+
+/* motion bits */
+.flyer { position: fixed; z-index: 40; pointer-events: none; border-radius: 18px; object-fit: cover; box-shadow: 0 12px 30px rgba(21, 17, 43, .3); }
+.confetto { position: fixed; z-index: 50; width: 9px; height: 9px; border-radius: 2px; pointer-events: none; }
+.dish:active { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { .aurora i, img.tile[src^="data:image/gif"] { animation: none !important; } }
 </style>
 
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div id="app"></div>
 <div id="sheet"></div>
 <div id="toast" class="toast" hidden></div>
@@ -881,7 +978,9 @@ function add(g, geo, m, p, s, r) {
 const lathe = (pts, seg = 64) => new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), seg);
 const curve = pts => new THREE.CatmullRomCurve3(pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)));
 function disc(R, r) { const a = R() * Math.PI * 2, d = Math.sqrt(R()) * r; return [Math.cos(a) * d, Math.sin(a) * d]; }
-function plate3(g, r = 1, color = "#f7f5f0") { add(g, lathe([[0, .055], [.68 * r, .05], [.88 * r, .09], [r, .13], [1.04 * r, .125], [.95 * r, .06], [.6 * r, 0], [0, 0]]), mat(color, { r: .22, ds: true })); }
+let PLATE = "#f7f5f0";
+const PLATES = { starters: "#ff9cc8", mains: "#a99cff", desserts: "#7fdcae", drinks: "#c8ec2a" };
+function plate3(g, r = 1, color = PLATE) { add(g, lathe([[0, .055], [.68 * r, .05], [.88 * r, .09], [r, .13], [1.04 * r, .125], [.95 * r, .06], [.6 * r, 0], [0, 0]]), mat(color, { r: .22, ds: true })); }
 function bowl3(g, r, color, x = 0, z = 0) { add(g, lathe([[0, 0], [.5 * r, 0], [.9 * r, .3 * r], [r, .55 * r], [.95 * r, .56 * r], [.85 * r, .32 * r], [.45 * r, .08], [0, .08]]), mat(color, { r: .25, ds: true }), [x, 0, z]); }
 function leaf3(g, R, x, y, z, len, color) { add(g, g3().low, mat(color, { r: .55 }), [x, y, z], [len, .025, len * .42], [(R() - .5) * .4, R() * 6.28, (R() - .5) * .3]); }
 function tube(g, pts, rad, color, o) { add(g, new THREE.TubeGeometry(curve(pts), 48, rad, 8, false), mat(color, o || { r: .5 })); }
@@ -981,13 +1080,13 @@ const BUILD = {
     leaf3(g, R, .1, .45, .1, .07, "#3f8f35");
   },
   gelato(g, R) {
-    plate3(g, 1.05, "#efebe4"); bowl3(g, .82, "#2f3b44");
+    plate3(g, 1.05); bowl3(g, .82, "#2f3b44");
     [["#b8cf7c", -.2, -.12], ["#f4a6ae", .2, -.12], ["#f8efd6", 0, .2]].forEach(([c, x, z]) => add(g, g3().sphere, mat(c, { r: .75 }), [x, .42, z], [.27, .23, .27]));
     add(g, g3().box, mat("#e0b56d", { r: .7 }), [.32, .62, .25], [.08, .48, .17], [.2, .4, -.5]);
   },
   drink(g, R, d) {
     const G = g3();
-    add(g, G.cyl, mat("#2b2622", { r: .8 }), [0, .02, 0], [.75, .04, .75]);
+    add(g, G.cyl, mat(PLATE, { r: .6 }), [0, .02, 0], [.75, .04, .75]);
     add(g, G.cyl, mat(d.color ? d.color[1] : "#b9da6a", { r: .2, t: true, o: .88 }), [0, .55, 0], [.37, .98, .37]);
     add(g, G.cyl, mat(d.color ? d.color[0] : "#e9f5c8", { r: .2, t: true, o: .9 }), [0, 1.045, 0], [.37, .01, .37]);
     add(g, new THREE.CylinderGeometry(.42, .38, 1.25, 48, 1, true), mat("#ffffff", { r: .05, t: true, o: .22, ds: true }), [0, .66, 0]);
@@ -1010,6 +1109,7 @@ const BUILD = {
 };
 function buildDish(d) {
   const g = new THREE.Group(), R = rng(hash(d.id + d.kind));
+  PLATE = PLATES[d.cat] || "#f7f5f0";
   (BUILD[d.kind] || BUILD.curry)(g, R, d);
   return g;
 }
@@ -1458,7 +1558,7 @@ function detect() {
     }
     prevOrders = cur;
     const mine = {}; paymentsFor(view.table).filter(p => p.by === me.id).forEach(p => mine[p.id] = p);
-    if (prevPays) Object.entries(prevPays).forEach(([pid, p]) => { if (p.status !== "pending") return; const now = mine[pid]; if (now && now.status !== "pending") toast(`${fmt(p.amount + (p.tip || 0))} received. Thank you!`); else if (!now) toast(`Staff couldn't find your ${fmt(p.amount + (p.tip || 0))} payment. Please check with your waiter.`); });
+    if (prevPays) Object.entries(prevPays).forEach(([pid, p]) => { if (p.status !== "pending") return; const now = mine[pid]; if (now && now.status !== "pending") toast(`${fmt(p.amount + (p.tip || 0))} received. Thank you!`), confetti(); else if (!now) toast(`Staff couldn't find your ${fmt(p.amount + (p.tip || 0))} payment. Please check with your waiter.`); });
     prevPays = mine;
     const w = tdoc(view.table).waiter || 0;
     if (prevWaiter && !w && !ui.selfCancel) toast("Your waiter saw your call and is coming over");
@@ -1498,6 +1598,7 @@ function chime() {
 /* ================= Render ================= */
 let lastSheet = null, spy = null;
 function render() {
+  document.body.dataset.view = view.name;
   if (game.running || game.counting) return;
   const a = document.activeElement, aid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
   const old = document.querySelector(".sheet"), keep = old && ui.sheet === lastSheet ? old.scrollTop : 0;
@@ -1617,7 +1718,7 @@ function popularDishes() {
 }
 function dishCard(d) {
   const q = inBasket(d.id), off = soldOut(d), deal = !off && dealFor(d.cat);
-  return `<article class="dish${off ? " soldout" : ""}">
+  return `<article class="dish c-${d.cat}${off ? " soldout" : ""}">
     <button class="dish-open" data-act="dish" data-id="${d.id}" aria-label="${esc(d.name)}, ${fmt(d.price)}">
       <img class="tile c-${d.cat}" src="${photo(d)}" alt="" loading="lazy">
       <span class="meta">
@@ -1643,8 +1744,8 @@ function guestMenu() {
   }
   const pop = popularDishes();
   const carousel = `<section class="pop"><h2 class="sec">Popular right now</h2><div class="carousel">${pop.map(({ d, count }) => `<button class="pcard" data-act="dish" data-id="${d.id}"><img class="tile c-${d.cat}" src="${photo(d)}" alt=""><span class="pc-b"><span class="pc-n">${esc(d.name)}</span><span class="pc-m"><span class="mono">${fmt(d.price)}</span>${count ? ` · ordered ${count}× today` : d.tag ? ` · ${esc(d.tag)}` : ""}</span></span></button>`).join("")}</div></section>`;
-  const cats = CATS.filter(c => MENU.some(d => d.cat === c.id && match(d))).map((c, i) => `<button class="${i === 0 ? "on" : ""}" data-act="jump" data-cat="${c.id}">${c.label}</button>`).join("");
-  const body = CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id && match(d)); return ds.length ? `<h2 class="catname" id="cat-${c.id}" data-cat="${c.id}">${c.label}</h2>` + ds.map(dishCard).join("") : ""; }).join("");
+  const cats = CATS.filter(c => MENU.some(d => d.cat === c.id && match(d))).map((c, i) => `<button class="c-${c.id}${i === 0 ? " on" : ""}" data-act="jump" data-cat="${c.id}"><i class="dot"></i>${c.label}</button>`).join("");
+  const body = CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id && match(d)); return ds.length ? `<h2 class="catname c-${c.id}" id="cat-${c.id}" data-cat="${c.id}">${c.label}<small>${ds.length} ${ds.length === 1 ? "dish" : "dishes"}</small></h2>` + ds.map(dishCard).join("") : ""; }).join("");
   return `${tools}${offersStrip()}${ui.vegOnly ? "" : carousel}
     <nav class="cats" aria-label="Menu sections">${cats}</nav>
     <div class="dishes">${body}</div>
@@ -1755,7 +1856,7 @@ async function endGame() {
   const prev = S.scores[me.id];
   game.newBest = game.score > game.best;
   if (game.newBest) { game.best = game.score; LS.set("rt-best", game.best); }
-  render();
+  render(); if (game.newBest) confetti();
   const best = Math.max(game.score, prev && prev.table === view.table ? prev.best : 0);
   if (!prev || best !== prev.best || prev.table !== view.table || prev.name !== me.name) await put("scores", me.id, { name: me.name, table: view.table, best, at: Date.now() });
 }
@@ -2158,7 +2259,7 @@ document.addEventListener("click", async e => {
     case "veg": ui.vegOnly = !ui.vegOnly; render(); break;
     case "clear-q": ui.q = ""; render(); break;
     case "dish": ui.qty = 1; ui.note = ""; ui.sheet = "dish:" + id; render(); break;
-    case "quick-add": if (soldOut(DISH[id])) break; addToBasket(id); render(); toast(DISH[id].name + " added"); break;
+    case "quick-add": { if (soldOut(DISH[id])) break; const im = el.closest(".dish") && el.closest(".dish").querySelector("img.tile"), fr = im && im.getBoundingClientRect(), fs = im && im.src; addToBasket(id); render(); fly(fr, fs); buzz(10); toast(DISH[id].name + " added"); break; }
     case "pair-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
     case "q-": ui.qty = Math.max(1, ui.qty - 1); render(); break;
     case "q+": ui.qty = Math.min(20, ui.qty + 1); render(); break;
@@ -2174,7 +2275,7 @@ document.addEventListener("click", async e => {
       if (gone.length) toast(listText(gone.map(l => DISH[l.id].name)) + " just sold out and " + (gone.length > 1 ? "were" : "was") + " removed");
       if (!basketLines().length) { ui.sheet = null; render(); break; }
       for (const l of basketLines()) { const dd = DISH[l.id]; ok = await put("orders", newId("o"), { table: view.table, dish: l.id, dname: dd.name, price: dd.price, cat: dd.cat, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
-      if (ok) { ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); toast("Order sent. Your waiter will confirm it."); } else { el.disabled = false; render(); }
+      if (ok) { ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); confetti(); buzz([10, 40, 10]); toast("Order sent. Your waiter will confirm it."); } else { el.disabled = false; render(); }
       break;
     }
     case "cancel-waiter": { const t = tdoc(view.table); ui.selfCancel = true; await put("tables", "t" + view.table, { ...t, waiter: 0 }); toast("Waiter call cancelled"); break; }
@@ -2187,7 +2288,7 @@ document.addEventListener("click", async e => {
       const m = el.dataset.m, amount = +el.dataset.amt, tip = +el.dataset.tip; ui.paying = m; render();
       await new Promise(r => setTimeout(r, 1300));
       const ok = await put("payments", newId("p"), { table: view.table, amount, tip, method: m, status: "confirmed", by: me.id, name: me.name, at: Date.now() });
-      ui.paying = null; if (ok) { ui.lastPay = { amount, tip, method: m }; ui.sheet = "paid"; } render(); break;
+      ui.paying = null; if (ok) { ui.lastPay = { amount, tip, method: m }; ui.sheet = "paid"; } render(); if (ok) confetti(); break;
     }
     case "copy-wifi": try { await navigator.clipboard.writeText(R.wifi.pass); toast("Wi-Fi password copied"); } catch { const v = el.parentElement.querySelector(".wifi-pass"); if (v) { const r = document.createRange(); r.selectNodeContents(v); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } toast("Password selected. Copy it from here."); } break;
     case "start-game": startGame(); break;
@@ -2243,6 +2344,27 @@ document.addEventListener("pointermove", e => {
   const b = c.getBoundingClientRect(), x = (e.clientX - b.left) / b.width - .5, y = (e.clientY - b.top) / b.height - .5;
   c.style.transform = `perspective(800px) rotateX(${(-y * 8).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateY(-4px)`; tiltEl = c;
 });
+const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function buzz(p) { if (navigator.vibrate) try { navigator.vibrate(p); } catch {} }
+function fly(from, src) {
+  if (!from || !src || calm()) return;
+  const target = document.querySelector(".basketbar .bb-c") || document.querySelector('.nav [data-tab="table"]'); if (!target) return;
+  const to = target.getBoundingClientRect(), img = document.createElement("img"); img.src = src; img.className = "flyer"; img.alt = "";
+  Object.assign(img.style, { left: from.left + "px", top: from.top + "px", width: from.width + "px", height: from.height + "px" }); document.body.appendChild(img);
+  const dx = to.left + to.width / 2 - (from.left + from.width / 2), dy = to.top + to.height / 2 - (from.top + from.height / 2);
+  img.animate([{ transform: "translate(0,0) scale(1) rotate(0deg)", opacity: 1 }, { transform: `translate(${dx * .5}px, ${dy * .35 - 60}px) scale(.55) rotate(-12deg)`, opacity: 1, offset: .45 }, { transform: `translate(${dx}px, ${dy}px) scale(.1) rotate(20deg)`, opacity: .4 }], { duration: 700, easing: "cubic-bezier(.45,0,.3,1)" }).onfinish = () => { img.remove(); const bb = document.querySelector(".basketbar"); if (bb) { bb.classList.remove("bump"); void bb.offsetWidth; bb.classList.add("bump"); } };
+}
+function confetti(n = 70) {
+  if (calm()) return;
+  const colors = ["#d4f53c", "#ff5fa2", "#3b3bff", "#ffb03b", "#3ddc97", "#8b5cff"], cx = innerWidth / 2, cy = innerHeight * .38;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement("i"); p.className = "confetto"; p.style.background = colors[i % colors.length];
+    p.style.left = cx + "px"; p.style.top = cy + "px"; if (i % 3 === 0) p.style.borderRadius = "50%"; if (i % 4 === 0) { p.style.width = "6px"; p.style.height = "14px"; }
+    document.body.appendChild(p);
+    const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 240, dx = Math.cos(a) * v, dy = Math.sin(a) * v - 180;
+    p.animate([{ transform: "translate(0,0) rotate(0deg)", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 540}deg)`, opacity: 1, offset: .55 }, { transform: `translate(${dx * 1.15}px, ${dy + 460}px) rotate(${Math.random() * 1080}deg)`, opacity: 0 }], { duration: 1300 + Math.random() * 700, easing: "cubic-bezier(.2,.65,.4,1)" }).onfinish = () => p.remove();
+  }
+}
 /* ================= Boot ================= */
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { for (const k in TENT) delete TENT[k]; if (view.name === "admin") render(); });
 addEventListener("load", () => { if (view.name === "admin") render(); });
