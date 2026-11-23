@@ -772,7 +772,7 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 
 /* ===== v8: staff and admin on phones ===== */
 @media (max-width: 640px) {
-  .shead-in { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 8px; padding-block: 10px; }
+  .shead-in { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; align-items: center; gap: 8px; padding-block: 10px; }
   .shead h1 { font-size: 15px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .shead .stabs { grid-column: 1 / -1; grid-row: 2; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
   .shead .stabs button { padding: 8px 6px; font-size: 13px; }
@@ -817,6 +817,11 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 .btn.alert, .pill.alert { color: var(--alert-fg); }
 .bell.on { background: #d6175a; }
 .catname small { color: color-mix(in srgb, var(--fg) 82%, transparent); }
+
+/* ===== v11: named waiters ===== */
+.who { gap: 6px; }
+.avatar { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--pop); color: var(--pop-fg); font: 800 12px var(--display); }
+@media (max-width: 640px) { .who .lbl { display: none; } }
 </style>
 
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -1610,7 +1615,7 @@ const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + "
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const ui = { staffName: LS.get("rt-staffname", ""), opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
 const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
@@ -1651,7 +1656,7 @@ function detect() {
     if (prevPays) Object.entries(prevPays).forEach(([pid, p]) => { if (p.status !== "pending") return; const now = mine[pid]; if (now && now.status !== "pending") toast(`${fmt(p.amount + (p.tip || 0))} received. Thank you!`), confetti(); else if (!now) toast(`Staff couldn't find your ${fmt(p.amount + (p.tip || 0))} payment. Please check with your waiter.`); });
     prevPays = mine;
     const w = tdoc(view.table).waiter || 0;
-    if (prevWaiter && !w && !ui.selfCancel) toast("Your waiter saw your call and is coming over");
+    if (prevWaiter && !w && !ui.selfCancel) { const by = tdoc(view.table).ackBy; toast(by ? `${by} saw your call and is coming over` : "Your waiter saw your call and is coming over"); buzz([20, 60, 20]); }
     ui.selfCancel = false; prevWaiter = w;
   }
   if (view.name === "staff") {
@@ -1792,6 +1797,8 @@ function guestHTML() {
   <div class="dock"><div class="dock-in wrap">${dockHTML(ts)}</div></div>`;
 }
 function statusBanner(ts) {
+  const ack = ts.t.ackAt && !ts.t.waiter && Date.now() - ts.t.ackAt < 4 * 60000;
+  if (ack) return `<div class="status ok" role="status"><span class="pulse"></span><span class="st-t">${ts.t.ackBy ? esc(ts.t.ackBy) + " is" : "Your waiter is"} on the way to your table</span></div>`;
   if (!ts.os.length) return "";
   let text, cls = "";
   if (ts.paid && !ts.nNew && !ts.nCook) { text = "Bill paid. Thanks for dining with us."; cls = "ok"; }
@@ -2034,6 +2041,9 @@ function sheetHTML() {
   if (s.startsWith("table:")) return staffTableSheet(+s.slice(6));
   if (s === "ad-dish") return adminDishSheet();
   if (s === "call") return callSheet();
+  if (s === "who") return `<div class="sheet-b"><div class="xrow"><div><h2>Who's on shift?</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Guests see your first name when you answer their call.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+    <label class="field" for="staff-name">Your first name<input id="staff-name" maxlength="20" value="${esc(ui.staffName)}" placeholder="e.g. Ravi" autocomplete="given-name"></label>
+    <button class="btn block" data-act="who-save">Save</button><p class="note">Saved on this device only.</p></div>`;
   if (s === "upi") return upiSheet();
   if (s === "of-edit") return offerSheet();
   if (s === "csv") return `<div class="sheet-b"><div class="xrow"><div><h2>Sales export</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Select all, copy, and paste into Excel or Google Sheets.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div><textarea id="csv-text" class="csvbox" readonly rows="10">${esc(ui.csvText)}</textarea></div>`;
@@ -2095,6 +2105,7 @@ function staffHTML() {
   return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)}</h1>
     <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "orders" ? "on" : ""}" data-act="stab" data-tab="orders">Orders${all.reduce((s, t) => s + t.nNew, 0) ? ` <span class="sbadge n">${all.reduce((s, t) => s + t.nNew, 0)}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button></div>
     <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}" aria-label="${ui.sound ? "Sound alerts on" : "Sound alerts off"}">${ui.sound ? ICON.sound + '<span class="lbl">Sound on</span>' : ICON.mute + '<span class="lbl">Sound off</span>'}</button>
+    <button class="btn sm ghost who" data-act="who" aria-label="${ui.staffName ? "On shift: " + esc(ui.staffName) + ". Change name" : "Set your name"}">${ui.staffName ? `<i class="avatar">${esc(ui.staffName[0].toUpperCase())}</i><span class="lbl">${esc(ui.staffName)}</span>` : "Your name"}</button>
     ${adminAllowed() ? `<a href="#admin" class="btn sm ghost" style="text-decoration:none">Admin</a>` : ""}<a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
     <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
@@ -2102,6 +2113,7 @@ function staffTableSheet(n) {
   const ts = tableState(n), { os, t } = ts;
   const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${ago(o.at)}${reqText(o)}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
   return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "phone" : "phones"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
+    ${!t.waiter && t.ackAt && Date.now() - t.ackAt < 10 * 60000 ? `<p class="note" style="text-align:left;margin:0">${t.ackBy ? esc(t.ackBy) : "Someone"} answered the last call ${ago(t.ackAt)} ago.</p>` : ""}
     ${t.waiter ? `<div class="alertbox"><b>${esc(t.reason || "Called the waiter")} · ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
     ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
     ${group("new", "New, not sent yet")}
@@ -2141,7 +2153,7 @@ function bestOffer(os, sub, code) {
   });
   return best;
 }
-const offerWhen = of => [hasWindow(of) ? `${hh(of.from)}–${hh(of.to)}` : "", of.scope !== "all" ? ((CATS.find(c => c.id === of.scope) || {}).label || "") : "", of.minBill ? `bills over ${fmt(of.minBill)}` : "", of.code ? `use code ${of.code}` : ""].filter(Boolean).join(" · ");
+const offerWhen = of => [hasWindow(of) ? `${hh(of.from)}–${hh(of.to)}` : "", of.scope !== "all" ? ((CATS.find(c => c.id === of.scope) || {}).label || "") : "", of.minBill && !String(of.title).includes(fmt(of.minBill)) ? `bills over ${fmt(of.minBill)}` : "", of.code ? `use code ${of.code}` : ""].filter(Boolean).join(" · ");
 const liveOffers = () => OFFERS.filter(of => of.active && hourIn(of, Date.now()));
 const dealFor = cat => liveOffers().find(of => !of.code && !of.minBill && of.kind === "percent" && (of.scope === cat || of.scope === "all"));
 function offersStrip() {
@@ -2475,6 +2487,11 @@ document.addEventListener("click", e => {
   }
 });
 
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  if (el.dataset.act === "who") { ui.sheet = "who"; render(); }
+  if (el.dataset.act === "who-save") { const v = ($("#staff-name") && $("#staff-name").value.trim().slice(0, 20)) || ""; ui.staffName = v; LS.set("rt-staffname", v); ui.sheet = null; render(); toast(v ? `Hi ${v}! Guests will see your name.` : "Name cleared"); }
+});
 /* ================= Actions ================= */
 async function sendToKitchen(n) {
   for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking", cookAt: Date.now() })) return; }
@@ -2539,7 +2556,7 @@ document.addEventListener("click", async e => {
       render(); break;
     }
     case "open-table": ui.clearArm = 0; ui.sheet = "table:" + n; render(); break;
-    case "ack-waiter": { const t = tdoc(n); if (await put("tables", "t" + n, { ...t, waiter: 0, reason: "" })) toast("Table " + n + " knows you're coming"); break; }
+    case "ack-waiter": { const t = tdoc(n); if (await put("tables", "t" + n, { ...t, waiter: 0, reason: "", ackBy: ui.staffName || "", ackAt: Date.now() })) toast("Table " + n + " knows " + (ui.staffName ? ui.staffName + " is" : "you're") + " coming"); break; }
     case "to-kitchen": el.disabled = true; await sendToKitchen(n); break;
     case "served": { const o = S.orders[id]; if (o) await put("orders", id, { ...o, state: "served" }); break; }
     case "all-served": { for (const o of ordersFor(n).filter(o => o.state === "cooking")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "served" })) break; } toast("Table " + n + " served"); break; }
