@@ -769,6 +769,29 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 .fb { margin: 0; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); font-size: 14px; display: grid; gap: 2px; }
 .fb-s { color: #ff9f1a; letter-spacing: 1px; font-size: 13px; }
 .fb small { color: var(--muted); font-size: 12px; }
+
+/* ===== v8: staff and admin on phones ===== */
+@media (max-width: 640px) {
+  .shead-in { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 8px; padding-block: 10px; }
+  .shead h1 { font-size: 15px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shead .stabs { grid-column: 1 / -1; grid-row: 2; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  .shead .stabs button { padding: 8px 6px; font-size: 13px; }
+  .shead .btn.sm { min-height: 34px; padding: 0 10px; font-size: 13px; }
+  .soundbtn .lbl { display: none; }
+  .sbody { padding-block: 12px 32px; gap: 12px; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .kpi { padding: 10px 12px; } .kpi .k { font-size: 11px; } .kpi .v { font-size: 20px; }
+  .floor { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .tcard { min-height: 118px; padding: 12px; gap: 8px; } .tcard .num { font-size: 22px; } .tcard .state { font-size: 11px; text-align: right; }
+  .tcard .foot { font-size: 11px; flex-wrap: wrap; gap: 2px 6px; }
+  .tcard .qa { width: 100%; }
+  .queue li { flex-wrap: wrap; } .queue .qb { margin-left: auto; }
+  .mlist li { gap: 8px 10px; } .mlist .n { min-width: calc(100% - 70px); }
+  .mlist li > .mono { margin-left: 62px; }
+  .feed li .qx { min-width: calc(100% - 140px); }
+}
+.mlist .n small { flex-wrap: wrap; }
+.btn { white-space: nowrap; }
 </style>
 
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -1375,7 +1398,7 @@ function adminHTML() {
   } else if (ui.atab === "menu") {
     body = `<div class="xrow"><div><h2 style="font-size:22px">Menu</h2><p class="muted" style="margin:2px 0 0">${MENU.length} dishes. Changes show on every table straight away.</p></div><button class="btn" data-act="ad-new">Add dish</button></div>
       ${CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id); return `<section class="panel"><div class="xrow"><h2>${c.label}</h2><span class="muted" style="font-size:13px">${ds.filter(d => !soldOut(d)).length} of ${ds.length} available</span></div>
-        ${ds.length ? `<ul class="mlist">${ds.map(d => `<li class="${soldOut(d) ? "off" : ""}"><img src="${photo(d)}" alt=""><span class="n"><b>${esc(d.name)}</b><small><span class="veg ${d.veg ? "" : "non"}"></span>${d.tag ? esc(d.tag) : d.veg ? "Vegetarian" : "Non-vegetarian"}</small></span><span class="mono">${fmt(d.price)}</span><button class="avail ${soldOut(d) ? "" : "on"}" data-act="ad-toggle" data-id="${d.id}" aria-pressed="${!soldOut(d)}"><i></i>${soldOut(d) ? "Sold out" : "Available"}</button><button class="btn sm ghost" data-act="ad-edit" data-id="${d.id}">Edit</button></li>`).join("")}</ul>` : `<p class="empty">No dishes here yet.</p>`}</section>`; }).join("")}
+        ${ds.length ? `<ul class="mlist">${ds.map(d => `<li class="${soldOut(d) ? "off" : ""}"><img class="tile c-${d.cat}" src="${photo(d)}" alt=""><span class="n"><b>${esc(d.name)}</b><small><span class="veg ${d.veg ? "" : "non"}"></span>${d.tag ? esc(d.tag) + " · " : ""}~${prepOf(d)} min${algOf(d).length ? " · " + algOf(d).map(a => ALG_LABEL[a]).join(", ") : ""}</small></span><span class="mono">${fmt(d.price)}</span><button class="avail ${soldOut(d) ? "" : "on"}" data-act="ad-toggle" data-id="${d.id}" aria-pressed="${!soldOut(d)}"><i></i>${soldOut(d) ? "Sold out" : "Available"}</button><button class="btn sm ghost" data-act="ad-edit" data-id="${d.id}">Edit</button></li>`).join("")}</ul>` : `<p class="empty">No dishes here yet.</p>`}</section>`; }).join("")}
       <p class="note" style="text-align:left">Prices on bills already sent to the kitchen don't change when you edit a price.</p>`;
   } else {
     const s = ui.sdraft || (ui.sdraft = { name: R.name, tagline: R.tagline, tables: R.tables, ssid: R.wifi.ssid, pass: R.wifi.pass, tax: +(R.tax * 100).toFixed(1), link: R.link === DEFAULT_LINK ? "" : R.link, upi: R.upi, err: "" });
@@ -2044,7 +2067,7 @@ function staffHTML() {
   }
   return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)}</h1>
     <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "orders" ? "on" : ""}" data-act="stab" data-tab="orders">Orders${all.reduce((s, t) => s + t.nNew, 0) ? ` <span class="sbadge n">${all.reduce((s, t) => s + t.nNew, 0)}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button></div>
-    <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}">${ui.sound ? ICON.sound + "Sound on" : ICON.mute + "Sound off"}</button>
+    <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}">${ui.sound ? ICON.sound + '<span class="lbl">Sound on</span>' : ICON.mute + '<span class="lbl">Sound off</span>'}</button>
     ${adminAllowed() ? `<a href="#admin" class="btn sm ghost" style="text-decoration:none">Admin</a>` : ""}<a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
     <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
