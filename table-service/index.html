@@ -792,6 +792,19 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 }
 .mlist .n small { flex-wrap: wrap; }
 .btn { white-space: nowrap; }
+
+/* ===== v9: dish choices ===== */
+.optg { display: grid; gap: 8px; }
+.opt-hint { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--muted); }
+.optchips { display: flex; flex-wrap: wrap; gap: 8px; }
+.optchip { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; transition: transform .15s cubic-bezier(.3, 1.8, .5, 1); }
+.optchip b { color: var(--muted); font-weight: 600; font-size: 13px; }
+.optchip.on { background: linear-gradient(120deg, #e9fbb0, #c9f7d6); color: #15112b; border-color: #15112b; box-shadow: 2px 2px 0 #15112b; transform: translateY(-1px); }
+.optchip.on b { color: #3d3a52; }
+.spicy .optchip.on { background: linear-gradient(120deg, #ffe0bf, #ffb3a0); }
+.chili { display: inline-flex; gap: 2px; }
+.chili b { width: 6px; height: 13px; border-radius: 6px 6px 6px 2px; background: linear-gradient(180deg, #2f9e44 0 22%, #ff3b30 22%); transform: rotate(18deg); box-shadow: inset -1px -1px 0 rgba(0,0,0,.18); }
+.optt { color: var(--accent); font-weight: 700; }
 </style>
 
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -1585,7 +1598,7 @@ const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + "
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const ui = { opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
 const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
@@ -1605,10 +1618,10 @@ let basket = {};
 const basketKey = () => "rt-basket-" + view.table;
 function loadBasket() { basket = LS.get(basketKey(), {}); }
 function saveBasket() { LS.set(basketKey(), basket); }
-const parseKey = k => { const i = k.indexOf("|"); return i < 0 ? { id: k, note: "" } : { id: k.slice(0, i), note: k.slice(i + 1) }; };
+const parseKey = k => { const p = k.split("|"); if (p.length === 1) return { id: k, note: "", code: "" }; if (p.length === 2) return { id: p[0], note: p[1], code: "" }; return { id: p[0], note: safeDec(p[1]), code: p.slice(2).join("|") }; };
 const basketLines = () => Object.entries(basket).filter(([k, q]) => q > 0 && DISH[parseKey(k).id]).map(([k, q]) => ({ key: k, ...parseKey(k), qty: q }));
 const inBasket = id => basketLines().filter(l => l.id === id).reduce((s, l) => s + l.qty, 0);
-function addToBasket(id, qty = 1, note = "") { const k = note ? id + "|" + note : id; basket[k] = (basket[k] || 0) + qty; saveBasket(); ui.bump = id; }
+function addToBasket(id, qty = 1, note = "", code = "") { const k = mkKey(id, note, code); basket[k] = (basket[k] || 0) + qty; saveBasket(); ui.bump = id; }
 
 /* ================= Live change detection (guest notices, staff alerts) ================= */
 let prevPays = null, prevOrders = null, prevWaiter = null, staffSeen = null, actx = null;
@@ -1822,13 +1835,13 @@ function guestTable(ts) {
   const { os } = ts;
   const pending = basketLines();
   const unsent = pending.length ? `<section class="panel unsent"><div class="xrow"><div><h2>Not sent yet</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Only you can see these until you send them.</p></div></div>
-      <ul class="lines">${pending.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="q">${l.qty}×</span><span class="n">${esc(DISH[l.id].name)}${l.note ? `<small>“${esc(l.note)}”</small>` : ""}</span><span class="p">${fmt(DISH[l.id].price * l.qty)}</span></li>`).join("")}</ul>
+      <ul class="lines">${pending.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="q">${l.qty}×</span><span class="n">${esc(DISH[l.id].name)}${lineLabel(l) ? `<small>${lineLabel(l)}</small>` : ""}</span><span class="p">${fmt(unitOf(l) * l.qty)}</span></li>`).join("")}</ul>
       <button class="btn block" data-act="open-basket">Review and send</button></section>` : "";
   const tracker = os.length ? `<div class="tracker">
       <div class="${ts.nNew ? "on new" : ""}"><b class="mono">${ts.nNew}</b><span>Waiting for staff</span></div>
       <div class="${ts.nCook ? "on cook" : ""}"><b class="mono">${ts.nCook}</b><span>Cooking</span></div>
       <div class="${ts.nServed ? "on ok" : ""}"><b class="mono">${ts.nServed}</b><span>Served</span></div></div>` : "";
-  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = dishOf(o); return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state, o)}</li>`; }).join("")}</ul>`
+  const lines = os.length ? `<ul class="lines">${os.map(o => { const d = dishOf(o); return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.opts && o.opts.length ? ` · ${esc(o.opts.join(", "))}` : ""}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state, o)}</li>`; }).join("")}</ul>`
     : `<div class="emptybox"><b>Nothing sent to the kitchen yet</b><span>Everyone at table ${view.table} orders from their own phone onto one shared bill.</span><button class="btn sm" data-act="gtab" data-tab="menu">Browse the menu</button></div>`;
   const pays = ts.pays.length ? `<div class="sec-h">Payments</div><ul class="lines">${ts.pays.map(p => `<li><span class="n">${p.by === me.id ? "You" : esc(p.name)}<small>${esc(p.method)} · ${ago(p.at)}${p.tip ? ` · tip ${fmt(p.tip)}` : ""}</small></span>${p.status === "pending" ? `<span class="pill new">Checking</span>` : `<span class="pill ok">Received</span>`}<span class="p">${fmt(p.amount)}</span></li>`).join("")}</ul>` : "";
   const money = os.length ? billSum(ts, true) : "";
@@ -1845,7 +1858,7 @@ function billSum(ts, guest) {
   return `<div class="sum"><div><span>Subtotal</span><span>${fmt(ts.sub)}</span></div>${ts.offer ? `<div class="offerline"><span>${ICON.tag}${esc(ts.offer.title)}</span><span>−${fmt(ts.disc)}</span></div>` : ""}<div><span>${taxLabel()}</span><span>${fmt(ts.due - (ts.sub - ts.disc))}</span></div>${ts.paidAmt ? `<div><span>Paid</span><span>−${fmt(ts.paidAmt)}</span></div>` : ""}${ts.pendAmt ? `<div><span>Being checked by staff</span><span>−${fmt(ts.pendAmt)}</span></div>` : ""}<div class="tot"><span>${ts.paid ? "Bill" : ts.paidAmt || ts.pendAmt ? "Left to pay" : guest ? "Total so far" : "Total"}</span><span>${ts.paid ? "Paid ✓" : fmt(ts.left)}</span></div></div>`;
 }
 function dockHTML(ts) {
-  const lines = basketLines(), items = lines.reduce((a, l) => a + l.qty, 0), total = lines.reduce((s, l) => s + DISH[l.id].price * l.qty, 0);
+  const lines = basketLines(), items = lines.reduce((a, l) => a + l.qty, 0), total = lines.reduce((s, l) => s + unitOf(l) * l.qty, 0);
   const bar = items && ui.gtab !== "play" ? `<button class="basketbar" data-act="open-basket"><span class="bb-c mono">${items}</span><span>Review order</span><span class="mono">${fmt(total)}</span></button>` : "";
   const tabCount = qtyOf(ts.os);
   return `${bar}
@@ -1952,15 +1965,16 @@ function sheetHTML() {
       <p class="muted" style="margin:6px 0 0">${esc(d.desc)}</p>
       <p class="dmeta"><span class="mono">${fmt(d.price)}</span><span class="veg ${d.veg ? "" : "non"}"></span>${d.veg ? "Veg" : "Non-veg"}<span class="eta">${ICON.clock}~${prepOf(d)} min</span></p>
       <p class="alg">${ICON.shield}${algOf(d).length ? `Contains ${algOf(d).map(a => `<span>${ALG_LABEL[a]}</span>`).join("")}` : "No common allergens listed"}</p></div>
+      ${optionsHTML(d)}
       <label class="field" for="dish-note"><span>Special request <span class="muted" style="font-weight:400">(optional)</span></span><input id="dish-note" maxlength="60" value="${esc(ui.note)}" placeholder="e.g. no chilli, extra crispy" autocomplete="off"></label>
       ${pairs.length ? `<div><div class="sec-h" style="margin-bottom:8px">Goes well with</div><div class="pairs">${pairs.map(p => `<button class="pair" data-act="pair-add" data-id="${p.id}"><img src="${photo(p)}" alt=""><span><b>${esc(p.name)}</b><span class="mono">${fmt(p.price)}</span></span><i>${inBasket(p.id) ? inBasket(p.id) : "+"}</i></button>`).join("")}</div></div>` : ""}
       <div class="addrow"><div class="stepper"><button data-act="q-" aria-label="Fewer">−</button><span>${ui.qty}</span><button data-act="q+" aria-label="More">+</button></div>
-      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}" ${soldOut(d) ? "disabled" : ""}>${soldOut(d) ? "Sold out today" : "Add · " + fmt(d.price * ui.qty)}</button></div></div>`;
+      <button class="btn block" style="flex:1" data-act="add-dish" data-id="${d.id}" ${soldOut(d) ? "disabled" : ""}>${soldOut(d) ? "Sold out today" : "Add · " + fmt((d.price + optsInfo(d, optCode(ui.opts)).add) * ui.qty)}</button></div></div>`;
   }
   if (s === "basket") {
-    const lines = basketLines(), total = lines.reduce((t, l) => t + DISH[l.id].price * l.qty, 0);
+    const lines = basketLines(), total = lines.reduce((t, l) => t + unitOf(l) * l.qty, 0);
     return `<div class="sheet-b"><div class="xrow"><div><h2>Your picks</h2><p class="muted" style="margin:2px 0 0;font-size:14px">They join table ${view.table}'s shared order and bill.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
-      ${lines.length ? `<ul class="lines">${lines.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="n">${esc(DISH[l.id].name)}<small>${l.note ? "“" + esc(l.note) + "” · " : ""}<span class="mono">${fmt(DISH[l.id].price * l.qty)}</span></small></span><div class="stepper sm"><button data-act="b-" data-key="${esc(l.key)}" aria-label="Fewer">−</button><span>${l.qty}</span><button data-act="b+" data-key="${esc(l.key)}" aria-label="More">+</button></div></li>`).join("")}</ul>` : `<p class="empty">Your picks are empty.</p>`}
+      ${lines.length ? `<ul class="lines">${lines.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="n">${esc(DISH[l.id].name)}<small>${lineLabel(l) ? lineLabel(l) + " · " : ""}<span class="mono">${fmt(unitOf(l) * l.qty)}</span></small></span><div class="stepper sm"><button data-act="b-" data-key="${esc(l.key)}" aria-label="Fewer">−</button><span>${l.qty}</span><button data-act="b+" data-key="${esc(l.key)}" aria-label="More">+</button></div></li>`).join("")}</ul>` : `<p class="empty">Your picks are empty.</p>`}
       <div class="sum"><div class="tot"><span>Subtotal</span><span>${fmt(total)}</span></div></div>
       <label class="namefield" for="myname2">Name on the order <input id="myname2" maxlength="20" value="${esc(me.name)}" autocomplete="off"></label>
       <button class="btn block" data-act="send-order" ${lines.length ? "" : "disabled"}>Send order · ${fmt(total)}</button>
@@ -2058,7 +2072,7 @@ function staffHTML() {
     body = ordersFeed();
   } else if (ui.stab === "kitchen") {
     const tickets = all.filter(t => t.nCook).map(t => ({ ...t, cook: t.os.filter(o => o.state === "cooking") })).sort((a, b) => a.cook[0].at - b.cook[0].at);
-    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const over = Math.max(...t.cook.map(o => -minsLeft(etaOf(o)))), late = over > 5 ? "late2" : over > 0 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${dueText(o)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
+    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const over = Math.max(...t.cook.map(o => -minsLeft(etaOf(o)))), late = over > 5 ? "late2" : over > 0 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${dueText(o)}${reqText(o)}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
       : `<div class="allclear">${ICON.check}<b>The kitchen is clear</b><span>Orders appear here once staff send them to the kitchen, oldest first.</span></div>`;
   } else {
     body = `<p class="muted" style="margin:0">Replace the illustrations with real photos of your dishes. Guests see them right away.</p>
@@ -2073,7 +2087,7 @@ function staffHTML() {
 }
 function staffTableSheet(n) {
   const ts = tableState(n), { os, t } = ts;
-  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${ago(o.at)}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
+  const group = (st, title, btn) => { const g = os.filter(o => o.state === st); return g.length ? `<div class="sec-h">${title}</div><ul class="lines">${g.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${ago(o.at)}${reqText(o)}</small></span>${btn ? btn(o) : `<span class="p">${fmt(lineTotal(o))}</span>`}</li>`).join("")}</ul>` : ""; };
   return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "phone" : "phones"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
     ${t.waiter ? `<div class="alertbox"><b>${esc(t.reason || "Called the waiter")} · ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
     ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
@@ -2149,7 +2163,7 @@ function ordersFeed() {
   const list = all.filter(o => ui.ofilter === "all" || o.state === ui.ofilter);
   const tabs = [["all", "All"], ["new", "New"], ["cooking", "Cooking"], ["served", "Served"]];
   return `<div class="modes ofil">${tabs.map(([k, l]) => `<button class="${ui.ofilter === k ? "on" : ""}" data-act="ofilter" data-f="${k}">${l} <span class="mono">${count(k)}</span></button>`).join("")}</div>
-    ${list.length ? `<ul class="feed">${list.map(o => `<li class="f-${o.state}"><span class="ft mono">${clock(o.at)}</span><button class="qt mono" data-act="open-table" data-n="${o.table}" aria-label="Open table ${o.table}">${String(o.table).padStart(2, "0")}</button><span class="qx"><b>${o.qty}× ${esc(dishOf(o).name)}</b><small>${esc(o.name)} · ${fmt(lineTotal(o))}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}</small></span>${o.state === "new" ? `<span class="pill new">New</span><button class="btn sm pop" data-act="o-cook" data-id="${o.id}">Start</button>` : o.state === "cooking" ? `<span class="pill cook">Cooking</span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>` : `<span class="pill ok">Served</span>`}</li>`).join("")}</ul>`
+    ${list.length ? `<ul class="feed">${list.map(o => `<li class="f-${o.state}"><span class="ft mono">${clock(o.at)}</span><button class="qt mono" data-act="open-table" data-n="${o.table}" aria-label="Open table ${o.table}">${String(o.table).padStart(2, "0")}</button><span class="qx"><b>${o.qty}× ${esc(dishOf(o).name)}</b><small>${esc(o.name)} · ${fmt(lineTotal(o))}${reqText(o)}</small></span>${o.state === "new" ? `<span class="pill new">New</span><button class="btn sm pop" data-act="o-cook" data-id="${o.id}">Start</button>` : o.state === "cooking" ? `<span class="pill cook">Cooking</span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>` : `<span class="pill ok">Served</span>`}</li>`).join("")}</ul>`
       : `<div class="allclear">${ICON.check}<b>No orders here</b><span>Every item guests send appears here the moment they tap Send, newest first.</span></div>`}`;
 }
 
@@ -2407,6 +2421,47 @@ document.addEventListener("change", e => {
   if (t.id && t.id.startsWith("aa-") && ui.draft) { const k = t.id.slice(3), cur = ui.draft.alg || []; ui.draft.alg = t.checked ? [...new Set([...cur, k])] : cur.filter(x => x !== k); }
 });
 
+/* ================= Round 9: dish choices (spice, size, extras) ================= */
+const OPTS = {
+  spice: { label: "Spice level", type: "one", def: "medium", choices: [["mild", "Mild", 0], ["medium", "Medium", 0], ["hot", "Hot", 0], ["xhot", "Extra hot", 0]] },
+  psize: { label: "Size", type: "one", def: "reg", quiet: true, choices: [["reg", "Regular 10\"", 0], ["lg", "Large 13\"", 180]] },
+  pextra: { label: "Extras", type: "many", choices: [["cheese", "Extra cheese", 60], ["jalapeno", "Jalapeños", 40], ["olives", "Olives", 40]] },
+  bextra: { label: "Make it bigger", type: "many", choices: [["patty", "Extra patty", 120], ["onions", "Crispy onions", 50]] },
+  dsize: { label: "Size", type: "one", def: "reg", quiet: true, choices: [["reg", "Regular", 0], ["lg", "Large", 40]] },
+  ice: { label: "Ice", type: "one", def: "ice", quiet: true, choices: [["ice", "Regular ice", 0], ["less", "Less ice", 0], ["none", "No ice", 0]] },
+  milk: { label: "Milk", type: "one", def: "dairy", quiet: true, choices: [["dairy", "Regular milk", 0], ["oat", "Oat milk", 50]] },
+  shot: { label: "Extras", type: "many", choices: [["shot", "Extra shot", 40]] },
+  scoop: { label: "Add on", type: "many", choices: [["scoop", "Scoop of vanilla gelato", 60]] },
+};
+const OPTS_BY_KIND = { curry: ["spice"], satay: ["spice"], pasta: ["spice"], pizza: ["psize", "pextra"], burger: ["bextra"], drink: ["dsize", "ice"], coffee: ["milk", "shot"], lava: ["scoop"] };
+const optGroups = d => (Array.isArray(d.opts) ? d.opts : OPTS_BY_KIND[d.kind] || []).filter(g => OPTS[g]);
+const optDefaults = d => Object.fromEntries(optGroups(d).map(g => [g, OPTS[g].type === "one" ? OPTS[g].def : []]));
+const optCode = sel => Object.entries(sel || {}).flatMap(([g, v]) => Array.isArray(v) ? v.map(x => g + ":" + x) : OPTS[g] && v !== OPTS[g].def ? [g + ":" + v] : []).sort().join(",");
+function decodeOpts(d, code) { const sel = optDefaults(d); String(code || "").split(",").filter(Boolean).forEach(p => { const [g, c] = p.split(":"); if (!OPTS[g] || !(g in sel)) return; if (OPTS[g].type === "one") sel[g] = c; else sel[g] = [...new Set([...sel[g], c])]; }); return sel; }
+function optsInfo(d, code) {
+  const sel = decodeOpts(d, code); let add = 0; const labels = [];
+  optGroups(d).forEach(g => { const G = OPTS[g], v = sel[g]; (G.type === "one" ? [v] : v).forEach(cid => { const c = G.choices.find(x => x[0] === cid); if (!c) return; add += c[2]; if (!(G.quiet && cid === G.def)) labels.push(c[1]); }); });
+  return { add, labels };
+}
+const unitOf = l => DISH[l.id] ? DISH[l.id].price + optsInfo(DISH[l.id], l.code).add : 0;
+const safeDec = s => { try { return decodeURIComponent(s); } catch { return s; } };
+const mkKey = (id, note, code) => (note || code) ? `${id}|${encodeURIComponent(note || "")}|${code || ""}` : id;
+const reqText = o => `${o.opts && o.opts.length ? ` · <b class="optt">${esc(o.opts.join(", "))}</b>` : ""}${o.note ? ` · <b class="req">“${esc(o.note)}”</b>` : ""}`;
+const lineLabel = l => { const lab = optsInfo(DISH[l.id], l.code).labels; return [lab.length ? esc(lab.join(", ")) : "", l.note ? "“" + esc(l.note) + "”" : ""].filter(Boolean).join(" · "); };
+function optionsHTML(d) {
+  const groups = optGroups(d); if (!groups.length) return "";
+  return groups.map(g => { const G = OPTS[g]; return `<div class="optg"><div class="sec-h">${G.label}${G.type === "many" ? ` <span class="opt-hint">optional</span>` : ""}</div><div class="optchips ${g === "spice" ? "spicy" : ""}">${G.choices.map(([cid, l, add], i) => { const on = G.type === "one" ? ui.opts[g] === cid : (ui.opts[g] || []).includes(cid); return `<button class="optchip ${on ? "on" : ""}" data-act="opt" data-g="${g}" data-c="${cid}" aria-pressed="${on}">${g === "spice" ? `<i class="chili" aria-hidden="true">${"<b></b>".repeat(i + 1)}</i>` : ""}${esc(l)}${add ? ` <b>+${fmt(add)}</b>` : ""}</button>`; }).join("")}</div></div>`; }).join("");
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  if (el.dataset.act === "dish" && DISH[el.dataset.id]) ui.opts = optDefaults(DISH[el.dataset.id]);
+  if (el.dataset.act === "opt") {
+    const g = el.dataset.g, c = el.dataset.c, G = OPTS[g]; if (!G) return;
+    if (G.type === "one") ui.opts[g] = c; else { const cur = ui.opts[g] || []; ui.opts[g] = cur.includes(c) ? cur.filter(x => x !== c) : [...cur, c]; }
+    buzz(6); render();
+  }
+});
+
 /* ================= Actions ================= */
 async function sendToKitchen(n) {
   for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking", cookAt: Date.now() })) return; }
@@ -2434,7 +2489,7 @@ document.addEventListener("click", async e => {
     case "pair-add": addToBasket(id); render(); toast(DISH[id].name + " added"); break;
     case "q-": ui.qty = Math.max(1, ui.qty - 1); render(); break;
     case "q+": ui.qty = Math.min(20, ui.qty + 1); render(); break;
-    case "add-dish": addToBasket(id, ui.qty, ui.note.trim()); toast(`${ui.qty} × ${DISH[id].name} added`); ui.sheet = null; render(); break;
+    case "add-dish": addToBasket(id, ui.qty, ui.note.trim(), optCode(ui.opts)); toast(`${ui.qty} × ${DISH[id].name} added`); ui.sheet = null; render(); break;
     case "open-basket": ui.sheet = "basket"; render(); break;
     case "b-": { const k = el.dataset.key; basket[k]--; if (basket[k] <= 0) delete basket[k]; saveBasket(); if (!basketLines().length) ui.sheet = null; render(); break; }
     case "b+": basket[el.dataset.key]++; saveBasket(); render(); break;
@@ -2445,7 +2500,7 @@ document.addEventListener("click", async e => {
       gone.forEach(l => delete basket[l.key]); saveBasket();
       if (gone.length) toast(listText(gone.map(l => DISH[l.id].name)) + " just sold out and " + (gone.length > 1 ? "were" : "was") + " removed");
       if (!basketLines().length) { ui.sheet = null; render(); break; }
-      for (const l of basketLines()) { const dd = DISH[l.id]; ok = await put("orders", newId("o"), { table: view.table, dish: l.id, dname: dd.name, price: dd.price, cat: dd.cat, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
+      for (const l of basketLines()) { const dd = DISH[l.id]; ok = await put("orders", newId("o"), { table: view.table, dish: l.id, dname: dd.name, price: unitOf(l), opts: optsInfo(dd, l.code).labels, cat: dd.cat, qty: l.qty, note: l.note, state: "new", at: Date.now(), by: me.id, name: me.name }); if (!ok) break; delete basket[l.key]; saveBasket(); }
       if (ok) { ui.sheet = null; ui.gtab = "table"; render(); scrollTo(0, 0); confetti(); buzz([10, 40, 10]); toast("Order sent. Your waiter will confirm it."); } else { el.disabled = false; render(); }
       break;
     }
