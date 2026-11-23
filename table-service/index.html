@@ -199,7 +199,7 @@ h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-
 .tcard.s-cooking { border-top-color: var(--cook); }
 .tcard.s-seated { border-top-color: var(--ok); }
 .tcard.s-paid { border-top-color: var(--accent); }
-.tcard.s-empty { opacity: .7; }
+.tcard.s-empty { opacity: 1; }
 @keyframes ring { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--alert) 35%, transparent); } }
 .tcard .top { display: flex; justify-content: space-between; align-items: baseline; }
 .tcard .num { font: 700 28px var(--mono); }
@@ -493,7 +493,7 @@ code { font-family: var(--mono); font-size: .92em; }
 :root {
   --bg: #f3f1fa; --surface: #ffffff; --surface-2: #ece8f7; --fg: #15112b; --muted: #625c7a; --line: #e0daf0;
   --accent: #3b3bff; --accent-fg: #ffffff; --pop: #d4f53c; --pop-fg: #15112b;
-  --alert: #ff3d71; --ok: #12a66a; --cook: #ff8a1f; --scrim: rgba(21, 17, 43, .55);
+  --alert: #d6175a; --ok: #0e8a57; --cook: #ff8a1f; --scrim: rgba(21, 17, 43, .55);
   --ink: #15112b; --glass: rgba(255, 255, 255, .72);
   --display: "Unbounded", "Segoe UI", system-ui, sans-serif;
   --body: "Plus Jakarta Sans", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -805,6 +805,18 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 .chili { display: inline-flex; gap: 2px; }
 .chili b { width: 6px; height: 13px; border-radius: 6px 6px 6px 2px; background: linear-gradient(180deg, #2f9e44 0 22%, #ff3b30 22%); transform: rotate(18deg); box-shadow: inset -1px -1px 0 rgba(0,0,0,.18); }
 .optt { color: var(--accent); font-weight: 700; }
+
+/* ===== v10: accessibility ===== */
+.tcard .top { display: flex; justify-content: space-between; align-items: baseline; width: 100%; text-align: left; gap: 8px; }
+.cover-h { font-size: 26px; color: #d4f53c; }
+.offer-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 18px; }
+
+:root { --alert-fg: #ffffff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --alert-fg: #15112b; } }
+:root[data-theme="dark"] { --alert-fg: #15112b; }
+.btn.alert, .pill.alert { color: var(--alert-fg); }
+.bell.on { background: #d6175a; }
+.catname small { color: color-mix(in srgb, var(--fg) 82%, transparent); }
 </style>
 
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -1676,13 +1688,14 @@ function chime() {
 /* ================= Render ================= */
 let lastSheet = null, spy = null;
 function render() {
-  document.body.dataset.view = view.name;
+  document.body.dataset.view = view.name; document.documentElement.lang = "en";
   if (game.running || game.counting) return;
   const a = document.activeElement, aid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
   const old = document.querySelector(".sheet"), keep = old && ui.sheet === lastSheet ? old.scrollTop : 0;
   $("#app").innerHTML = view.name === "guest" ? guestHTML() : view.name === "staff" ? staffHTML() : view.name === "admin" ? adminHTML() : homeHTML();
   $("#sheet").innerHTML = ui.sheet ? `<div class="scrim${ui.sheet === lastSheet ? " still" : ""}" data-act="close-sheet"><div class="sheet" role="dialog" aria-modal="true"><div class="grab" aria-hidden="true"><i></i></div>${sheetHTML()}</div></div>` : "";
   if (keep) document.querySelector(".sheet").scrollTop = keep;
+  const shEl = document.querySelector(".sheet"); if (shEl) { const h = shEl.querySelector("h2"); if (h) { h.id = "sheet-title"; shEl.setAttribute("aria-labelledby", "sheet-title"); } else shEl.setAttribute("aria-label", "Details"); }
   if (ui.sheet && ui.sheet.startsWith("dish:") && DISH[ui.sheet.slice(5)]) viewerAttach(DISH[ui.sheet.slice(5)]); else viewerStop();
   lastSheet = ui.sheet;
   $("#toast").style.bottom = view.name === "guest" ? "" : "calc(24px + env(safe-area-inset-bottom, 0px))";
@@ -1768,14 +1781,14 @@ function guestHTML() {
     ? `<button class="bell on" data-act="cancel-waiter" aria-label="Waiter is coming. Tap to cancel">${ICON.bell}<span>Waiter coming<small>${esc(ts.t.reason || "Tap to cancel")}</small></span></button>`
     : `<button class="bell" data-act="call-waiter">${ICON.bell}<span>Call waiter</span></button>`;
   const content = ui.gtab === "menu" ? guestMenu() : ui.gtab === "table" ? guestTable(ts) : guestPlay();
-  return `<div class="guest wrap">
+  return `<main class="guest wrap">
     <header class="ghead">
       <div><p class="eyebrow">${esc(R.name)}</p><h1>Table <span class="mono">${n}</span></h1></div>
       ${bell}
     </header>
     ${ui.gtab !== "table" ? statusBanner(ts) : ""}
     ${content}
-  </div>
+  </main>
   <div class="dock"><div class="dock-in wrap">${dockHTML(ts)}</div></div>`;
 }
 function statusBanner(ts) {
@@ -1875,8 +1888,8 @@ function guestPlay() {
   const scores = Object.entries(S.scores).map(([id, s]) => ({ id, ...s }));
   const list = (ui.lbMode === "me" ? scores.filter(s => s.id === me.id) : ui.lbMode === "table" ? scores.filter(s => s.table === view.table) : scores).sort((a, b) => b.best - a.best).slice(0, 10);
   const lb = list.length ? `<ol class="lb">${list.map(s => `<li class="${s.id === me.id ? "me" : ""}"><span>${esc(s.name)}${s.id === me.id ? " (you)" : ""}</span><span class="muted" style="font-size:12px">Table ${s.table}</span><span class="s">${s.best}</span></li>`).join("")}</ol>` : `<p class="empty">${ui.lbMode === "table" ? "No scores at this table yet. Set the first one." : "Play a round to get on the board."}</p>`;
-  const cover = game.last ? `<h3>${game.newBest ? "New best: " + game.last + "!" : "You scored " + game.last}</h3><p>${game.newBest ? "Your score is on the board." : "Your best is " + game.best + ". Go again?"}</p><button class="btn pop" data-act="start-game">Play again</button>`
-    : `<h3>Dumpling Dash</h3><p>Tap dumplings as they pop up: +1.<br>Tap a chilli: −3. You have 20 seconds.</p><button class="btn pop" data-act="start-game">Start</button>`;
+  const cover = game.last ? `<h2 class="cover-h">${game.newBest ? "New best: " + game.last + "!" : "You scored " + game.last}</h2><p>${game.newBest ? "Your score is on the board." : "Your best is " + game.best + ". Go again?"}</p><button class="btn pop" data-act="start-game">Play again</button>`
+    : `<h2 class="cover-h">Dumpling Dash</h2><p>Tap dumplings as they pop up: +1.<br>Tap a chilli: −3. You have 20 seconds.</p><button class="btn pop" data-act="start-game">Start</button>`;
   return `<section class="panel game">
     <div class="hud"><div><small>Score</small><span id="g-score">${game.score}</span></div><div style="text-align:right"><small>Your best</small><span>${game.best}</span></div></div>
     <div class="tbar"><i id="g-bar"></i></div>
@@ -1886,7 +1899,7 @@ function guestPlay() {
   </section>
   <section class="panel">
     <h2>Leaderboard</h2>
-    <div class="modes" role="tablist">
+    <div class="modes" role="group" aria-label="Leaderboard">
       <button class="${ui.lbMode === "me" ? "on" : ""}" data-act="lb" data-mode="me">Just me</button>
       <button class="${ui.lbMode === "table" ? "on" : ""}" data-act="lb" data-mode="table">Table ${view.table}</button>
       <button class="${ui.lbMode === "all" ? "on" : ""}" data-act="lb" data-mode="all">Restaurant</button>
@@ -2062,7 +2075,7 @@ function staffHTML() {
         <div><div class="floor">${all.map(t => {
           const pills = [t.t.waiter ? `<span class="pill alert">${esc(t.t.reason || "Waiter")} · ${ago(t.t.waiter)}</span>` : "", t.pendAmt ? `<span class="pill new">Check ${fmt(t.pendAmt)}</span>` : "", t.nNew ? `<span class="pill new">${t.nNew} new</span>` : "", t.nCook ? `<span class="pill cook">${t.nCook} cooking</span>` : "", t.t.bill && !t.paid && t.left > 0 ? `<span class="pill new">Bill requested</span>` : "", t.paid ? `<span class="pill ok">Paid</span>` : t.paidAmt ? `<span class="pill ok">Part paid</span>` : ""].join("");
           const qa = t.t.waiter ? `<button class="btn sm alert qa" data-act="ack-waiter" data-n="${t.n}">On my way</button>` : t.nNew ? `<button class="btn sm pop qa" data-act="to-kitchen" data-n="${t.n}">Send to kitchen</button>` : "";
-          return `<div class="tcard s-${t.st}" role="button" tabindex="0" data-act="open-table" data-n="${t.n}" aria-label="Table ${t.n}: ${STATE_LABEL[t.st]}"><div class="top"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></div>
+          return `<div class="tcard s-${t.st}" data-act="open-table" data-n="${t.n}"><button class="top" data-act="open-table" data-n="${t.n}" aria-label="Open table ${t.n}: ${STATE_LABEL[t.st]}"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></button>
             ${pills ? `<div class="pills">${pills}</div>` : ""}${qa}
             <div class="foot">${t.st === "empty" ? "<span>Ready for guests</span>" : `<span>${t.guests} ${t.guests === 1 ? "phone" : "phones"} · ${ago(t.since)}</span><b>${fmt(t.paid ? t.due : t.due - t.paidAmt)}</b>`}</div></div>`;
         }).join("")}</div>
@@ -2081,7 +2094,7 @@ function staffHTML() {
   }
   return `<div class="staff"><header class="shead"><div class="shead-in wrap"><h1>${esc(R.name)}</h1>
     <div class="stabs"><button class="${ui.stab === "floor" ? "on" : ""}" data-act="stab" data-tab="floor">Floor${queue.length ? ` <span class="sbadge">${queue.length}</span>` : ""}</button><button class="${ui.stab === "orders" ? "on" : ""}" data-act="stab" data-tab="orders">Orders${all.reduce((s, t) => s + t.nNew, 0) ? ` <span class="sbadge n">${all.reduce((s, t) => s + t.nNew, 0)}</span>` : ""}</button><button class="${ui.stab === "kitchen" ? "on" : ""}" data-act="stab" data-tab="kitchen">Kitchen${cooking ? ` <span class="sbadge k">${cooking}</span>` : ""}</button></div>
-    <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}">${ui.sound ? ICON.sound + '<span class="lbl">Sound on</span>' : ICON.mute + '<span class="lbl">Sound off</span>'}</button>
+    <button class="btn sm ghost soundbtn" data-act="sound" aria-pressed="${ui.sound}" aria-label="${ui.sound ? "Sound alerts on" : "Sound alerts off"}">${ui.sound ? ICON.sound + '<span class="lbl">Sound on</span>' : ICON.mute + '<span class="lbl">Sound off</span>'}</button>
     ${adminAllowed() ? `<a href="#admin" class="btn sm ghost" style="text-decoration:none">Admin</a>` : ""}<a href="#" class="btn sm ghost" style="text-decoration:none">Exit</a></div></header>
     <main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
@@ -2133,7 +2146,7 @@ const liveOffers = () => OFFERS.filter(of => of.active && hourIn(of, Date.now())
 const dealFor = cat => liveOffers().find(of => !of.code && !of.minBill && of.kind === "percent" && (of.scope === cat || of.scope === "all"));
 function offersStrip() {
   const live = liveOffers(); if (!live.length) return "";
-  return `<section class="offers"><h2 class="sec">Today's offers</h2><div class="offer-row">${live.map(of => `<div class="offer">${ICON.tag}<div><b>${esc(of.title)}</b><small>${esc(offerWhen(of) || "Applied automatically")}</small></div></div>`).join("")}</div></section>`;
+  return `<section class="offers"><h2 class="sec">Today's offers</h2><div class="offer-row" tabindex="0" role="region" aria-label="Today's offers">${live.map(of => `<div class="offer">${ICON.tag}<div><b>${esc(of.title)}</b><small>${esc(offerWhen(of) || "Applied automatically")}</small></div></div>`).join("")}</div></section>`;
 }
 
 /* ================= Waiter calls ================= */
