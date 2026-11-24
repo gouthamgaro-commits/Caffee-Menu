@@ -36,3 +36,13 @@ For the owner and editors:
 - **Settings:** restaurant name, number of tables, GST, Wi-Fi, and the guest link the QR codes open (set this to your own domain once hosted).
 
 The QR library loads from cdnjs (`qrcode-generator` 1.4.4).
+
+## Deploying to Vercel
+
+`site/index.html` is the standalone build of `table-service/index.html`. After changing the app, rebuild it:
+
+```sh
+python3 scripts/build-site.py
+```
+
+In Vercel, set the project's **Root Directory** to `site` (no build command, no framework). On a normal website the app runs in demo mode: orders are saved on each device only. Syncing orders between phones and the staff screen needs a backend (for example Supabase).

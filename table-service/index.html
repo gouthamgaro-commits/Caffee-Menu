@@ -831,6 +831,33 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 .role { display: inline-block; padding: 1px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; background: var(--surface-2); color: var(--fg); }
 .role-waiter { background: #e7f6ee; color: #0f7a4d; } .role-kitchen { background: #ffeedd; color: #9a4d00; } .role-manager { background: #e6edff; color: #2d4fa8; }
 .mstats { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+/* ===== v14: warmth — banner, logo, icons ===== */
+:root { --bg: #fbf7f2; }
+.ghead { border-bottom: 0; padding-bottom: 4px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.logo { width: 42px; height: 42px; border-radius: 12px; flex: none; display: grid; place-items: center; font: 800 15px var(--display); font-style: normal; color: #fff; background: linear-gradient(140deg, #c2321f, #e8532c); box-shadow: 0 4px 12px -4px rgba(194, 50, 31, .6); }
+.hero { position: relative; overflow: hidden; margin-top: 10px; border-radius: 20px; min-height: 172px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: radial-gradient(120% 140% at 100% 0%, #f29a4a 0%, transparent 55%), linear-gradient(135deg, #b52a1a 0%, #d63b2f 55%, #e8532c 100%); color: #fff; box-shadow: 0 12px 30px -14px rgba(181, 42, 26, .7); }
+.hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(rgba(255, 255, 255, .09) 1px, transparent 1.3px) 0 0 / 7px 7px; pointer-events: none; }
+.hero-body { position: relative; z-index: 1; padding: 18px 0 18px 18px; display: grid; gap: 8px; align-content: center; }
+.hero h2 { font-size: clamp(19px, 5.4vw, 26px); line-height: 1.15; font-weight: 800; color: #fff; }
+.hero p { margin: 0; font-size: 13px; color: rgba(255, 255, 255, .92); }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hero-chips span { padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .28); font-size: 11.5px; font-weight: 700; color: #fff; }
+.hero-art { position: relative; z-index: 1; }
+.ha { position: absolute; width: 74%; aspect-ratio: 4 / 3; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(60, 10, 0, .35)); animation: float 5s ease-in-out infinite alternate; }
+.ha1 { right: -14%; top: 4%; width: 92%; }
+.ha2 { left: -6%; bottom: -6%; animation-delay: -1.7s; }
+.ha3 { right: 0; bottom: -10%; width: 58%; animation-delay: -3.2s; }
+@keyframes float { from { transform: translateY(0) rotate(-1deg); } to { transform: translateY(-6px) rotate(1deg); } }
+.cats button svg, .caticon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.caticon { width: 32px; height: 32px; border-radius: 10px; display: inline-grid; place-items: center; align-self: center; background: var(--accent-soft); color: var(--accent); }
+.catname { align-items: center; }
+.catname small { margin-left: 2px; }
+.dish, .pcard, .panel, .entry > section { background: var(--surface); }
+@media (prefers-reduced-motion: reduce) { .ha { animation: none; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121214; } }
+:root[data-theme="dark"] { --bg: #121214; }
 </style>
 
 <div id="app"></div>
@@ -1340,7 +1367,7 @@ const EXTRA = {
 };
 MENU.forEach(d => Object.assign(d, EXTRA[d.id] || {}));
 /* ================= Admin: settings, menu editor, QR codes ================= */
-const DEFAULT_LINK = "https://claude.ai/artifact/SrTfysVbmmRug5VLymD9MW";
+const DEFAULT_LINK = (window.claude && window.claude.use) || !/^https?:$/.test(location.protocol) ? "https://claude.ai/artifact/SrTfysVbmmRug5VLymD9MW" : location.origin + location.pathname;
 const STYLES = [
   { id: "pizza-basil", label: "Pizza with basil", kind: "pizza", top: "basil" },
   { id: "pizza-mushroom", label: "Pizza with mushrooms", kind: "pizza", top: "mushroom" },
@@ -1803,6 +1830,12 @@ const ICON = {
   tag: `<svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>`,
   lock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`,
 };
+const CAT_ICON = {
+  starters: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M9 9c0-2 1.5-4 4-5M14 9c.5-1.5 2-2.8 4-3"/></svg>`,
+  mains: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="6.5"/><path d="M3 4v6a2 2 0 0 0 2 2v8M5 4v4M21 4c-1.7 0-3 2-3 5v3h3v8"/></svg>`,
+  desserts: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19h18L12 6z"/><path d="M6.5 15h11M12 6V3"/></svg>`,
+  drinks: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1.5 12h-9z"/><path d="M14 8l2-5 3 1M6.5 12h11"/></svg>`,
+};
 function guestHTML() {
   const n = view.table, ts = tableState(n);
   const bell = ts.t.waiter
@@ -1811,7 +1844,7 @@ function guestHTML() {
   const content = ui.gtab === "menu" ? guestMenu() : ui.gtab === "table" ? guestTable(ts) : guestPlay();
   return `<main class="guest wrap">
     <header class="ghead">
-      <div><p class="eyebrow">${esc(R.name)}</p><h1>Table <span class="mono">${n}</span></h1></div>
+      <div class="brand"><i class="logo" aria-hidden="true">${esc(R.name.split(/[^A-Za-z]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase())}</i><div><p class="eyebrow">${esc(R.name)}</p><h1>Table <span class="mono">${n}</span></h1></div></div>
       ${bell}
     </header>
     ${ui.gtab !== "table" ? statusBanner(ts) : ""}
@@ -1866,9 +1899,11 @@ function guestMenu() {
   }
   const pop = popularDishes();
   const carousel = `<section class="pop"><h2 class="sec">Popular right now</h2><div class="carousel">${pop.map(({ d, count }) => `<button class="pcard" data-act="dish" data-id="${d.id}"><img class="tile c-${d.cat}" src="${photo(d)}" alt=""><span class="pc-b"><span class="pc-n">${esc(d.name)}</span><span class="pc-m"><span class="mono">${fmt(d.price)}</span>${count ? ` · ordered ${count}× today` : d.tag ? ` · ${esc(d.tag)}` : ""}</span></span></button>`).join("")}</div></section>`;
-  const cats = CATS.filter(c => MENU.some(d => d.cat === c.id && match(d))).map((c, i) => `<button class="c-${c.id}${i === 0 ? " on" : ""}" data-act="jump" data-cat="${c.id}"><i class="dot"></i>${c.label}</button>`).join("");
-  const body = CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id && match(d)); return ds.length ? `<h2 class="catname c-${c.id}" id="cat-${c.id}" data-cat="${c.id}">${c.label}<small>${ds.length} ${ds.length === 1 ? "dish" : "dishes"}</small></h2>` + ds.map(dishCard).join("") : ""; }).join("");
-  return `${tools}${offersStrip()}${ui.vegOnly ? "" : carousel}
+  const cats = CATS.filter(c => MENU.some(d => d.cat === c.id && match(d))).map((c, i) => `<button class="c-${c.id}${i === 0 ? " on" : ""}" data-act="jump" data-cat="${c.id}">${CAT_ICON[c.id] || ""}${c.label}</button>`).join("");
+  const body = CATS.map(c => { const ds = MENU.filter(d => d.cat === c.id && match(d)); return ds.length ? `<h2 class="catname c-${c.id}" id="cat-${c.id}" data-cat="${c.id}"><span class="caticon" aria-hidden="true">${CAT_ICON[c.id] || ""}</span>${c.label}<small>${ds.length} ${ds.length === 1 ? "dish" : "dishes"}</small></h2>` + ds.map(dishCard).join("") : ""; }).join("");
+  const heroDishes = ["margherita", "butterchicken", "tiramisu"].map(id => DISH[id]).filter(Boolean);
+  const hero = `<section class="hero" aria-label="Welcome"><div class="hero-body"><h2>Hungry? Order right from your table.</h2><p>${esc(R.tagline)}</p><div class="hero-chips"><span>Freshly made</span><span>Veg &amp; non-veg</span><span>Free Wi-Fi</span></div></div><div class="hero-art" aria-hidden="true">${heroDishes.map((d, i) => `<img class="ha ha${i + 1}" src="${photo(d)}" alt="">`).join("")}</div></section>`;
+  return `${ui.vegOnly || ui.avoid.length ? "" : hero}${tools}${offersStrip()}${ui.vegOnly ? "" : carousel}
     <nav class="cats" aria-label="Menu sections">${cats}</nav>
     <div class="dishes">${body}</div>
     <div class="wifi slim">${ICON.wifi}<div><div class="k">Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm" data-act="copy-wifi">Copy</button></div>`;
