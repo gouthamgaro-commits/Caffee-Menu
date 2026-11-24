@@ -870,6 +870,9 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 /* ===== v15: staff sign-in ===== */
 .login { max-width: 460px; margin: 12px auto; gap: 14px; }
 .login-f { display: grid; gap: 12px; }
+.pw-row { position: relative; display: block; }
+.pw-row input { width: 100%; padding-right: 64px; }
+.pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--accent, inherit); font: inherit; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -2924,10 +2927,10 @@ function loginHTML(what) {
     <p class="note" style="text-align:left;margin:0">Already have an owner? Ask them to add your email in Admin → Settings → Staff logins.</p>
     <button class="btn ghost block" data-act="signout">Sign out</button></section>`;
   return `<section class="panel login"><h2>Staff sign in</h2><p class="muted" style="margin:0">${esc(what)} is for restaurant staff. Guests don't need to sign in.</p>
-    <form id="login-form" class="login-f"><label class="field" for="lg-email">Email<input id="lg-email" type="email" autocomplete="username" value="${esc(ui.loginEmail || "")}" required></label>
-      <label class="field" for="lg-pass">Password<input id="lg-pass" type="password" autocomplete="current-password" required></label>
+    <form id="login-form" class="login-f"><label class="field" for="lg-email">Email<input id="lg-email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="${esc(ui.loginEmail || "")}" required></label>
+      <label class="field" for="lg-pass">Password<span class="pw-row"><input id="lg-pass" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required><button type="button" class="pw-eye" data-act="pw-eye" aria-label="Show password" aria-pressed="false">Show</button></span></label>
       ${ui.loginErr ? `<p class="formerr">${esc(ui.loginErr)}</p>` : ""}<button class="btn block" type="submit">Sign in</button></form>
-    <p class="note" style="text-align:left;margin:0">Staff accounts are created by the owner. Forgot your password? Ask the owner to reset it.</p></section>`;
+    <p class="note" style="text-align:left;margin:0">Staff accounts are created by the owner. Forgot your password? The owner can reset it in Supabase → Authentication → Users.</p></section>`;
 }
 function staffLoginsHTML() {
   if (mode !== "cloud") return "";
@@ -2948,9 +2951,9 @@ async function loadStaffList() {
 document.addEventListener("submit", async e => {
   const f = e.target;
   if (f.id === "login-form") {
-    e.preventDefault(); const btn = f.querySelector("button"); btn.disabled = true; ui.loginErr = ""; ui.loginEmail = $("#lg-email").value.trim();
+    e.preventDefault(); const btn = f.querySelector("button[type=submit]"); btn.disabled = true; ui.loginErr = ""; ui.loginEmail = $("#lg-email").value.trim().toLowerCase();
     const { error } = await sb.auth.signInWithPassword({ email: ui.loginEmail, password: $("#lg-pass").value });
-    if (error) { ui.loginErr = /confirm/i.test(error.message) ? "This account isn't confirmed yet. Ask the owner to confirm it in Supabase." : "Wrong email or password."; btn.disabled = false; render(); const pw = $("#lg-pass"); if (pw) pw.focus(); return; }
+    if (error) { ui.loginErr = /confirm/i.test(error.message) ? "This account isn't confirmed yet. Ask the owner to confirm it in Supabase." : "Wrong email or password. Tap Show to check what you typed."; btn.disabled = false; render(); const pw = $("#lg-pass"); if (pw) pw.focus(); return; }
     location.reload();
   }
   if (f.id === "claim-form") {
@@ -2962,6 +2965,7 @@ document.addEventListener("submit", async e => {
 });
 document.addEventListener("click", async e => {
   const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
+  if (el.dataset.act === "pw-eye") { const i = $("#lg-pass"), show = i.type === "password"; i.type = show ? "text" : "password"; el.textContent = show ? "Hide" : "Show"; el.setAttribute("aria-label", show ? "Hide password" : "Show password"); el.setAttribute("aria-pressed", String(show)); i.focus(); return; }
   if (el.dataset.act === "signout" && sb) { await sb.auth.signOut(); location.reload(); }
   if (el.dataset.act === "sl-add") {
     const v = ($("#sl-email") && $("#sl-email").value.trim().toLowerCase()) || "";
