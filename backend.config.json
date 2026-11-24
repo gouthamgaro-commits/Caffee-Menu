@@ -1,0 +1,5 @@
+{
+  "url": "https://qnoxxirebbkiqtqpurvh.supabase.co",
+  "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFub3h4aXJlYmJraXF0cXB1cnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDczMDAsImV4cCI6MjEwNjYyMzMwMH0.4pvQFHhdgtUCWuhegk7QjwxNI5zrW9PHznwjPVinP_o",
+  "_note": "Public (anon) key: safe to ship in the website. Access is controlled by the database's row-level security rules in supabase/migrations."
+}

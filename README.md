@@ -45,4 +45,12 @@ The QR library loads from cdnjs (`qrcode-generator` 1.4.4).
 python3 scripts/build-site.py
 ```
 
-In Vercel, set the project's **Root Directory** to `site` (no build command, no framework). On a normal website the app runs in demo mode: orders are saved on each device only. Syncing orders between phones and the staff screen needs a backend (for example Supabase).
+In Vercel, set the project's **Root Directory** to `site` (no build command, no framework).
+
+## Database (Supabase)
+
+The website build reads `backend.config.json` (project URL and public anon key) and syncs everything through the `restaurant_docs` table in Supabase. The schema and security rules are in `supabase/migrations/`. Guests can read the menu and live orders and add orders, waiter calls, payments and feedback; only signed-in staff (emails in `restaurant_staff`) can see sales, activity and feedback or change the menu and settings.
+
+Live updates use Supabase Realtime; if a network blocks it, the app re-syncs every 5 seconds.
+
+Staff accounts: create them in Supabase → Authentication → Users → Add user (tick "Auto Confirm User"). The first account claims ownership on `/#admin` with the one-time setup code; after that, owners add staff emails in Admin → Settings → Staff logins.

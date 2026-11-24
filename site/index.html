@@ -866,6 +866,10 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 @media (prefers-reduced-motion: reduce) { .ha { animation: none; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121214; } }
 :root[data-theme="dark"] { --bg: #121214; }
+
+/* ===== v15: staff sign-in ===== */
+.login { max-width: 460px; margin: 12px auto; gap: 14px; }
+.login-f { display: grid; gap: 12px; }
 </style>
 </head>
 <body>
@@ -873,6 +877,8 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 <div id="sheet"></div>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>window.RESTAURANT_BACKEND = {"url": "https://qnoxxirebbkiqtqpurvh.supabase.co", "key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFub3h4aXJlYmJraXF0cXB1cnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDczMDAsImV4cCI6MjEwNjYyMzMwMH0.4pvQFHhdgtUCWuhegk7QjwxNI5zrW9PHznwjPVinP_o"};</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
@@ -1511,7 +1517,7 @@ function adminHTML() {
       <p class="note" style="text-align:left;margin:0">Use your own domain once you host the site there. Each table adds #table-1, #table-2 and so on. Reprint the codes after changing it.</p>
       ${s.err ? `<p class="formerr">${esc(s.err)}</p>` : ""}
       <div><button class="btn" data-act="st-save">Save settings</button></div>
-    </section>`;
+    </section>${staffLoginsHTML()}`;
   }
   return `<div class="staff">${head}<main class="sbody wrap">${body}<p class="modeline">${modeLine()}</p></main></div>`;
 }
@@ -1638,6 +1644,7 @@ function startRemote() {
   render();
 }
 async function put(coll, id, data) {
+  if (mode === "cloud") return cloudPut(coll, id, data);
   if (mode === "live") {
     try { await db.collection(coll).doc(id).set(data); return true; }
     catch (e) { console.error(e); toast(e && e.code === "invalid_argument" ? "You can't change this page's data. Ask the owner for Contributor access." : "That didn't save. Try again."); return false; }
@@ -1645,6 +1652,7 @@ async function put(coll, id, data) {
   S[coll] = { ...S[coll], [id]: data }; LS.set("rt-demo", S); bc && bc.postMessage(1); dataChanged(); return true;
 }
 async function del(coll, id) {
+  if (mode === "cloud") return cloudDel(coll, id);
   if (mode === "live") { try { await db.collection(coll).doc(id).delete(); return true; } catch (e) { console.error(e); toast("That didn't save. Try again."); return false; } }
   const n = { ...S[coll] }; delete n[id]; S[coll] = n; LS.set("rt-demo", S); bc && bc.postMessage(1); dataChanged(); return true;
 }
@@ -1673,7 +1681,7 @@ const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + "
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { staffId: LS.get("rt-staffid", ""), mine: LS.get("rt-mine", true), afilter: "all", atable: 0, tdraft: null, staffName: LS.get("rt-staffname", ""), opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const ui = { loginErr: "", staffList: null, staffListLoading: false, slArm: null, staffId: LS.get("rt-staffid", ""), mine: LS.get("rt-mine", true), afilter: "all", atable: 0, tdraft: null, staffName: LS.get("rt-staffname", ""), opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
 const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
@@ -1776,11 +1784,13 @@ function setupSpy() {
 }
 function modeLine() {
   if (mode === "live") return `<span class="dot live"></span> Live: orders sync to every phone and the staff floor.`;
+  if (mode === "cloud") return `<span class="dot live"></span> Live: orders sync to every phone and the staff screens.`;
   if (mode === "local") return `<span class="dot"></span> Demo mode: orders are saved on this device and shared between its open tabs.`;
   return `<span class="dot"></span> Connecting…`;
 }
 
 function lockedHTML(what) {
+  if (mode === "cloud") return loginHTML(what);
   return `<div class="allclear locked">${ICON.lock}<b>${what} is for restaurant staff</b><span>You're signed in without staff access. The owner can give you Editor access from this page's Share menu. Guests only ever see their own table.</span><a class="btn sm" href="#" style="text-decoration:none">Back</a></div>`;
 }
 function homeHTML() {
@@ -2501,6 +2511,7 @@ document.addEventListener("click", async e => {
       const entry = { table: view.table, stars: ui.stars, text: String(ui.fbText || "").trim().slice(0, 300), name: me.name, at: Date.now() };
       try {
         if (mode === "live") { const ref = db.doc("feedback/" + uid), snap = await ref.get(), items = (snap.exists && snap.data().items) || []; await ref.set({ items: [...items, entry].slice(-20) }); }
+        else if (mode === "cloud") await put("feedback", newId("f"), { items: [entry] });
         else { const cur = (S.feedback[me.id] && S.feedback[me.id].items) || []; await put("feedback", me.id, { items: [...cur, entry].slice(-20) }); }
         ui.rated = true; render(); if (entry.stars >= 4) confetti(40); toast("Thanks! The team will see it.");
       } catch (err) { console.error(err); el.disabled = false; toast("Your feedback didn't send. Try again."); }
@@ -2580,7 +2591,7 @@ const durText = m => m < 1 ? "under a minute" : Math.round(m) + " min";
 let evReady = false, evSub = false;
 const evPending = new Set();
 function ensureEvents() {
-  if (mode === "local") { evReady = true; return; }
+  if (mode === "local" || mode === "cloud") { evReady = true; return; }
   if (mode !== "live" || evSub || !db) return; evSub = true;
   db.collection("events").orderBy("at", "desc").limit(800).onSnapshot(snap => {
     const next = {}; snap.docs.forEach(d => next[d.id] = d.data()); S.events = next;
@@ -2677,7 +2688,7 @@ async function saveTeam(items, msg) { if (await put("config", "team", { items, u
 function whoSheet() {
   return `<div class="sheet-b"><div class="xrow"><div><h2>Who's on shift?</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Pick your name. Guests see it when you answer, and your actions are recorded under it.</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
     <div class="reasons">${TEAM.map(m => `<button class="reason ${ui.staffId === m.id ? "on" : ""}" data-act="who-pick" data-id="${m.id}"><b>${esc(m.name)}</b><br><small class="muted">${ROLES[m.role] || ""}${m.role === "waiter" && m.tables && m.tables.length ? " · tables " + tablesText(m.tables) : ""}</small></button>`).join("")}</div>
-    <p class="note">Not on the list? Ask a manager to add you in Admin → Team.</p></div>`;
+    <p class="note">Not on the list? Ask a manager to add you in Admin → Team.</p>${mode === "cloud" && cloudUser ? `<button class="btn ghost block" data-act="signout">Sign out of this device</button>` : ""}</div>`;
 }
 
 /* ---- actions ---- */
@@ -2845,6 +2856,127 @@ function confetti(n = 70) {
     p.animate([{ transform: "translate(0,0) rotate(0deg)", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 540}deg)`, opacity: 1, offset: .55 }, { transform: `translate(${dx * 1.15}px, ${dy + 460}px) rotate(${Math.random() * 1080}deg)`, opacity: 0 }], { duration: 1300 + Math.random() * 700, easing: "cubic-bezier(.2,.65,.4,1)" }).onfinish = () => p.remove();
   }
 }
+/* ================= Cloud backend (Supabase) for the standalone website ================= */
+const CLOUD = window.RESTAURANT_BACKEND && window.supabase && window.supabase.createClient ? window.RESTAURANT_BACKEND : null;
+const DOCS = "restaurant_docs";
+let sb = null, cloudUser = null, cloudLive = false;
+async function startCloud() {
+  mode = "cloud";
+  sb = window.supabase.createClient(CLOUD.url, CLOUD.key, { auth: { persistSession: true, autoRefreshToken: true, storageKey: "olive-ember-auth" } });
+  const { data: sess } = await sb.auth.getSession();
+  cloudUser = sess && sess.session ? sess.session.user : null;
+  if (cloudUser) { const { data } = await sb.rpc("restaurant_is_staff"); canEdit = data === true; }
+  roleKnown = true;
+  render();
+  await cloudLoad();
+  sb.channel("restaurant-live")
+    .on("postgres_changes", { event: "*", schema: "public", table: DOCS }, p => {
+      if (p.eventType === "DELETE") { const o = p.old || {}; if (o.coll && S[o.coll] && o.id in S[o.coll]) { const n = { ...S[o.coll] }; delete n[o.id]; S[o.coll] = n; } }
+      else { const r = p.new; if (r && S[r.coll]) S[r.coll] = { ...S[r.coll], [r.id]: r.data }; }
+      dataChanged();
+    })
+    .subscribe(status => { cloudLive = status === "SUBSCRIBED"; if (cloudLive) cloudLoad(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) cloudLoad(); });
+  /* safety net: networks that block live connections still stay in sync */
+  setInterval(() => { if (!cloudLive && !document.hidden) cloudLoad(); }, 5000);
+}
+let cloudLoading = null;
+async function cloudLoad() {
+  if (cloudLoading) return cloudLoading;
+  cloudLoading = (async () => {
+    const next = Object.fromEntries(COLLS.map(c => [c, {}])), page = 1000;
+    for (let from = 0; ; from += page) {
+      const { data, error } = await sb.from(DOCS).select("coll,id,data").range(from, from + page - 1);
+      if (error) { console.error(error); toast("Can't reach the restaurant right now. Check your connection."); return; }
+      data.forEach(r => { if (next[r.coll]) next[r.coll][r.id] = r.data; });
+      if (data.length < page) break;
+    }
+    COLLS.forEach(c => S[c] = next[c]); loadedRemote = true; dataChanged();
+  })();
+  try { await cloudLoading; } finally { cloudLoading = null; }
+}
+function cloudError(error) {
+  console.error(error);
+  const denied = error && (error.code === "42501" || /row-level security|permission/i.test(error.message || ""));
+  toast(denied ? "That needs a staff sign-in." : "That didn't save. Check your connection and try again.");
+  cloudLoad();
+  return false;
+}
+async function cloudPut(coll, id, data) {
+  S[coll] = { ...S[coll], [id]: data }; dataChanged();
+  const q = coll === "feedback" ? sb.from(DOCS).insert({ coll, id, data }) : sb.from(DOCS).upsert({ coll, id, data }, { onConflict: "coll,id" });
+  const { error } = await q;
+  return error ? cloudError(error) : true;
+}
+async function cloudDel(coll, id) {
+  const n = { ...S[coll] }; delete n[id]; S[coll] = n; dataChanged();
+  const { error } = await sb.from(DOCS).delete().match({ coll, id });
+  return error ? cloudError(error) : true;
+}
+
+/* staff sign-in */
+function loginHTML(what) {
+  if (cloudUser && !canEdit) return `<section class="panel login"><h2>Signed in as ${esc(cloudUser.email || "")}</h2>
+    <p class="muted" style="margin:0">This account isn't on the staff list yet.</p>
+    <form id="claim-form" class="login-f"><p style="margin:0"><b>Setting up for the first time?</b> Enter the one-time setup code to become the owner.</p>
+      <label class="field" for="lg-code">Setup code<input id="lg-code" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX" required></label>
+      ${ui.loginErr ? `<p class="formerr">${esc(ui.loginErr)}</p>` : ""}<button class="btn block" type="submit">Become the owner</button></form>
+    <p class="note" style="text-align:left;margin:0">Already have an owner? Ask them to add your email in Admin → Settings → Staff logins.</p>
+    <button class="btn ghost block" data-act="signout">Sign out</button></section>`;
+  return `<section class="panel login"><h2>Staff sign in</h2><p class="muted" style="margin:0">${esc(what)} is for restaurant staff. Guests don't need to sign in.</p>
+    <form id="login-form" class="login-f"><label class="field" for="lg-email">Email<input id="lg-email" type="email" autocomplete="username" value="${esc(ui.loginEmail || "")}" required></label>
+      <label class="field" for="lg-pass">Password<input id="lg-pass" type="password" autocomplete="current-password" required></label>
+      ${ui.loginErr ? `<p class="formerr">${esc(ui.loginErr)}</p>` : ""}<button class="btn block" type="submit">Sign in</button></form>
+    <p class="note" style="text-align:left;margin:0">Staff accounts are created by the owner. Forgot your password? Ask the owner to reset it.</p></section>`;
+}
+function staffLoginsHTML() {
+  if (mode !== "cloud") return "";
+  if (!ui.staffList) { if (!ui.staffListLoading) loadStaffList(); return `<section class="panel form"><h2>Staff logins</h2><p class="muted" style="margin:0">Loading…</p></section>`; }
+  const mine = (cloudUser && cloudUser.email || "").toLowerCase();
+  return `<section class="panel form"><h2>Staff logins</h2>
+    <p class="muted" style="margin:0">People on this list can open the staff floor and admin after signing in.</p>
+    <ul class="mlist">${ui.staffList.map(s => `<li><span class="n"><b>${esc(s.email)}</b><small>${s.email === mine ? "You" : "Added " + new Date(s.added_at).toLocaleDateString()}</small></span>${s.email === mine ? "" : `<button class="btn sm ghost" data-act="sl-del" data-email="${esc(s.email)}">${ui.slArm === s.email ? "Tap again to remove" : "Remove"}</button>`}</li>`).join("")}</ul>
+    <div class="coupon"><input id="sl-email" type="email" placeholder="new.staff@email.com" autocomplete="off"><button class="btn sm" data-act="sl-add">Add</button></div>
+    <p class="note" style="text-align:left;margin:0">Each person also needs an account: in Supabase, open Authentication → Users → Add user, enter their email and a password, and tick "Auto Confirm User". Then give them the password.</p>
+    <button class="btn ghost" data-act="signout">Sign out of this device</button></section>`;
+}
+async function loadStaffList() {
+  ui.staffListLoading = true;
+  const { data, error } = await sb.from("restaurant_staff").select("email,added_at").order("added_at");
+  ui.staffListLoading = false; ui.staffList = error ? [] : data; render();
+}
+document.addEventListener("submit", async e => {
+  const f = e.target;
+  if (f.id === "login-form") {
+    e.preventDefault(); const btn = f.querySelector("button"); btn.disabled = true; ui.loginErr = ""; ui.loginEmail = $("#lg-email").value.trim();
+    const { error } = await sb.auth.signInWithPassword({ email: ui.loginEmail, password: $("#lg-pass").value });
+    if (error) { ui.loginErr = /confirm/i.test(error.message) ? "This account isn't confirmed yet. Ask the owner to confirm it in Supabase." : "Wrong email or password."; btn.disabled = false; render(); const pw = $("#lg-pass"); if (pw) pw.focus(); return; }
+    location.reload();
+  }
+  if (f.id === "claim-form") {
+    e.preventDefault(); const btn = f.querySelector("button"); btn.disabled = true; ui.loginErr = "";
+    const { data, error } = await sb.rpc("restaurant_claim_owner", { setup_code: $("#lg-code").value.trim().toUpperCase() });
+    if (error || data !== true) { ui.loginErr = "That code isn't right, or this restaurant already has an owner."; btn.disabled = false; render(); return; }
+    location.reload();
+  }
+});
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act]"); if (!el || el.disabled) return;
+  if (el.dataset.act === "signout" && sb) { await sb.auth.signOut(); location.reload(); }
+  if (el.dataset.act === "sl-add") {
+    const v = ($("#sl-email") && $("#sl-email").value.trim().toLowerCase()) || "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { toast("Enter a full email address"); return; }
+    const { error } = await sb.from("restaurant_staff").insert({ email: v });
+    if (error) { toast(/duplicate/i.test(error.message) ? "That email is already on the list" : "Couldn't add that email"); return; }
+    toast(v + " can now sign in as staff"); loadStaffList();
+  }
+  if (el.dataset.act === "sl-del") {
+    const v = el.dataset.email; if (ui.slArm !== v) { ui.slArm = v; render(); return; }
+    ui.slArm = null; const { error } = await sb.from("restaurant_staff").delete().eq("email", v);
+    toast(error ? "Couldn't remove that email" : v + " removed"); loadStaffList();
+  }
+});
+
 /* ================= Boot ================= */
 cacheLoad().finally(() => { D3.cacheReady = true; render(); });
 setTimeout(() => { if (!D3.cacheReady) { D3.cacheReady = true; render(); } }, 1800);
@@ -2853,6 +2985,7 @@ addEventListener("load", () => { if (view.name === "admin") render(); });
 route();
 (async () => {
   const c = window.claude;
+  if (CLOUD) { try { await startCloud(); } catch (e) { console.error(e); roleKnown = true; startLocal(); } return; }
   if (!c || !c.use) { roleKnown = true; startLocal(); return; }
   const [d, user] = await Promise.all([c.use("db").catch(() => null), c.use("user").catch(() => null)]);
   let canWrite = null;
