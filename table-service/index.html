@@ -864,6 +864,16 @@ img.tile[src^="data:image/gif"] { background: linear-gradient(110deg, transparen
 .login-f { display: grid; gap: 12px; }
 .pw-row { position: relative; display: block; }
 .pw-row input { width: 100%; padding-right: 64px; }
+.tcard.s-ready { border-top-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--surface)); }
+.queue li.q-ready { border-left-color: var(--ok); }
+.tracker.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tracker.four div { padding: 10px 8px; }
+.kc-times { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kc-times button { display: grid; gap: 1px; justify-items: center; min-height: 48px; }
+.kc-times small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.ticket .tk-acts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.lines .acts2 { display: inline-flex; gap: 6px; flex: none; }
+.ev-ready .ev-dot { background: var(--ok); }
 .pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--accent, inherit); font: inherit; font-weight: 600; cursor: pointer; }
 </style>
 
@@ -1664,16 +1674,16 @@ function tableState(n) {
   const sub = sumOf(os), offer = bestOffer(os, sub, t.code), disc = offer ? offer.amount : 0, due = withTax(sub - disc);
   const pending = pays.filter(p => p.status === "pending"), pendAmt = pending.reduce((s, p) => s + p.amount, 0);
   const paidAmt = pays.filter(p => p.status !== "pending").reduce((s, p) => s + p.amount, 0), left = Math.max(0, due - paidAmt - pendAmt), paid = due > 0 && paidAmt >= due;
-  const nNew = qtyOf(os, "new"), nCook = qtyOf(os, "cooking"), nServed = qtyOf(os, "served");
-  const st = t.waiter ? "call" : nNew ? "new" : pendAmt ? "confirm" : t.bill && !paid ? "bill" : nCook ? "cooking" : paid ? "paid" : os.length ? "seated" : "empty";
-  return { os, t, pays, sub, offer, disc, due, paidAmt, pending, pendAmt, left, paid, nNew, nCook, nServed, st, guests: new Set(os.map(o => o.by)).size, since: os.length ? os[0].at : t.waiter || 0 };
+  const nNew = qtyOf(os, "new"), nCook = qtyOf(os, "cooking"), nServed = qtyOf(os, "served"), nReady = os.filter(isReady).reduce((s, o) => s + o.qty, 0);
+  const st = t.waiter ? "call" : nNew ? "new" : nReady ? "ready" : pendAmt ? "confirm" : t.bill && !paid ? "bill" : nCook ? "cooking" : paid ? "paid" : os.length ? "seated" : "empty";
+  return { os, t, pays, sub, offer, disc, due, paidAmt, pending, pendAmt, left, paid, nNew, nCook, nServed, nReady, st, guests: new Set(os.map(o => o.by)).size, since: os.length ? os[0].at : t.waiter || 0 };
 }
-const STATE_LABEL = { confirm: "Payment to check", paid: "Paid", call: "Calling waiter", bill: "Wants the bill", new: "New order", cooking: "Food cooking", seated: "Dining", empty: "Free" };
+const STATE_LABEL = { confirm: "Payment to check", paid: "Paid", call: "Calling waiter", bill: "Wants the bill", new: "New order", ready: "Food ready to serve", cooking: "Food cooking", seated: "Dining", empty: "Free" };
 const listText = a => a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 
 /* ================= Routing & UI state ================= */
 let view = { name: "home" };
-const ui = { loginErr: "", staffList: null, staffListLoading: false, slArm: null, staffId: LS.get("rt-staffid", ""), mine: LS.get("rt-mine", true), afilter: "all", atable: 0, tdraft: null, staffName: LS.get("rt-staffname", ""), opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
+const ui = { kc: { n: 0, mins: 0 }, loginErr: "", staffList: null, staffListLoading: false, slArm: null, staffId: LS.get("rt-staffid", ""), mine: LS.get("rt-mine", true), afilter: "all", atable: 0, tdraft: null, staffName: LS.get("rt-staffname", ""), opts: {}, avoid: LS.get("rt-avoid", []), algOpen: false, stars: 0, fbText: "", rated: false, rateFor: null, ofilter: "all", srange: "today", odraft: null, coupon: "", upiPay: null, payNoArm: null, csvText: "", atab: "qr", draft: null, sdraft: null, imgData: "", gtab: "menu", stab: "floor", sheet: null, qty: 1, note: "", tip: 10, paying: null, lbMode: "table", clearArm: 0, q: "", vegOnly: false, split: "all", ways: 2, bump: null, sound: false, lastPay: null, selfCancel: false };
 const BASE_TITLE = document.title;
 function route() {
   const h = location.hash.slice(1);
@@ -1703,11 +1713,12 @@ let prevPays = null, prevOrders = null, prevWaiter = null, staffSeen = null, act
 function detect() {
   if (view.name === "guest") {
     const os = ordersFor(view.table), cur = {};
-    os.forEach(o => cur[o.id] = o.state);
+    os.forEach(o => cur[o.id] = o.state + (isReady(o) ? ":ready" : ""));
     if (prevOrders) {
-      const cooking = [], served = [];
-      os.forEach(o => { const p = prevOrders[o.id]; if (p && p !== o.state && o.by === me.id && DISH[o.dish]) (o.state === "cooking" ? cooking : o.state === "served" ? served : []).push(dishOf(o).name); });
-      if (cooking.length || served.length) { notice.cooking.push(...cooking); notice.served.push(...served); clearTimeout(notice.t); notice.t = setTimeout(flushNotice, 450); }
+      const cooking = [], ready = [], served = [];
+      os.forEach(o => { const p = prevOrders[o.id], c = cur[o.id]; if (!p || p === c || o.by !== me.id || !DISH[o.dish]) return; const nm = dishOf(o).name;
+        if (c === "cooking") { cooking.push(nm); notice.mins = Math.max(notice.mins || 0, minsLeft(etaOf(o))); } else if (c === "cooking:ready") ready.push(nm); else if (c === "served") served.push(nm); });
+      if (cooking.length || ready.length || served.length) { notice.cooking.push(...cooking); notice.ready.push(...ready); notice.served.push(...served); clearTimeout(notice.t); notice.t = setTimeout(flushNotice, 450); }
     }
     prevOrders = cur;
     const mine = {}; paymentsFor(view.table).filter(p => p.by === me.id).forEach(p => mine[p.id] = p);
@@ -1724,20 +1735,22 @@ function detect() {
       if (ts.t.waiter) keys.add("w" + n + ":" + ts.t.waiter);
       if (ts.t.bill && !ts.paid) keys.add("b" + n + ":" + ts.t.bill);
       ts.os.filter(o => o.state === "new").forEach(o => keys.add("o" + o.id));
+      ts.os.filter(isReady).forEach(o => keys.add("r" + o.id));
       ts.pending.forEach(p => keys.add("p" + p.id));
-      if (ts.t.waiter || ts.nNew || ts.pendAmt || (ts.t.bill && !ts.paid)) count++;
+      if (ts.t.waiter || ts.nNew || ts.nReady || ts.pendAmt || (ts.t.bill && !ts.paid)) count++;
     }
     if (staffSeen && [...keys].some(k => !staffSeen.has(k))) chime();
     staffSeen = keys;
     document.title = count ? `(${count}) ${R.name} floor` : `${R.name} floor`;
   }
 }
-const notice = { cooking: [], served: [], t: 0 };
+const notice = { cooking: [], ready: [], served: [], mins: 0, t: 0 };
 function flushNotice() {
-  const { cooking, served } = notice;
+  const { cooking, ready, served, mins } = notice;
   if (served.length) toast(listText(served) + (served.length > 1 ? " are" : " is") + " on the way. Enjoy!");
-  else if (cooking.length) toast("The kitchen started on " + listText(cooking));
-  notice.cooking = []; notice.served = [];
+  else if (ready.length) { toast(listText(ready) + (ready.length > 1 ? " are" : " is") + " ready! Bringing it to your table."); buzz([30, 80, 30]); }
+  else if (cooking.length) toast("Order confirmed. The kitchen started on " + listText(cooking) + (mins > 0 ? `, ready in about ${mins} min` : ""));
+  notice.cooking = []; notice.ready = []; notice.served = []; notice.mins = 0;
 }
 function dataChanged() { applyConfig(); detect(); render(); }
 function chime() {
@@ -1870,8 +1883,9 @@ function statusBanner(ts) {
   let text, cls = "";
   if (ts.paid && !ts.nNew && !ts.nCook) { text = "Bill paid. Thanks for dining with us."; cls = "ok"; }
   else if (ts.pendAmt && !ts.nNew) { text = `Staff are checking your ${fmt(ts.pendAmt)} payment`; cls = "new"; }
+  else if (ts.nReady) { text = `${ts.nReady} ${ts.nReady === 1 ? "item is" : "items are"} ready · bringing ${ts.nReady === 1 ? "it" : "them"} to your table`; cls = "ok"; }
   else if (ts.nNew) { text = `${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} waiting for staff to confirm`; cls = "new"; }
-  else if (ts.nCook) { const m = minsLeft(Math.max(...ts.os.filter(o => o.state === "cooking").map(etaOf))); text = `Cooking ${ts.nCook} ${ts.nCook === 1 ? "item" : "items"} · ${m > 0 ? `ready in about ${m} min` : "coming any moment"}`; cls = "cook"; }
+  else if (ts.nCook) { const m = minsLeft(Math.max(...ts.os.filter(o => o.state === "cooking").map(etaOf))); text = `Order confirmed · cooking ${ts.nCook} ${ts.nCook === 1 ? "item" : "items"} · ${m > 0 ? `ready in about ${m} min` : "coming any moment"}`; cls = "cook"; }
   else { text = `Everything is served · ${fmt(ts.left)} left on the bill`; cls = "ok"; }
   return `<button class="status ${cls}" data-act="gtab" data-tab="table"><span class="pulse"></span><span class="st-t">${text}</span><span class="st-l">Order →</span></button>`;
 }
@@ -1919,16 +1933,17 @@ function guestMenu() {
     <div class="dishes">${body}</div>
     <div class="wifi slim">${ICON.wifi}<div><div class="k">Wi-Fi · ${esc(R.wifi.ssid)}</div><div class="v wifi-pass">${esc(R.wifi.pass)}</div></div><button class="btn ghost sm" data-act="copy-wifi">Copy</button></div>`;
 }
-function statePill(s, o) { return s === "new" ? `<span class="pill new">Waiting for staff</span>` : s === "cooking" ? `<span class="pill cook">Cooking${o ? " · " + etaText(o) : ""}</span>` : `<span class="pill ok">Served</span>`; }
+function statePill(s, o) { if (o && isReady(o)) return `<span class="pill ok">Ready</span>`; return s === "new" ? `<span class="pill new">Waiting for staff</span>` : s === "cooking" ? `<span class="pill cook">Cooking${o ? " · " + etaText(o) : ""}</span>` : `<span class="pill ok">Served</span>`; }
 function guestTable(ts) {
   const { os } = ts;
   const pending = basketLines();
   const unsent = pending.length ? `<section class="panel unsent"><div class="xrow"><div><h2>Not sent yet</h2><p class="muted" style="margin:2px 0 0;font-size:14px">Only you can see these until you send them.</p></div></div>
       <ul class="lines">${pending.map(l => `<li><img src="${photo(DISH[l.id])}" alt=""><span class="q">${l.qty}×</span><span class="n">${esc(DISH[l.id].name)}${lineLabel(l) ? `<small>${lineLabel(l)}</small>` : ""}</span><span class="p">${fmt(unitOf(l) * l.qty)}</span></li>`).join("")}</ul>
       <button class="btn block" data-act="open-basket">Review and send</button></section>` : "";
-  const tracker = os.length ? `<div class="tracker">
-      <div class="${ts.nNew ? "on new" : ""}"><b class="mono">${ts.nNew}</b><span>Waiting for staff</span></div>
-      <div class="${ts.nCook ? "on cook" : ""}"><b class="mono">${ts.nCook}</b><span>Cooking</span></div>
+  const tracker = os.length ? `<div class="tracker four">
+      <div class="${ts.nNew ? "on new" : ""}"><b class="mono">${ts.nNew}</b><span>Sent</span></div>
+      <div class="${ts.nCook - ts.nReady ? "on cook" : ""}"><b class="mono">${ts.nCook - ts.nReady}</b><span>Cooking</span></div>
+      <div class="${ts.nReady ? "on ok" : ""}"><b class="mono">${ts.nReady}</b><span>Ready</span></div>
       <div class="${ts.nServed ? "on ok" : ""}"><b class="mono">${ts.nServed}</b><span>Served</span></div></div>` : "";
   const lines = os.length ? `<ul class="lines">${os.map(o => { const d = dishOf(o); return `<li><img src="${photo(d)}" alt=""><span class="q">${o.qty}×</span><span class="n">${esc(d.name)}<small>${o.by === me.id ? "You" : esc(o.name)} · ${ago(o.at)}${o.opts && o.opts.length ? ` · ${esc(o.opts.join(", "))}` : ""}${o.note ? ` · “${esc(o.note)}”` : ""}</small></span>${statePill(o.state, o)}</li>`; }).join("")}</ul>`
     : `<div class="emptybox"><b>Nothing sent to the kitchen yet</b><span>Everyone at table ${view.table} orders from their own phone onto one shared bill.</span><button class="btn sm" data-act="gtab" data-tab="menu">Browse the menu</button></div>`;
@@ -2039,7 +2054,7 @@ function sheetHTML() {
       <div class="sheet-b">
         <label class="field" for="wname">What should we call you?<input id="wname" maxlength="20" value="${esc(me.name.startsWith("Guest ") ? "" : me.name)}" placeholder="Your first name" autocomplete="given-name"></label>
         <ul class="howto">
-          <li>${ICON.menu}<span><b>Order from your phone.</b> Staff confirm it and the kitchen starts cooking.</span></li>
+          <li>${ICON.menu}<span><b>Order from your phone.</b> Staff confirm it, tell you how long it takes and the kitchen starts cooking.</span></li>
           <li>${ICON.table}<span><b>One bill for the table.</b> Everyone adds from their own phone. Split it when you pay.</span></li>
           <li>${ICON.bell}<span><b>Need something?</b> Call the waiter from the top of the screen.</span></li>
         </ul>
@@ -2109,6 +2124,7 @@ function sheetHTML() {
       ${rateBlock()}<button class="btn block ghost" data-act="close">Done</button></div>`;
   }
   if (s.startsWith("table:")) return staffTableSheet(+s.slice(6));
+  if (s === "kc") return kitchenConfirmSheet();
   if (s === "ad-dish") return adminDishSheet();
   if (s === "call") return callSheet();
   if (s === "who") return whoSheet();
@@ -2127,7 +2143,8 @@ function attentionQueue(all) {
   all.forEach(t => {
     if (t.t.waiter) q.push({ at: t.t.waiter, n: t.n, kind: "alert", text: t.t.reason ? "Waiter: " + esc(t.t.reason) : "Called a waiter", btn: "On my way", act: "ack-waiter" });
     t.pending.forEach(p => q.push({ at: p.at, n: t.n, kind: "pay", text: `Check ${fmt(p.amount + (p.tip || 0))} · ${esc(p.method)}<br>from ${esc(p.name)}`, btn: "Received", act: "pay-ok", id: p.id, btn2: ui.payNoArm === p.id ? "Tap again: not received" : "Not received", act2: "pay-no" }));
-    if (t.nNew) q.push({ at: t.os.find(o => o.state === "new").at, n: t.n, kind: "new", text: `${t.nNew} new ${t.nNew === 1 ? "item" : "items"} to confirm`, btn: "Send to kitchen", act: "to-kitchen" });
+    if (t.nNew) q.push({ at: t.os.find(o => o.state === "new").at, n: t.n, kind: "new", text: `New order: ${t.os.filter(o => o.state === "new").map(o => o.qty + "× " + esc(dishOf(o).name)).join(", ")}`, btn: "Confirm", act: "to-kitchen" });
+    if (t.nReady) { const rd = t.os.filter(isReady); q.push({ at: Math.min(...rd.map(o => o.readyAt)), n: t.n, kind: "ready", text: `Ready to serve: ${rd.map(o => o.qty + "× " + esc(dishOf(o).name)).join(", ")}`, btn: "Served", act: "serve-ready" }); }
     if (t.t.bill && !t.paid && t.left > 0) q.push({ at: t.t.bill, n: t.n, kind: "bill", text: `Wants the bill · ${fmt(t.left)} left`, btn: "View", act: "open-table" });
   });
   return q.sort((a, b) => a.at - b.at);
@@ -2137,7 +2154,7 @@ function staffHTML() {
   const all = Array.from({ length: R.tables }, (_, i) => ({ n: i + 1, ...tableState(i + 1) }));
   const mt = myTables(), shown = ui.mine && mt ? all.filter(t => mt.includes(t.n)) : all;
   const queue = attentionQueue(shown);
-  const cooking = all.reduce((s, t) => s + t.nCook, 0);
+  const cooking = all.reduce((s, t) => s + t.nCook - t.nReady, 0);
   const open = all.filter(t => t.st !== "empty").length;
   const openBills = all.reduce((s, t) => s + t.left, 0);
   const takings = all.reduce((s, t) => s + t.paidAmt, 0);
@@ -2150,23 +2167,26 @@ function staffHTML() {
       <div class="kpi"><div class="k">Open bills</div><div class="v">${fmt(openBills)}</div>${takings ? `<div class="kpi-s">${fmt(takings)} paid tonight</div>` : ""}</div></div>
       <div class="floorwrap">
         <section class="queue"><h2>Needs you <span class="mono muted">${queue.length}</span></h2>
-          ${queue.length ? `<ul>${queue.map(i => `<li class="q-${i.kind}"><span class="qt mono">${String(i.n).padStart(2, "0")}</span><span class="qx">${i.text}<small>${agoAgo(i.at)}${waiterFor(i.n) ? " · " + esc(waiterFor(i.n).name) + "'s table" : ""}</small></span><span class="qb"><button class="btn sm ${i.kind === "alert" ? "alert" : i.kind === "new" || i.kind === "pay" ? "pop" : "ghost"}" data-act="${i.act}" data-n="${i.n}" ${i.id ? `data-id="${i.id}"` : ""}>${i.btn}</button>${i.btn2 ? `<button class="btn sm ghost" data-act="${i.act2}" data-id="${i.id}">${i.btn2}</button>` : ""}</span></li>`).join("")}</ul>` : `<div class="allclear">${ICON.check}<b>All caught up</b><span>Waiter calls, new orders and bill requests appear here first, oldest at the top.</span></div>`}
+          ${queue.length ? `<ul>${queue.map(i => `<li class="q-${i.kind}"><span class="qt mono">${String(i.n).padStart(2, "0")}</span><span class="qx">${i.text}<small>${agoAgo(i.at)}${waiterFor(i.n) ? " · " + esc(waiterFor(i.n).name) + "'s table" : ""}</small></span><span class="qb"><button class="btn sm ${i.kind === "alert" ? "alert" : i.kind === "new" || i.kind === "pay" ? "pop" : i.kind === "ready" ? "" : "ghost"}" data-act="${i.act}" data-n="${i.n}" ${i.id ? `data-id="${i.id}"` : ""}>${i.btn}</button>${i.btn2 ? `<button class="btn sm ghost" data-act="${i.act2}" data-id="${i.id}">${i.btn2}</button>` : ""}</span></li>`).join("")}</ul>` : `<div class="allclear">${ICON.check}<b>All caught up</b><span>Waiter calls, new orders, food ready to serve and bill requests appear here first, oldest at the top.</span></div>`}
         </section>
         <div>${mt ? `<div class="minebar"><button class="chip-toggle ${ui.mine ? "on" : ""}" data-act="mine" aria-pressed="${!!ui.mine}">${ui.mine ? `Your tables: ${tablesText(mt)} · show all` : "Show only my tables"}</button></div>` : ""}<div class="floor">${shown.map(t => {
-          const pills = [waiterFor(t.n) ? `<span class="pill wtr">${esc(waiterFor(t.n).name)}</span>` : "", t.t.waiter ? `<span class="pill alert">${esc(t.t.reason || "Waiter")} · ${ago(t.t.waiter)}</span>` : "", t.pendAmt ? `<span class="pill new">Check ${fmt(t.pendAmt)}</span>` : "", t.nNew ? `<span class="pill new">${t.nNew} new</span>` : "", t.nCook ? `<span class="pill cook">${t.nCook} cooking</span>` : "", t.t.bill && !t.paid && t.left > 0 ? `<span class="pill new">Bill requested</span>` : "", t.paid ? `<span class="pill ok">Paid</span>` : t.paidAmt ? `<span class="pill ok">Part paid</span>` : ""].join("");
-          const qa = t.t.waiter ? `<button class="btn sm alert qa" data-act="ack-waiter" data-n="${t.n}">On my way</button>` : t.nNew ? `<button class="btn sm pop qa" data-act="to-kitchen" data-n="${t.n}">Send to kitchen</button>` : "";
+          const pills = [waiterFor(t.n) ? `<span class="pill wtr">${esc(waiterFor(t.n).name)}</span>` : "", t.t.waiter ? `<span class="pill alert">${esc(t.t.reason || "Waiter")} · ${ago(t.t.waiter)}</span>` : "", t.pendAmt ? `<span class="pill new">Check ${fmt(t.pendAmt)}</span>` : "", t.nNew ? `<span class="pill new">${t.nNew} new</span>` : "", t.nReady ? `<span class="pill ok">${t.nReady} ready</span>` : "", t.nCook - t.nReady ? `<span class="pill cook">${t.nCook - t.nReady} cooking</span>` : "", t.t.bill && !t.paid && t.left > 0 ? `<span class="pill new">Bill requested</span>` : "", t.paid ? `<span class="pill ok">Paid</span>` : t.paidAmt ? `<span class="pill ok">Part paid</span>` : ""].join("");
+          const qa = t.t.waiter ? `<button class="btn sm alert qa" data-act="ack-waiter" data-n="${t.n}">On my way</button>` : t.nNew ? `<button class="btn sm pop qa" data-act="to-kitchen" data-n="${t.n}">Confirm order</button>` : t.nReady ? `<button class="btn sm qa" data-act="serve-ready" data-n="${t.n}">Served</button>` : "";
           return `<div class="tcard s-${t.st}" data-act="open-table" data-n="${t.n}"><button class="top" data-act="open-table" data-n="${t.n}" aria-label="Open table ${t.n}: ${STATE_LABEL[t.st]}"><span class="num">${String(t.n).padStart(2, "0")}</span><span class="state">${STATE_LABEL[t.st]}</span></button>
             ${pills ? `<div class="pills">${pills}</div>` : ""}${qa}
             <div class="foot">${t.st === "empty" ? "<span>Ready for guests</span>" : `<span>${t.guests} ${t.guests === 1 ? "phone" : "phones"} · ${ago(t.since)}</span><b>${fmt(t.paid ? t.due : t.due - t.paidAmt)}</b>`}</div></div>`;
         }).join("")}</div>
-        <div class="legend"><span><i style="background:var(--alert)"></i>Calling waiter</span><span><i style="background:var(--pop)"></i>New order or bill</span><span><i style="background:var(--cook)"></i>Cooking</span><span><i style="background:var(--ok)"></i>Dining</span><span><i style="background:var(--accent)"></i>Paid</span></div></div>
+        <div class="legend"><span><i style="background:var(--alert)"></i>Calling waiter</span><span><i style="background:var(--pop)"></i>New order or bill</span><span><i style="background:var(--cook)"></i>Cooking</span><span><i style="background:var(--ok)"></i>Food ready or dining</span><span><i style="background:var(--accent)"></i>Paid</span></div></div>
       </div>`;
   } else if (ui.stab === "orders") {
     body = ordersFeed();
   } else if (ui.stab === "kitchen") {
     const tickets = all.filter(t => t.nCook).map(t => ({ ...t, cook: t.os.filter(o => o.state === "cooking") })).sort((a, b) => a.cook[0].at - b.cook[0].at);
-    body = tickets.length ? `<div class="tickets">${tickets.map(t => { const over = Math.max(...t.cook.map(o => -minsLeft(etaOf(o)))), late = over > 5 ? "late2" : over > 0 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${dueText(o)}${reqText(o)}</small></span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></li>`).join("")}</ul>${t.cook.length > 1 ? `<button class="btn sm block" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div>`; }).join("")}</div>`
-      : `<div class="allclear">${ICON.check}<b>The kitchen is clear</b><span>Orders appear here once staff send them to the kitchen, oldest first.</span></div>`;
+    body = tickets.length ? `<h2 class="vh">Kitchen tickets</h2><div class="tickets">${tickets.map(t => { const todo = t.cook.filter(o => !isReady(o)), over = todo.length ? Math.max(...todo.map(o => -minsLeft(etaOf(o)))) : 0, late = over > 5 ? "late2" : over > 0 ? "late" : ""; return `<div class="ticket ${late}"><h3>Table ${t.n}<span class="age">${ago(t.cook[0].at)}</span></h3><ul class="lines">${t.cook.map(o => isReady(o)
+        ? `<li class="rdy"><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>Ready ${agoAgo(o.readyAt)} · waiting for a waiter</small></span><span class="acts2"><span class="pill ok">Ready</span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></span></li>`
+        : `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${dueText(o)}${reqText(o)}</small></span><button class="btn sm pop" data-act="o-ready" data-id="${o.id}">Ready</button></li>`).join("")}</ul>
+        <div class="tk-acts">${todo.length > 1 ? `<button class="btn sm" data-act="all-ready" data-n="${t.n}">All ready</button>` : ""}${t.cook.length > 1 ? `<button class="btn sm ghost" data-act="all-served" data-n="${t.n}">All served</button>` : ""}</div></div>`; }).join("")}</div>`
+      : `<div class="allclear">${ICON.check}<b>The kitchen is clear</b><span>Orders appear here once staff confirm them, oldest first. Tap Ready when a dish is done and the waiters get an alert.</span></div>`;
   } else {
     body = `<p class="muted" style="margin:0">Replace the illustrations with real photos of your dishes. Guests see them right away.</p>
       ${assets ? "" : `<p class="note" style="text-align:left">Photo uploads need editor access to this page.</p>`}
@@ -2185,9 +2205,10 @@ function staffTableSheet(n) {
   return `<div class="sheet-b"><div class="xrow"><div><h2>Table ${n}</h2><p class="muted" style="margin:2px 0 0;font-size:14px">${STATE_LABEL[ts.st]}${os.length ? ` · ${ts.guests} ${ts.guests === 1 ? "phone" : "phones"} · seated ${ago(ts.since)}` : ""}</p></div><button class="x" data-act="close" aria-label="Close">×</button></div>
     ${!t.waiter && t.ackAt && Date.now() - t.ackAt < 10 * 60000 ? `<p class="note" style="text-align:left;margin:0">${t.ackBy ? esc(t.ackBy) : "Someone"} answered the last call ${ago(t.ackAt)} ago.</p>` : ""}
     ${t.waiter ? `<div class="alertbox"><b>${esc(t.reason || "Called the waiter")} · ${ago(t.waiter)} ago</b><button class="btn sm alert" data-act="ack-waiter" data-n="${n}">On my way</button></div>` : ""}
-    ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Send ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} to the kitchen</button>` : ""}
+    ${ts.nNew ? `<button class="btn pop block" data-act="to-kitchen" data-n="${n}">Confirm ${ts.nNew} ${ts.nNew === 1 ? "item" : "items"} and send to the kitchen</button>` : ""}
+    ${ts.nReady ? `<button class="btn block" data-act="serve-ready" data-n="${n}">Mark ${ts.nReady} ready ${ts.nReady === 1 ? "item" : "items"} served</button>` : ""}
     ${group("new", "New, not sent yet")}
-    ${group("cooking", "In the kitchen", o => `<button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>`)}
+    ${group("cooking", "In the kitchen", o => isReady(o) ? `<span class="acts2"><span class="pill ok">Ready</span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></span>` : `<span class="acts2"><button class="btn sm pop" data-act="o-ready" data-id="${o.id}">Ready</button><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button></span>`)}
     ${group("served", "Served")}
     ${os.length ? billSum(ts, false) : `<p class="empty">This table is free.</p>`}
     ${ts.pays.length ? `<div class="sec-h">Payments</div><ul class="lines">${ts.pays.map(p => `<li><span class="n">${esc(p.name)}<small>${esc(p.method)} · ${ago(p.at)}${p.tip ? ` · tip ${fmt(p.tip)}` : ""}</small></span><span class="p">${fmt(p.amount)}</span>${p.status === "pending" ? `<button class="btn sm pop" data-act="pay-ok" data-id="${p.id}">Received</button><button class="btn sm ghost" data-act="pay-no" data-id="${p.id}">${ui.payNoArm === p.id ? "Sure?" : "Not received"}</button>` : `<span class="pill ok">Received</span>`}</li>`).join("")}</ul>` : ""}
@@ -2258,7 +2279,7 @@ function ordersFeed() {
   const list = all.filter(o => ui.ofilter === "all" || o.state === ui.ofilter);
   const tabs = [["all", "All"], ["new", "New"], ["cooking", "Cooking"], ["served", "Served"]];
   return `<div class="modes ofil">${tabs.map(([k, l]) => `<button class="${ui.ofilter === k ? "on" : ""}" data-act="ofilter" data-f="${k}">${l} <span class="mono">${count(k)}</span></button>`).join("")}</div>
-    ${list.length ? `<ul class="feed">${list.map(o => `<li class="f-${o.state}"><span class="ft mono">${clock(o.at)}</span><button class="qt mono" data-act="open-table" data-n="${o.table}" aria-label="Open table ${o.table}">${String(o.table).padStart(2, "0")}</button><span class="qx"><b>${o.qty}× ${esc(dishOf(o).name)}</b><small>${esc(o.name)} · ${fmt(lineTotal(o))}${o.confirmedBy ? " · sent by " + esc(o.confirmedBy) : ""}${o.servedBy ? " · served by " + esc(o.servedBy) : ""}${reqText(o)}</small></span>${o.state === "new" ? `<span class="pill new">New</span><button class="btn sm pop" data-act="o-cook" data-id="${o.id}">Start</button>` : o.state === "cooking" ? `<span class="pill cook">Cooking</span><button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>` : `<span class="pill ok">Served</span>`}</li>`).join("")}</ul>`
+    ${list.length ? `<ul class="feed">${list.map(o => `<li class="f-${o.state}"><span class="ft mono">${clock(o.at)}</span><button class="qt mono" data-act="open-table" data-n="${o.table}" aria-label="Open table ${o.table}">${String(o.table).padStart(2, "0")}</button><span class="qx"><b>${o.qty}× ${esc(dishOf(o).name)}</b><small>${esc(o.name)} · ${fmt(lineTotal(o))}${o.confirmedBy ? " · sent by " + esc(o.confirmedBy) : ""}${o.servedBy ? " · served by " + esc(o.servedBy) : ""}${reqText(o)}</small></span>${o.state === "new" ? `<span class="pill new">New</span><button class="btn sm pop" data-act="o-cook" data-id="${o.id}">Start</button>` : o.state === "cooking" ? (isReady(o) ? `<span class="pill ok">Ready</span>` : `<span class="pill cook">Cooking</span><button class="btn sm pop" data-act="o-ready" data-id="${o.id}">Ready</button>`) + `<button class="btn sm ghost" data-act="served" data-id="${o.id}">Served</button>` : `<span class="pill ok">Served</span>`}</li>`).join("")}</ul>`
       : `<div class="allclear">${ICON.check}<b>No orders here</b><span>Every item guests send appears here the moment they tap Send, newest first.</span></div>`}`;
 }
 
@@ -2421,7 +2442,9 @@ const ALG_LABEL = Object.fromEntries(ALLERGENS);
 const DEFAULT_ALG = { burrata: ["dairy"], soup: ["dairy", "gluten"], calamari: ["seafood", "gluten", "egg"], satay: ["nuts", "soy"], margherita: ["gluten", "dairy"], funghi: ["gluten", "dairy"], aglio: ["gluten"], butterchicken: ["dairy", "nuts"], burger: ["gluten", "dairy", "egg", "soy"], salmon: ["fish", "dairy"], tiramisu: ["gluten", "dairy", "egg"], lava: ["gluten", "dairy", "egg"], gelato: ["dairy", "nuts"], lassi: ["dairy"], cappuccino: ["dairy"] };
 const algOf = d => d ? (Array.isArray(d.allergens) ? d.allergens : DEFAULT_ALG[d.id] || []) : [];
 const avoided = d => algOf(d).some(a => ui.avoid.includes(a));
-const etaOf = o => o.state === "cooking" ? (o.cookAt || o.at) + prepOf(dishOf(o)) * 60000 : 0;
+const prepMins = o => o.mins > 0 ? o.mins : prepOf(dishOf(o));
+const isReady = o => o.state === "cooking" && !!o.readyAt;
+const etaOf = o => o.state === "cooking" ? (o.cookAt || o.at) + prepMins(o) * 60000 : 0;
 const minsLeft = t => Math.ceil((t - Date.now()) / 60000);
 const etaText = o => { const m = minsLeft(etaOf(o)); return m > 0 ? `~${m} min` : "any moment"; };
 const dueText = o => { const m = minsLeft(etaOf(o)); return m >= 0 ? `due in ${m} min` : `<b class="late-t">${-m} min late</b>`; };
@@ -2619,8 +2642,8 @@ function syncGuestEvents() {
 }
 
 /* ---- Admin: Activity ---- */
-const EV_GROUPS = { all: null, order: ["order"], kitchen: ["kitchen", "served"], call: ["call", "answer"], payment: ["payment", "paycheck", "bill"], table: ["clear"] };
-const EV_LABEL = { order: "Order", kitchen: "Kitchen", served: "Served", call: "Waiter call", answer: "Answered", payment: "Payment", paycheck: "Payment check", bill: "Bill", clear: "Table cleared" };
+const EV_GROUPS = { all: null, order: ["order"], kitchen: ["kitchen", "ready", "served"], call: ["call", "answer"], payment: ["payment", "paycheck", "bill"], table: ["clear"] };
+const EV_LABEL = { order: "Order", kitchen: "Confirmed", ready: "Ready", served: "Served", call: "Waiter call", answer: "Answered", payment: "Payment", paycheck: "Payment check", bill: "Bill", clear: "Table cleared" };
 function dayLabel(t) { const d = new Date(t), today = new Date(); today.setHours(0, 0, 0, 0); const k = new Date(d); k.setHours(0, 0, 0, 0); const diff = (today - k) / 86400000; return diff === 0 ? "Today" : diff === 1 ? "Yesterday" : d.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }); }
 function activityList() {
   const g = EV_GROUPS[ui.afilter];
@@ -2717,11 +2740,31 @@ document.addEventListener("change", e => {
 });
 
 /* ================= Actions ================= */
-async function sendToKitchen(n) {
-  let items = 0;
-  for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking", cookAt: Date.now(), confirmedBy: staffName() })) return; items += o.qty; }
-  if (items) logEvent("kitchen", n, `${staffName()} sent ${items} ${items === 1 ? "item" : "items"} from table ${n} to the kitchen`, { items });
-  toast("Table " + n + " sent to the kitchen");
+const suggestedMins = os => os.length ? Math.ceil(Math.max(...os.map(o => prepOf(dishOf(o)))) / 5) * 5 : 15;
+function kitchenConfirmSheet() {
+  const n = ui.kc.n, os = ordersFor(n).filter(o => o.state === "new");
+  const head = t => `<div class="xrow"><div><h2>${t}</h2>${os.length ? `<p class="muted" style="margin:2px 0 0;font-size:14px">${listText([...new Set(os.map(o => esc(o.name)))])} · ordered ${agoAgo(os[0].at)}</p>` : ""}</div><button class="x" data-act="close" aria-label="Close">×</button></div>`;
+  if (!os.length) return `<div class="sheet-b">${head("Table " + n)}<p class="muted" style="margin:0">Someone already confirmed this order.</p><button class="btn block ghost" data-act="close">Close</button></div>`;
+  const sug = suggestedMins(os), mins = ui.kc.mins || sug, opts = [...new Set([5, 10, 15, 20, 30, 45, sug])].sort((a, b) => a - b).slice(-6);
+  if (!opts.includes(sug)) opts[0] = sug;
+  return `<div class="sheet-b">${head("Confirm table " + n + "'s order")}
+    <ul class="lines">${os.map(o => `<li><span class="q">${o.qty}×</span><span class="n">${esc(dishOf(o).name)}<small>${esc(o.name)} · ${clock(o.at)}${reqText(o)}</small></span><span class="p">${fmt(lineTotal(o))}</span></li>`).join("")}</ul>
+    <div class="sec-h" id="kc-h">Ready in</div>
+    <div class="tips kc-times" role="group" aria-labelledby="kc-h">${opts.sort((a, b) => a - b).map(m => `<button class="${mins === m ? "on" : ""}" data-act="kc-mins" data-m="${m}" aria-pressed="${mins === m}">${m} min${m === sug ? "<small>Suggested</small>" : ""}</button>`).join("")}</div>
+    <p class="note" style="text-align:left;margin:0">The kitchen gets the order now. Table ${n} sees “Order confirmed · ready in about ${mins} min” on their phones.</p>
+    <button class="btn pop block" data-act="kc-send" data-n="${n}">Confirm and send to kitchen</button></div>`;
+}
+async function sendToKitchen(n, mins) {
+  let items = 0; const now = Date.now();
+  for (const o of ordersFor(n).filter(o => o.state === "new")) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "cooking", cookAt: now, mins: mins || undefined, confirmedBy: staffName() })) return false; items += o.qty; }
+  if (items) logEvent("kitchen", n, `${staffName()} confirmed ${items} ${items === 1 ? "item" : "items"} from table ${n}${mins ? `, ready in ${mins} min` : ""}`, { items });
+  toast(`Table ${n} confirmed${mins ? ` · ready in about ${mins} min` : ""}`);
+  return true;
+}
+async function markReady(list, n) {
+  let items = 0; const now = Date.now();
+  for (const o of list) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, readyAt: now, readyBy: staffName() })) break; items += o.qty; }
+  if (items) { logEvent("ready", n, `${staffName()} marked ${list.length === 1 ? list[0].qty + "× " + dishOf(list[0]).name : items + " items"} for table ${n} ready`, { items }); toast(`Table ${n}: ready to serve. Waiters can see it.`); }
 }
 function welcomeDone() {
   const v = ($("#wname") && $("#wname").value.trim().slice(0, 20)) || "";
@@ -2783,7 +2826,12 @@ document.addEventListener("click", async e => {
     }
     case "open-table": ui.clearArm = 0; ui.sheet = "table:" + n; render(); break;
     case "ack-waiter": { const t = tdoc(n); if (await put("tables", "t" + n, { ...t, waiter: 0, reason: "", ackBy: (meStaff() || ui.staffName) ? staffName() : "", ackAt: Date.now() })) { logEvent("answer", n, `${staffName()} answered table ${n}${t.reason ? " (" + t.reason + ")" : ""}`, { dur: t.waiter ? (Date.now() - t.waiter) / 60000 : null }); } if (true) toast("Table " + n + " knows " + (ui.staffName ? ui.staffName + " is" : "you're") + " coming"); break; }
-    case "to-kitchen": el.disabled = true; await sendToKitchen(n); break;
+    case "to-kitchen": ui.kc = { n, mins: 0 }; ui.sheet = "kc"; render(); break;
+    case "kc-mins": ui.kc.mins = +el.dataset.m; render(); break;
+    case "kc-send": { el.disabled = true; const os = ordersFor(n).filter(o => o.state === "new"); if (await sendToKitchen(n, ui.kc.mins || suggestedMins(os))) { ui.sheet = null; render(); } else el.disabled = false; break; }
+    case "o-ready": { const o = S.orders[id]; if (o && o.state === "cooking" && !o.readyAt) { el.disabled = true; await markReady([{ id, ...o }], o.table); } break; }
+    case "all-ready": el.disabled = true; await markReady(ordersFor(n).filter(o => o.state === "cooking" && !o.readyAt), n); break;
+    case "serve-ready": { el.disabled = true; const rd = ordersFor(n).filter(isReady); let items = 0, mins = 0; for (const o of rd) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "served", servedBy: staffName(), servedAt: Date.now() })) break; items += o.qty; mins += (Date.now() - (o.cookAt || o.at)) / 60000; } if (items) logEvent("served", n, `${staffName()} served ${items} ${items === 1 ? "item" : "items"} to table ${n}`, { items, dur: mins / rd.length }); toast("Table " + n + " served"); break; }
     case "served": { const o = S.orders[id]; if (o && await put("orders", id, { ...o, state: "served", servedBy: staffName(), servedAt: Date.now() })) logEvent("served", o.table, `${staffName()} served ${o.qty}× ${dishOf(o).name} to table ${o.table}`, { items: o.qty, dur: (Date.now() - (o.cookAt || o.at)) / 60000 }); break; }
     case "all-served": { const cook = ordersFor(n).filter(o => o.state === "cooking"); let items = 0, mins = 0; for (const o of cook) { const { id: oid, ...rest } = o; if (!await put("orders", oid, { ...rest, state: "served", servedBy: staffName(), servedAt: Date.now() })) break; items += o.qty; mins += (Date.now() - (o.cookAt || o.at)) / 60000; } if (items) logEvent("served", n, `${staffName()} served ${items} ${items === 1 ? "item" : "items"} to table ${n}`, { items, dur: mins / cook.length }); toast("Table " + n + " served"); break; }
     case "clear-table": {
